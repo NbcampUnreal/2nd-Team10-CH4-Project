@@ -3,6 +3,11 @@ namespace SFWebAPI.Services.UserService
 {
     public interface IUserService
     {
+        Task<ResponseBody<string>> CreateAccount(RequestCreateAccount request);
+
+        Task<ResponseBody<SessionData>> LogInUser(RequestLogIn request);
+
+        Task<ResponseBody<SessionData>> LogOutUser(RequestLogOut request);
 
         #region Default CRUD
         // Get All Users 

@@ -13,6 +13,28 @@ public class UserController : ControllerBase
         _userService = usersService;
     }
 
+    [HttpPost("CreateAccount")]
+    public async Task<ActionResult<ResponseBody<string>>> AddUser(RequestCreateAccount request)
+    {
+        var result = await _userService.CreateAccount(request);
+        return Ok(result);
+    }
+
+    [HttpPost("LogIn")]
+    public async Task<ActionResult<ResponseBody<SessionData>>> LogInUser(RequestLogIn request)
+    {
+        var result = await _userService.LogInUser(request);
+        return Ok(result);
+    }
+
+    [HttpPost("LogOut")]
+    public async Task<ActionResult<ResponseBody<SessionData>>> LogOutUser(RequestLogOut request)
+    {
+        var result = await _userService.LogOutUser(request);
+        return Ok(result);
+    }
+
+
     //--------------------------------- Get All Users ---------------------------------
     [HttpGet]
     public async Task<ActionResult<List<User>>> GetAllUsers()
@@ -59,28 +81,4 @@ public class UserController : ControllerBase
 
         return Ok(result);
     }
-
-    //private static readonly string[] Summaries = new[]
-    //{
-    //    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    //};
-
-    //private readonly ILogger<WeatherForecastController> _logger;
-
-    //public WeatherForecastController(ILogger<WeatherForecastController> logger)
-    //{
-    //    _logger = logger;
-    //}
-
-    //[HttpGet(Name = "GetWeatherForecast")]
-    //public IEnumerable<WeatherForecast> Get()
-    //{
-    //    return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-    //    {
-    //        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-    //        TemperatureC = Random.Shared.Next(-20, 55),
-    //        Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-    //    })
-    //    .ToArray();
-    //}
 }

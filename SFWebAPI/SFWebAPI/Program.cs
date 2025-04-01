@@ -1,8 +1,9 @@
 
 global using SFWebAPI.Models;
 global using SFWebAPI.Data;
-//global using SFWebAPI.RequestBody;
-//global using SFWebAPI.ResponseBody;
+global using SFWebAPI.RequestBody;
+global using SFWebAPI.ResultBody;
+global using SFWebAPI.Managers;
 //using Microsoft.OpenApi.Models;
 
 using SFWebAPI.Services.UserService;

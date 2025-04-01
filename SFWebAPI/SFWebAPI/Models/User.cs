@@ -13,7 +13,7 @@ namespace SFWebAPI.Models
         [Key]
         [NotNull]
         [Column(TypeName = "BIGINT")]
-        public int Id { get; set; }
+        public int UserId { get; set; }
 
         [Required]
         [Column(TypeName = "VARCHAR")]
