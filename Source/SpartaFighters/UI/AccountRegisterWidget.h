@@ -1,14 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/PopUp/SelectPopUpBase.h"
 #include "AccountRegisterWidget.generated.h"
 
 class UEditableTextBox;
 class UButton;
 class UTextBlock;
 UCLASS()
-class SPARTAFIGHTERS_API UAccountRegisterWidget : public UUserWidget
+class SPARTAFIGHTERS_API UAccountRegisterWidget : public USelectPopUpBase
 {
 	GENERATED_BODY()
 	
@@ -25,14 +25,10 @@ private:
     UPROPERTY(meta = (BindWidget))
     UButton* RegisterConfirmButton;
     UPROPERTY(meta = (BindWidget))
-    UButton* RegisterCancelButton;
-    UPROPERTY(meta = (BindWidget))
     UTextBlock* RegisterInstructionText;
 
     UFUNCTION()
     void OnRegisterConfirmClicked();
-    UFUNCTION()
-    void OnRegisterCancelClicked();
     UFUNCTION()
     void ProcessRegisterSuccess();
 

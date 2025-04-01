@@ -13,10 +13,6 @@ void UAccountRegisterWidget::NativeConstruct()
     {
         RegisterConfirmButton->OnClicked.AddDynamic(this, &UAccountRegisterWidget::OnRegisterConfirmClicked);
     }
-    if (RegisterCancelButton)
-    {
-        RegisterCancelButton->OnClicked.AddDynamic(this, &UAccountRegisterWidget::OnRegisterCancelClicked);
-    }
     if (RegisterInstructionText)
     {
         RegisterInstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Sparta Fighters!"));
@@ -67,7 +63,7 @@ void UAccountRegisterWidget::ProcessRegisterSuccess()
     GetWorld()->GetTimerManager().SetTimer(
         RegisterButtonTimerHandle,
         this,
-        &UAccountRegisterWidget::OnRegisterCancelClicked,
+        &UAccountRegisterWidget::OnExitClicked,
         1.0f,
         false);
 }
@@ -92,11 +88,6 @@ void UAccountRegisterWidget::ResetRegisterWidget()
 		ConfirmPasswordTextBox->SetText(FText::GetEmpty());
 	}
 	RegisterConfirmButton->SetIsEnabled(true);
-}
-
-void UAccountRegisterWidget::OnRegisterCancelClicked()
-{
-    SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UAccountRegisterWidget::ResetRegisterInstructionText()

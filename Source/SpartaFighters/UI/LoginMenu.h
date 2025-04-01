@@ -8,6 +8,7 @@ class UEditableTextBox;
 class UButton;
 class UTextBlock;
 class UAccountRegisterWidget;
+class UQuitGameWidget;
 UCLASS()
 class SPARTAFIGHTERS_API ULoginMenu : public UUserWidget
 {
@@ -29,7 +30,7 @@ private:
     UPROPERTY(meta = (BindWidget))
     UButton* OptionButton;
     UPROPERTY(meta = (BindWidget))
-    UButton* ExitButton;
+    UButton* QuitGameButton;
     UPROPERTY(meta = (BindWidget))
     UTextBlock* InstructionText;
 
@@ -42,7 +43,7 @@ private:
     UFUNCTION()
     void OnOptionClicked();
     UFUNCTION()
-    void OnExitClicked();
+    void OnQuitGameClicked();
     UFUNCTION()
 	void OnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 
@@ -51,6 +52,11 @@ public:
     TSubclassOf<UAccountRegisterWidget> AccountRegisterWidgetClass;
     UPROPERTY()
     UAccountRegisterWidget* AccountRegisterWidget;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UQuitGameWidget> QuitGameWidgetClass;
+    UPROPERTY()
+    UQuitGameWidget* QuitGameWidget;
 
 private:
     UPROPERTY()

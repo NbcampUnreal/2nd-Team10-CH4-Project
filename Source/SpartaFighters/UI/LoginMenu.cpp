@@ -4,7 +4,7 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "UI/AccountRegisterWidget.h"
-#include "Kismet/GameplayStatics.h"
+#include "UI/QuitGameWidget.h"
 
 #define LOCTEXT_NAMESPACE "SpartaFighters"
 
@@ -24,9 +24,9 @@ void ULoginMenu::NativeConstruct()
 	{
 		OptionButton->OnClicked.AddDynamic(this, &ULoginMenu::OnOptionClicked);
 	}
-	if (ExitButton)
+	if (QuitGameButton)
 	{
-		ExitButton->OnClicked.AddDynamic(this, &ULoginMenu::OnExitClicked);
+		QuitGameButton->OnClicked.AddDynamic(this, &ULoginMenu::OnQuitGameClicked);
 	}
 	if (IDTextBox)
 	{
@@ -55,7 +55,7 @@ void ULoginMenu::ProcessLogin()
 			UE_LOG(LogTemp, Log, TEXT("Login Successful"));
 			if (InstructionText)
 			{
-				InstructionText->SetText(LOCTEXT("LoginSuccess", "Successful login! Start the game."));
+				InstructionText->SetText(LOCTEXT("LoginSuccess", "Login Success! Start the game."));
 			}
 		}
 		else
@@ -135,10 +135,26 @@ void ULoginMenu::OnOptionClicked()
 	UE_LOG(LogTemp, Log, TEXT("Option Button Clicked"));
 }
 
-void ULoginMenu::OnExitClicked()
+void ULoginMenu::OnQuitGameClicked()
 {
-	UE_LOG(LogTemp, Log, TEXT("Exit Button Clicked"));
-	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, false);
+	if (!QuitGameWidget && QuitGameWidgetClass)
+	{
+		QuitGameWidget = CreateWidget<UQuitGameWidget>(GetWorld(), QuitGameWidgetClass);
+		if (QuitGameWidget)
+		{
+			QuitGameWidget->AddToViewport();
+			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+			{
+				FInputModeUIOnly InputModeData;
+				PlayerController->SetInputMode(InputModeData);
+				PlayerController->bShowMouseCursor = true;
+			}
+		}
+	}
+	else
+	{
+		QuitGameWidget->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void ULoginMenu::ResetInstructionText()
