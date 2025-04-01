@@ -42,6 +42,7 @@ void ULoginMenu::NativeConstruct()
 	}
 }
 
+// DB Connection : Login processing logic requires Connection with DB
 void ULoginMenu::ProcessLogin()
 {
 	if (IDTextBox && PasswordTextBox)
@@ -49,7 +50,6 @@ void ULoginMenu::ProcessLogin()
 		FString ID = IDTextBox->GetText().ToString();
 		FString Password = PasswordTextBox->GetText().ToString();
 
-		// Login processing logic requires integration with DB
 		if (ID == "TestUser" && Password == "1234")
 		{
 			UE_LOG(LogTemp, Log, TEXT("Login Successful"));
