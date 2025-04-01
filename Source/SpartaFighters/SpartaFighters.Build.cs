@@ -13,7 +13,9 @@ public class SpartaFighters : ModuleRules
             "Core",
             "CoreUObject",
             "Engine",
-            "InputCore"
+            "InputCore",
+            "EnhancedInput",
+            "UMG"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[]
