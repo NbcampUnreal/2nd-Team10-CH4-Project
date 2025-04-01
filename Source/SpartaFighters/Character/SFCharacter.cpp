@@ -1,24 +1,21 @@
-
-
-
 #include "Character/SFCharacter.h"
+#include "Framework/SFPlayerController.h"
+#include "EnhancedInputComponent.h"
+#include "Components/MovementInputComponent.h"
 
-// Sets default values
 ASFCharacter::ASFCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	MovementInputComponent = CreateDefaultSubobject<UMovementInputComponent>(TEXT("MoveInputComponent"));
 }
 
-// Called when the game starts or when spawned
 void ASFCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-// Called every frame
 void ASFCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -30,5 +27,13 @@ void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(GetController()))
+	{
+		if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+		{
+			MovementInputComponent->SetupInput(EnhancedInput, SFPlayerController, this);
+			// Other SetupInput() gogogo
+		}
+	}
 }
 
