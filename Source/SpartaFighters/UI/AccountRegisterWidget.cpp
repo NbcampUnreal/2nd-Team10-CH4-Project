@@ -56,6 +56,7 @@ void UAccountRegisterWidget::OnRegisterConfirmClicked()
     }
 }
 
+// DB Connection : Register Confirm processing logic requires Connection with DB
 void UAccountRegisterWidget::ProcessRegisterSuccess()
 {
     RegisterInstructionText->SetText(FText::FromString("Sign up successfully!"));
