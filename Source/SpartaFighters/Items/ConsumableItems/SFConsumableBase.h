@@ -3,15 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Items/ItemBase.h"
+#include "Items/SFItemBase.h"
 #include "Character/SFCharacter.h"
-#include "ConsumableBase.generated.h"
+#include "SFConsumableBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SPARTAFIGHTERS_API UConsumableBase : public UItemBase
+class SPARTAFIGHTERS_API USFConsumableBase : public USFItemBase
 {
 	GENERATED_BODY()
 	

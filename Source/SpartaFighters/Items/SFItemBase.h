@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "ItemBase.generated.h"
+#include "SFItemBase.generated.h"
 
 /**
  * 
@@ -18,18 +18,18 @@ enum class EItemType
 };
 
 UCLASS()
-class SPARTAFIGHTERS_API UItemBase : public UObject
+class SPARTAFIGHTERS_API USFItemBase : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-	UItemBase();
+	USFItemBase();
 	TSoftObjectPtr<UTexture2D> ItemIcon;
 	FName ItemName;
 	FText ItemDescription;
 	EItemType Type;
 
-	virtual void InitializeItem(const UItemBase& Item);
+	virtual void InitializeItem(const USFItemBase& Item);
 	EItemType GetItemType() const;
 	
 };
