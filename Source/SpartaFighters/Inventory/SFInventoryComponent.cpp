@@ -2,6 +2,7 @@
 
 
 #include "Inventory/SFInventoryComponent.h"
+#include "Character/SFCharacter.h"
 
 // Sets default values for this component's properties
 USFInventoryComponent::USFInventoryComponent()
@@ -35,24 +36,45 @@ void USFInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 void USFInventoryComponent::UpdateData()
 {
 	//get game instance
+	UGameInstance* Instance = GetWorld()->GetGameInstance();
+	if (Instance)
+	{
+		/*USFGameInstance* SFGameInstance = Cast<USFGameInstance>(Instance);
+		if (SFGameInstance)
+		{
+			SFGameInstance->Has... = Potion;
+		}*/
+	}
 }
 
 void USFInventoryComponent::UseConsumable()
 {
 	//subtract count by 1 if count is not 1
 	//UpdateData(); at the end
+	AActor* PlayerCharacter = GetOwner();
+	if (PlayerCharacter)
+	{
+		ASFCharacter* SFPlayerCharacter = Cast<ASFCharacter>(PlayerCharacter);
+		if (!SFPlayerCharacter) //|| ItemCount <= 0)
+		{
+			return;
+		}
+		//ItemCount--;
+		//SFPlayerCharacter->ApplyConsumableEffect();
+		UpdateData();
+	}
 }
 
 void USFInventoryComponent::AddItem(USFItemBase* Item)
 {
 	//add Item to array
 	//add count if Item is already in the array
-	//UpdateData(); at the end
+	UpdateData(); 
 }
 
 void USFInventoryComponent::RemoveItem(USFItemBase* Item)
 {
 	//delete item from array if count is 1
 	//else UseConsumable();
-	//UpdateData(); at the end
+	UpdateData();
 }
