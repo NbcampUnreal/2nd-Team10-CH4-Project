@@ -4,6 +4,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/EditableTextBox.h"
 #include "UI/QuitGameWidget.h"
+#include "UI/PopUp/CreateRoomWidget.h"
 
 void ULobbyMenu::NativeConstruct()
 {
@@ -56,7 +57,30 @@ void ULobbyMenu::OnShopClicked()
 void ULobbyMenu::OnCreateRoomClicked()
 {
     UE_LOG(LogTemp, Warning, TEXT("OnCreateRoomClicked!"));
-    // Request to create a room (requires integration with server)
+    if (!CreateRoomWidget && CreateRoomWidgetClass)
+    {
+        UWorld* World = GetWorld();
+        if (!World) return;
+
+        CreateRoomWidget = CreateWidget<UCreateRoomWidget>(World, CreateRoomWidgetClass);
+        if (CreateRoomWidget)
+        {
+            CreateRoomWidget->AddToViewport();
+        }
+    }
+
+    if (CreateRoomWidget)
+    {
+        CreateRoomWidget->ResetCreateRoomWidget();
+        CreateRoomWidget->SetVisibility(ESlateVisibility::Visible);
+
+        if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+        {
+            FInputModeUIOnly InputModeData;
+            PlayerController->SetInputMode(InputModeData);
+            PlayerController->bShowMouseCursor = true;
+        }
+    }
 }
 
 void ULobbyMenu::OnOptionClicked()
@@ -69,21 +93,26 @@ void ULobbyMenu::OnQuitGameClicked()
 {
     if (!QuitGameWidget && QuitGameWidgetClass)
     {
-        QuitGameWidget = CreateWidget<UQuitGameWidget>(GetWorld(), QuitGameWidgetClass);
+        UWorld* World = GetWorld();
+        if (!World) return;
+
+        QuitGameWidget = CreateWidget<UQuitGameWidget>(World, QuitGameWidgetClass);
         if (QuitGameWidget)
         {
             QuitGameWidget->AddToViewport();
-            if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
-            {
-                FInputModeUIOnly InputModeData;
-                PlayerController->SetInputMode(InputModeData);
-                PlayerController->bShowMouseCursor = true;
-            }
         }
     }
-    else
+
+    if (QuitGameWidget)
     {
         QuitGameWidget->SetVisibility(ESlateVisibility::Visible);
+
+        if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+        {
+            FInputModeUIOnly InputModeData;
+            PlayerController->SetInputMode(InputModeData);
+            PlayerController->bShowMouseCursor = true;
+        }
     }
 }
 

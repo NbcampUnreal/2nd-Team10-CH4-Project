@@ -10,6 +10,7 @@ class UButton;
 class UVerticalBox;
 class UEditableTextBox;
 class UQuitGameWidget;
+class UCreateRoomWidget;
 
 UCLASS()
 class SPARTAFIGHTERS_API ULobbyMenu : public UUserWidget
@@ -70,5 +71,10 @@ public:
 	TSubclassOf<UQuitGameWidget> QuitGameWidgetClass;
 	UPROPERTY()
 	UQuitGameWidget* QuitGameWidget;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UCreateRoomWidget> CreateRoomWidgetClass;
+    UPROPERTY()
+	UCreateRoomWidget* CreateRoomWidget;
 	
 };

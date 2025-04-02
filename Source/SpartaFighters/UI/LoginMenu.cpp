@@ -124,23 +124,27 @@ void ULoginMenu::OnRegisterClicked()
 {
 	if (!AccountRegisterWidget && AccountRegisterWidgetClass)
 	{
-		AccountRegisterWidget = CreateWidget<UAccountRegisterWidget>(GetWorld(), AccountRegisterWidgetClass);
+		UWorld* World = GetWorld();
+		if (!World) return;
 
+		AccountRegisterWidget = CreateWidget<UAccountRegisterWidget>(World, AccountRegisterWidgetClass);
 		if (AccountRegisterWidget)
 		{
 			AccountRegisterWidget->AddToViewport();
-			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
-			{
-				FInputModeUIOnly InputModeData;
-				PlayerController->SetInputMode(InputModeData);
-				PlayerController->bShowMouseCursor = true;
-			}
 		}
 	}
-	else
+
+	if (AccountRegisterWidget)
 	{
-		AccountRegisterWidget->SetVisibility(ESlateVisibility::Visible);
 		AccountRegisterWidget->ResetRegisterWidget();
+		AccountRegisterWidget->SetVisibility(ESlateVisibility::Visible);
+
+		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+		{
+			FInputModeUIOnly InputModeData;
+			PlayerController->SetInputMode(InputModeData);
+			PlayerController->bShowMouseCursor = true;
+		}
 	}
 }
 
@@ -153,21 +157,26 @@ void ULoginMenu::OnQuitGameClicked()
 {
 	if (!QuitGameWidget && QuitGameWidgetClass)
 	{
-		QuitGameWidget = CreateWidget<UQuitGameWidget>(GetWorld(), QuitGameWidgetClass);
+		UWorld* World = GetWorld();
+		if (!World) return;
+
+		QuitGameWidget = CreateWidget<UQuitGameWidget>(World, QuitGameWidgetClass);
 		if (QuitGameWidget)
 		{
 			QuitGameWidget->AddToViewport();
-			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
-			{
-				FInputModeUIOnly InputModeData;
-				PlayerController->SetInputMode(InputModeData);
-				PlayerController->bShowMouseCursor = true;
-			}
 		}
 	}
-	else
+
+	if (QuitGameWidget)
 	{
 		QuitGameWidget->SetVisibility(ESlateVisibility::Visible);
+
+		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+		{
+			FInputModeUIOnly InputModeData;
+			PlayerController->SetInputMode(InputModeData);
+			PlayerController->bShowMouseCursor = true;
+		}
 	}
 }
 
