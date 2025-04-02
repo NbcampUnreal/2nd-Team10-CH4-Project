@@ -15,7 +15,10 @@ public class SpartaFighters : ModuleRules
             "Engine",
             "InputCore",
             "EnhancedInput",
-            "UMG"
+            "UMG",
+            "HTTP",
+            "JsonUtilities",
+            "Json"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[]
