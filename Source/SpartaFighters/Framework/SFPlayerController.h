@@ -27,6 +27,9 @@ public:
 	UInputAction* JumpAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UInputAction* RollAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UInputAction* AttackAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

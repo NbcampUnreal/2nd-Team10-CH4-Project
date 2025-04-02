@@ -37,3 +37,13 @@ void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	}
 }
 
+void ASFCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	// 여기서 InputComponent에 접근해서 점프 카운트 초기화해줘야 함
+	if (MovementInputComponent)
+	{
+		MovementInputComponent->ResetJumpCount();
+	}
+}
