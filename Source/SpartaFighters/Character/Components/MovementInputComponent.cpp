@@ -8,6 +8,8 @@ UMovementInputComponent::UMovementInputComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
+	JumpCount = 0;
+
 }
 
 void UMovementInputComponent::BeginPlay()
@@ -30,6 +32,7 @@ void UMovementInputComponent::SetupInput(UEnhancedInputComponent* Input, ASFPlay
 	{
 		OwnerCharacter->GetCharacterMovement()->JumpZVelocity = 1000.f;
 		OwnerCharacter->GetCharacterMovement()->AirControl = 1.0f;
+		OwnerCharacter->JumpMaxCount = 2;
 	}
 
 	if (IsValid(PlayerController->MoveAction))
@@ -39,8 +42,8 @@ void UMovementInputComponent::SetupInput(UEnhancedInputComponent* Input, ASFPlay
 
 	if (IsValid(PlayerController->JumpAction))
 	{
-		Input->BindAction(PlayerController->JumpAction, ETriggerEvent::Started, this, &UMovementInputComponent::JumpStart);
-		Input->BindAction(PlayerController->JumpAction, ETriggerEvent::Completed, this, &UMovementInputComponent::JumpStop);
+		Input->BindAction(PlayerController->JumpAction, ETriggerEvent::Started, this, &UMovementInputComponent::StartJump);
+		Input->BindAction(PlayerController->JumpAction, ETriggerEvent::Completed, this, &UMovementInputComponent::StopJump);
 	}
 }
 
@@ -56,12 +59,45 @@ void UMovementInputComponent::Move(const FInputActionValue& Value)
 	OwnerCharacter->AddMovementInput(LeftRight, InputVector.Y);
 }
 
-void UMovementInputComponent::JumpStart(const FInputActionValue& Value)
+void UMovementInputComponent::StartJump(const FInputActionValue& Value)
 {
-	OwnerCharacter->Jump();
+	// 2 Jump !!
+	if (JumpCount < OwnerCharacter->JumpMaxCount)
+	{
+		OwnerCharacter->Jump();
+		JumpCount++;
+	}
 }
 
-void UMovementInputComponent::JumpStop(const FInputActionValue& Value)
+void UMovementInputComponent::StopJump(const FInputActionValue& Value)
 {
 	OwnerCharacter->StopJumping();
+}
+
+void UMovementInputComponent::ResetJumpCount()
+{
+	JumpCount = 0; // 이게 없으면 1번 점프 후 끝남
+}
+
+void UMovementInputComponent::StartRoll(const FInputActionValue& Value)
+{
+	//if (bIsRolling || !CanRoll()) return;
+
+	//bIsRolling = true;
+	//PlayAnimMontage(RollMontage);
+
+	//FVector RollDir = GetLastMovementInputVector();
+	//if (!RollDir.IsNearlyZero())
+	//{
+	//	RollDir.Normalize();
+	//	LaunchCharacter(RollDir * RollPower, true, true);
+	//}
+
+	//// 구르기 끝났을 때 상태 복구
+	//GetWorld()->GetTimerManager().SetTimer(RollTimerHandle, this, &AMyCharacter::EndRoll, RollDuration, false);
+}
+
+void UMovementInputComponent::EndRoll(const FInputActionValue& Value)
+{
+	/*bIsRolling = false;*/
 }

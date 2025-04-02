@@ -28,6 +28,13 @@ public:
 
 	void SetupInput(UEnhancedInputComponent* Input, ASFPlayerController* PlayerController, ASFCharacter* SFCharacter);
 	void Move(const FInputActionValue& value);
-	void JumpStart(const FInputActionValue& Value);
-	void JumpStop(const FInputActionValue& Value);
+	void StartJump(const FInputActionValue& Value);
+	void StopJump(const FInputActionValue& Value);
+	void ResetJumpCount();
+
+	void StartRoll(const FInputActionValue& Value);
+	void EndRoll(const FInputActionValue& Value);
+
+private:
+	int32 JumpCount;
 };

@@ -18,6 +18,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void Landed(const FHitResult& Hit);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
 	UMovementInputComponent* MovementInputComponent;
 
