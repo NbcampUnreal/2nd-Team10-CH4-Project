@@ -9,6 +9,7 @@ class UButton;
 class UTextBlock;
 class UAccountRegisterWidget;
 class UQuitGameWidget;
+class ULobbyMenu;
 UCLASS()
 class SPARTAFIGHTERS_API ULoginMenu : public UUserWidget
 {
@@ -58,11 +59,19 @@ public:
     UPROPERTY()
     UQuitGameWidget* QuitGameWidget;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<ULobbyMenu> LobbyMenuClass;
+    UPROPERTY()
+    ULobbyMenu* LobbyMenu;
+
 private:
     UPROPERTY()
     FTimerHandle ResetInstructionTextTimerHandle;
+    UPROPERTY()
+    FTimerHandle EnterLobbyTimerHandle;
 
     void ResetInstructionText();
+    void EnterLobby();
 
 
 };
