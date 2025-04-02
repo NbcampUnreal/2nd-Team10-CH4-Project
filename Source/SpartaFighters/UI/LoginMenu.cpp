@@ -5,6 +5,7 @@
 #include "Components/TextBlock.h"
 #include "UI/AccountRegisterWidget.h"
 #include "UI/QuitGameWidget.h"
+#include "UI/LobbyMenu.h"
 
 #define LOCTEXT_NAMESPACE "SpartaFighters"
 
@@ -40,6 +41,13 @@ void ULoginMenu::NativeConstruct()
 	{
 		InstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Sparta Fighters!"));
 	}
+
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		FInputModeUIOnly InputModeData;
+		PlayerController->SetInputMode(InputModeData);
+		PlayerController->bShowMouseCursor = true;
+	}
 }
 
 // DB Connection : Login processing logic requires Connection with DB
@@ -56,6 +64,12 @@ void ULoginMenu::ProcessLogin()
 			if (InstructionText)
 			{
 				InstructionText->SetText(LOCTEXT("LoginSuccess", "Login Success! Start the game."));
+				GetWorld()->GetTimerManager().SetTimer(
+					EnterLobbyTimerHandle,
+					this,
+					&ULoginMenu::EnterLobby,
+					1.0f,
+					false);
 			}
 		}
 		else
@@ -162,6 +176,19 @@ void ULoginMenu::ResetInstructionText()
 	if (InstructionText)
 	{
 		InstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Sparta Fighters!"));
+	}
+}
+
+void ULoginMenu::EnterLobby()
+{
+	UE_LOG(LogTemp, Log, TEXT("Entering Lobby..."));
+
+	RemoveFromParent();
+
+	LobbyMenu = CreateWidget<ULobbyMenu>(GetWorld(), LobbyMenuClass);
+	if (LobbyMenu)
+	{
+		LobbyMenu->AddToViewport();
 	}
 }
 
