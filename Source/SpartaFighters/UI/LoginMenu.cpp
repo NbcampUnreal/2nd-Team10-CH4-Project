@@ -148,7 +148,10 @@ void ULoginMenu::OnRegisterClicked()
 	if (!AccountRegisterWidget && AccountRegisterWidgetClass)
 	{
 		UWorld* World = GetWorld();
-		if (!World) return;
+		if (!World)
+		{
+			return;
+		}
 
 		AccountRegisterWidget = CreateWidget<UAccountRegisterWidget>(World, AccountRegisterWidgetClass);
 		if (AccountRegisterWidget)
@@ -181,7 +184,10 @@ void ULoginMenu::OnQuitGameClicked()
 	if (!QuitGameWidget && QuitGameWidgetClass)
 	{
 		UWorld* World = GetWorld();
-		if (!World) return;
+		if (!World)
+		{
+			return;
+		}
 
 		QuitGameWidget = CreateWidget<UQuitGameWidget>(World, QuitGameWidgetClass);
 		if (QuitGameWidget)
