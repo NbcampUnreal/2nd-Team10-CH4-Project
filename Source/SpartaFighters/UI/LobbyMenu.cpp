@@ -71,7 +71,7 @@ void ULobbyMenu::OnCreateRoomClicked()
 
     if (CreateRoomWidget)
     {
-        CreateRoomWidget->ResetCreateRoomWidget();
+        CreateRoomWidget->ResetRoomNameText();
         CreateRoomWidget->SetVisibility(ESlateVisibility::Visible);
 
         if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
