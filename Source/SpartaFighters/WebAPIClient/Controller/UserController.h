@@ -4,6 +4,7 @@
 #include "UObject/NoExportTypes.h"
 #include "WebAPIClient/RequestBody/RequestUser.h"
 #include "WebAPIClient/ResponseBody/ResultUser.h"
+#include "WebAPIClient/ResponseBody/ResultCode.h"
 #include "UserController.generated.h"
 
 class UWebAPIClient;
@@ -22,9 +23,10 @@ public:
     void CreateAccount(const FRequestCreateAccount& Request, TFunction<void(TSharedPtr<FResultCreateAccount>)> Callback);
     void LogIn(const FRequestLogIn& Request, TFunction<void(TSharedPtr<FResultLogIn>)> Callback);
 
-
 private:
     static UUserController* Instance;
+    void Init();
+
     UWebAPIClient* WebAPIClient;
 
     FString URL = TEXT("http://localhost:5000/api/User");

@@ -73,5 +73,8 @@ private:
     void ResetInstructionText();
     void EnterLobby();
 
+    void OnLogInSucces();
+    void OnLogInFailed(FString FailMessage);
+
 
 };

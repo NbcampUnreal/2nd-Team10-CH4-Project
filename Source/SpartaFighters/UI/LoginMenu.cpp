@@ -7,6 +7,10 @@
 #include "UI/QuitGameWidget.h"
 #include "UI/LobbyMenu.h"
 
+#include "Common/DefaultGameIni.h"
+#include "WebAPIClient/Controller/UserController.h"
+
+
 #define LOCTEXT_NAMESPACE "SpartaFighters"
 
 void ULoginMenu::NativeConstruct()
@@ -58,36 +62,55 @@ void ULoginMenu::ProcessLogin()
 		FString ID = IDTextBox->GetText().ToString();
 		FString Password = PasswordTextBox->GetText().ToString();
 
-		if (ID == "TestUser" && Password == "1234")
+		if (UDefaultGameIni::GetInstance()->GetWebAPIUse())
 		{
-			UE_LOG(LogTemp, Log, TEXT("Login Successful"));
-			if (InstructionText)
-			{
-				InstructionText->SetText(LOCTEXT("LoginSuccess", "Login Success! Start the game."));
-				GetWorld()->GetTimerManager().SetTimer(
-					EnterLobbyTimerHandle,
-					this,
-					&ULoginMenu::EnterLobby,
-					1.0f,
-					false);
-			}
+			FRequestLogIn Request;
+			Request.Account = ID;
+			Request.Password = Password;
+
+			UUserController::GetInstance()->LogIn(Request,
+				[this](TSharedPtr<FResultLogIn> Response)
+				{
+					if (Response.IsValid())
+					{
+						EResultCode ResultCode = static_cast<EResultCode>(Response->ResultCode);
+						switch (ResultCode)
+						{
+						case EResultCode::OK:
+							OnLogInSucces();
+							break;
+							//case EResultCode::AccountNotFound:
+							//	OnLogInFailed("Fail : Account Not Found!");
+							//	break;
+							//case EResultCode::PasswordMismatched:
+							//	OnLogInFailed("Fail : PasswordMismatched!");
+							//	break;
+							//case EResultCode::AlreadyLogIn:
+							//	OnLogInFailed("Fail : AlreadyLogIn!");
+							//	break;
+						default:
+							OnLogInFailed(FString::Printf(TEXT("Fail[%d] : %s"), Response->ResultCode, *Response->ResultMessage));
+							break;
+						}
+					}
+					else
+					{
+						UE_LOG(LogTemp, Error, TEXT("Invalid response or network error occurred"));
+					}
+				});
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Login Failed"));
-			IDTextBox->SetText(FText::GetEmpty());
-			PasswordTextBox->SetText(FText::GetEmpty());
-			if (InstructionText)
+			if (ID == "TestUser" && Password == "1234")
 			{
-				InstructionText->SetText(LOCTEXT("LoginError", "Invalid ID or Password. Please Check and Try Again."));
-				GetWorld()->GetTimerManager().SetTimer(
-					ResetInstructionTextTimerHandle,
-					this,
-					&ULoginMenu::ResetInstructionText,
-					3.0f,
-					false);
+				OnLogInSucces();
+			}
+			else
+			{
+				OnLogInFailed("LoginError : Invalid ID or Password. Please Check and Try Again.");
 			}
 		}
+
 	}
 }
 
@@ -198,6 +221,39 @@ void ULoginMenu::EnterLobby()
 	if (LobbyMenu)
 	{
 		LobbyMenu->AddToViewport();
+	}
+}
+
+void ULoginMenu::OnLogInSucces()
+{
+	UE_LOG(LogTemp, Log, TEXT("Login Successful"));
+	if (InstructionText)
+	{
+		InstructionText->SetText(LOCTEXT("LoginSuccess", "Login Success! Start the game."));
+		GetWorld()->GetTimerManager().SetTimer(
+			EnterLobbyTimerHandle,
+			this,
+			&ULoginMenu::EnterLobby,
+			1.0f,
+			false);
+	}
+}
+
+void ULoginMenu::OnLogInFailed(FString FailMessage)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Login Failed"));
+	IDTextBox->SetText(FText::GetEmpty());
+	PasswordTextBox->SetText(FText::GetEmpty());
+	if (InstructionText)
+	{
+		InstructionText->SetText(FText::FromString(FailMessage));
+		//InstructionText->SetText(LOCTEXT("LoginError", "Invalid ID or Password. Please Check and Try Again."));
+		GetWorld()->GetTimerManager().SetTimer(
+			ResetInstructionTextTimerHandle,
+			this,
+			&ULoginMenu::ResetInstructionText,
+			3.0f,
+			false);
 	}
 }
 
