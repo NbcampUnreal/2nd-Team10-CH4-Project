@@ -40,4 +40,7 @@ protected:
 private:
 	FRoomInfo CurrentRoomInfo;
 	void UpdatePlayerList();
+
+public:
+	FRoomInfo GetCurrentRoomInfo() const { return CurrentRoomInfo; }
 };
