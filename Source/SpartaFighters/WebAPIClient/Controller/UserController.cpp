@@ -1,5 +1,6 @@
 ﻿#include "WebAPIClient/Controller/UserController.h"
 #include "WebAPIClient/WebAPIClient.h"
+#include "Common/DefaultGameIni.h"
 
 UUserController* UUserController::Instance = nullptr;
 
@@ -21,9 +22,21 @@ UUserController* UUserController::GetInstance()
         {
             Instance = NewObject<UUserController>();
             Instance->AddToRoot(); // GC에서 삭제되지 않도록 방지
+
+            Instance->Init();
         }
     }
     return Instance;
+}
+
+void UUserController::Init()
+{
+    // TODO : Config에 저장된 서버 URL 받아와서 맵핑해주기
+    //auto config = UDefaultGameIni::GetInstance();
+    //if (IsValid(config))
+    //{
+    //    FString url = config->GetWebAPIServerURL() + "/User";
+    //}
 }
 
 void UUserController::GetAllUsers(TFunction<void(TArray<FUser>)> Callback)

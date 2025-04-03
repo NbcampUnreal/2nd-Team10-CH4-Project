@@ -32,6 +32,8 @@ private:
     UFUNCTION()
     void ProcessRegisterSuccess();
 
+    void OnRegisterFailed(FString FailMessage);
+
 public:
     UFUNCTION()
     void ResetRegisterWidget();

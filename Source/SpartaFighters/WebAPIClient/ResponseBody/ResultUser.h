@@ -27,7 +27,7 @@ struct FUserResult
     TArray<FUser> Data;
 };
 
-USTRUCT(BlueprintType)
+USTRUCT(Atomic, BlueprintType)
 struct FResultCreateAccount
 {
     GENERATED_BODY()
@@ -42,7 +42,7 @@ struct FResultCreateAccount
     FString Data;
 };
 
-USTRUCT(BlueprintType)
+USTRUCT(Atomic, BlueprintType)
 struct FResultLogInData
 {
     GENERATED_BODY()
@@ -51,7 +51,7 @@ struct FResultLogInData
     FString SessionId;
 };
 
-USTRUCT(BlueprintType)
+USTRUCT(Atomic, BlueprintType)
 struct FResultLogIn
 {
     GENERATED_BODY()

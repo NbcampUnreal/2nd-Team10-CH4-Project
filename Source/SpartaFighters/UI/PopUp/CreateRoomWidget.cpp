@@ -1,83 +1,149 @@
 #include "UI/PopUp/CreateRoomWidget.h"
-#include "Components/ComboBoxString.h"
-#include "Components/CheckBox.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "UI/UIObject/GameModeSelectionWidget.h"
+#include "UI/UIObject/PlayerCountSelectionWidget.h"
+#include "UI/UIObject/ItemActivationSelectionWidget.h"
 // #include "SFGameInstanceSubsystem.h"
 
 void UCreateRoomWidget::NativeConstruct()
 {
-    Super::NativeConstruct();
+	Super::NativeConstruct();
 
-    if (CreateRoomButton)
-    {
-        CreateRoomButton->OnClicked.AddDynamic(this, &UCreateRoomWidget::OnCreateRoomButtonClicked);
-    }
-    if (ModeComboBox)
-    {
-        ModeComboBox->AddOption(TEXT("Single"));
-        ModeComboBox->AddOption(TEXT("Cooperative"));
-        ModeComboBox->AddOption(TEXT("Battle"));
-        ModeComboBox->SetSelectedIndex(0);
-    }
-    if (PlayerCountComboBox)
-    {
-        PlayerCountComboBox->AddOption(TEXT("1"));
-        PlayerCountComboBox->AddOption(TEXT("2"));
-        PlayerCountComboBox->AddOption(TEXT("3"));
-        PlayerCountComboBox->AddOption(TEXT("4"));
-        PlayerCountComboBox->SetSelectedIndex(0);
-    }
-    if (RoomNameText)
-    {
-        RoomNameText->SetText(FText::FromString(GenerateRandomRoomName()));
-    }
-}
+	if (CreateRoomButton)
+	{
+		CreateRoomButton->OnClicked.AddDynamic(this, &UCreateRoomWidget::OnCreateRoomButtonClicked);
+	}
 
-FString UCreateRoomWidget::GenerateRandomRoomName()
-{
-    static TArray<FString> Adjectives = { TEXT("Quick"), TEXT("Strong"), TEXT("Strategic"), TEXT("Mysterious") };
-    static TArray<FString> Nouns = { TEXT("Combat"), TEXT("Challenges"), TEXT("Showdown"), TEXT("Arena") };
+	if (GameModeSelectionWidget.IsValid())
+	{
+		GameModeSelectionWidget->OnSelectionChanged.AddDynamic(this, &UCreateRoomWidget::OnGameModeChanged);
+	}
 
-    int32 RandomAdjIndex = FMath::RandRange(0, Adjectives.Num() - 1);
-    int32 RandomNounIndex = FMath::RandRange(0, Nouns.Num() - 1);
+	if (PlayerCountSelectionWidget.IsValid())
+	{
+		PlayerCountSelectionWidget->OnSelectionChanged.AddDynamic(this, &UCreateRoomWidget::OnGameModeChanged);
+	}
 
-    return Adjectives[RandomAdjIndex] + TEXT(" ") + Nouns[RandomNounIndex];
+	if (ItemActivationSelectionWidget.IsValid())
+	{
+		ItemActivationSelectionWidget->OnSelectionChanged.AddDynamic(this, &UCreateRoomWidget::OnGameModeChanged);
+	}
+
+	if (RoomNameText)
+	{
+		RoomNameText->SetText(FText::FromString(GenerateRandomRoomName()));
+	}
 }
 
 void UCreateRoomWidget::OnCreateRoomButtonClicked()
 {
-    FString SelectedMode = ModeComboBox->GetSelectedOption();
-    int32 PlayerCount = FCString::Atoi(*PlayerCountComboBox->GetSelectedOption());
-    bool bItemsEnabled = ItemCheckBox->IsChecked();
-    FString RoomName = RoomNameText->GetText().ToString();
-    // Request to create a room (requires integration with server)
+	GetRoomSettings();
 
-    //USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance());
-    //if (GameInstance)
-    //{
-    //    GameInstance->CreateGameRoom(RoomName, SelectedMode, PlayerCount, bItemsEnabled);
-    //}
-	UE_LOG(LogTemp, Warning, TEXT("Create Room: %s, %s, %d, %d"), *RoomName, *SelectedMode, PlayerCount, bItemsEnabled);
+	// Request to create a room (requires integration with server)
+
+	//USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance());
+	//if (GameInstance)
+	//{
+	//    GameInstance->CreateGameRoom(RoomName, SelectedMode, PlayerCount, bItemsEnabled);
+	//}
+	FRoomSettings RoomSettings = GetRoomSettings();
+
+	UE_LOG(LogTemp, Warning, TEXT("Create Room: %s, %s, %d, %d"),
+		*RoomSettings.RoomName,
+		*RoomSettings.GameMode,
+		RoomSettings.PlayerCount,
+		RoomSettings.bItemEnabled);
+
 }
 
-void UCreateRoomWidget::ResetCreateRoomWidget()
+FString UCreateRoomWidget::GenerateRandomRoomName()
 {
-    UE_LOG(LogTemp, Warning, TEXT("ResetCreateRoomWidget Called"));
-    if (CreateRoomButton)
-    {
-        CreateRoomButton->OnClicked.AddDynamic(this, &UCreateRoomWidget::OnCreateRoomButtonClicked);
-    }
-    if (ModeComboBox)
-    {
-        ModeComboBox->SetSelectedIndex(0);
-    }
-    if (PlayerCountComboBox)
-    {
-        PlayerCountComboBox->SetSelectedIndex(0);
-    }
-    if (RoomNameText)
-    {
-        RoomNameText->SetText(FText::FromString(GenerateRandomRoomName()));
-    }
+	static TArray<FString> Adjectives = { TEXT("Quick"), TEXT("Strong"), TEXT("Strategic"), TEXT("Mysterious") };
+	static TArray<FString> Nouns = { TEXT("Combat"), TEXT("Challenges"), TEXT("Showdown"), TEXT("Arena") };
+
+	int32 RandomAdjIndex = FMath::RandRange(0, Adjectives.Num() - 1);
+	int32 RandomNounIndex = FMath::RandRange(0, Nouns.Num() - 1);
+
+	return Adjectives[RandomAdjIndex] + TEXT(" ") + Nouns[RandomNounIndex];
+}
+
+FRoomSettings UCreateRoomWidget::GetRoomSettings() const
+{
+	FRoomSettings RoomSettings;
+
+	if (!RoomNameText)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("RoomNameText is nullptr"));
+		return RoomSettings;
+	}
+	if (!GameModeSelectionWidget.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameModeSelectionWidget Is Not Valid"));
+		return RoomSettings;
+	}
+	if (!PlayerCountSelectionWidget.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerCountSelectionWidget Is Not Valid"));
+		return RoomSettings;
+	}
+	if (!ItemActivationSelectionWidget.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ItemActivationSelectionWidget Is Not Valid"));
+		return RoomSettings;
+	}
+
+	RoomSettings.RoomName = RoomNameText->GetText().ToString();
+	
+	UGameModeSelectionWidget* GameModeSelectionWidgetInstance = GameModeSelectionWidget.Get();
+	RoomSettings.GameMode = GameModeSelectionWidgetInstance->GetCurrentOption();
+	
+	UPlayerCountSelectionWidget* PlayerCountSelectionWidgetInstance = PlayerCountSelectionWidget.Get();
+	RoomSettings.PlayerCount = FCString::Atoi(*PlayerCountSelectionWidgetInstance->GetCurrentOption());
+	
+	UItemActivationSelectionWidget* ItemActivationSelectionWidgetInstance = ItemActivationSelectionWidget.Get();
+	RoomSettings.bItemEnabled = ItemActivationSelectionWidgetInstance->GetCurrentOption() == TEXT("ON");
+
+	return RoomSettings;
+}
+
+void UCreateRoomWidget::OnGameModeChanged(int32 SelectedIndex)
+{
+	if (!GameModeSelectionWidget.IsValid() || !PlayerCountSelectionWidget.IsValid() || !ItemActivationSelectionWidget.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnGameModeChanged: Some widgets are not valid"));
+		return;
+	}
+
+	FRoomSettings RoomSettings;
+	RoomSettings.RoomName = RoomNameText ? RoomNameText->GetText().ToString() : TEXT("Default Room");
+	RoomSettings.GameMode = GameModeSelectionWidget->GetCurrentOption();
+	RoomSettings.PlayerCount = FCString::Atoi(*PlayerCountSelectionWidget->GetCurrentOption());
+	RoomSettings.bItemEnabled = ItemActivationSelectionWidget->GetCurrentOption() == TEXT("ON");
+
+	if (RoomSettings.GameMode == TEXT("Single"))
+	{
+		PlayerCountSelectionWidget->SetCurrentOption(TEXT("1"));
+		PlayerCountSelectionWidget->SetIsEnabled(false);
+	}
+	else
+	{
+		PlayerCountSelectionWidget->SetIsEnabled(true);
+		CreateRoomButton->SetIsEnabled(true);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Create Room: %s, %s, %d, %d"),
+		*RoomSettings.RoomName,
+		*RoomSettings.GameMode,
+		RoomSettings.PlayerCount,
+		RoomSettings.bItemEnabled);
+}
+
+void UCreateRoomWidget::ResetRoomNameText()
+{
+	if (RoomNameText)
+	{
+		RoomNameText->SetText(FText::FromString(GenerateRandomRoomName()));
+	}
+	UE_LOG(LogTemp, Warning, TEXT("ResetCreateRoomWidget Called"));
 }

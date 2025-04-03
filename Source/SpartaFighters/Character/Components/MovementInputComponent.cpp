@@ -28,11 +28,13 @@ void UMovementInputComponent::SetupInput(UEnhancedInputComponent* Input, ASFPlay
 {
 	OwnerCharacter = SFCharacter;
 
+
 	if (OwnerCharacter && OwnerCharacter->GetCharacterMovement())
 	{
 		OwnerCharacter->GetCharacterMovement()->JumpZVelocity = 1000.f;
 		OwnerCharacter->GetCharacterMovement()->AirControl = 1.0f;
 		OwnerCharacter->JumpMaxCount = 2;
+		OwnerCharacter->bUseControllerRotationYaw = false;
 	}
 
 	if (IsValid(PlayerController->MoveAction))
@@ -57,6 +59,24 @@ void UMovementInputComponent::Move(const FInputActionValue& Value)
 	// In Unreal X direction is FrontBack.
 	OwnerCharacter->AddMovementInput(FrontBack, InputVector.X);
 	OwnerCharacter->AddMovementInput(LeftRight, InputVector.Y);
+
+	// Make Direction Vector
+	FVector InputDirection = FVector(InputVector.X, InputVector.Y, 0.f);
+
+	if (!InputDirection.IsNearlyZero())
+	{
+		// Get Only Direction
+		InputDirection.Normalize();
+
+		// Direction -> Rotation
+		FRotator TargetRotation = InputDirection.Rotation();
+
+		// I needs only Yaw
+		TargetRotation.Pitch = 0.f;
+		TargetRotation.Roll = 0.f;
+
+		OwnerCharacter->SetActorRotation(TargetRotation);
+	}
 }
 
 void UMovementInputComponent::StartJump(const FInputActionValue& Value)
