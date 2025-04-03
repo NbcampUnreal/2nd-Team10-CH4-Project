@@ -2,7 +2,7 @@
 #include "CoreMinimal.h"
 #include "RequestUser.generated.h"
 
-USTRUCT(BlueprintType)
+USTRUCT(Atomic, BlueprintType)
 struct SPARTAFIGHTERS_API FRequestCreateAccount
 {
     GENERATED_BODY()
@@ -15,7 +15,7 @@ struct SPARTAFIGHTERS_API FRequestCreateAccount
 };
 
 
-USTRUCT(BlueprintType)
+USTRUCT(Atomic, BlueprintType)
 struct SPARTAFIGHTERS_API FRequestLogIn
 {
     GENERATED_BODY()
@@ -27,7 +27,7 @@ struct SPARTAFIGHTERS_API FRequestLogIn
     FString Password;
 };
 
-USTRUCT(BlueprintType)
+USTRUCT(Atomic, BlueprintType)
 struct SPARTAFIGHTERS_API FRequestLogOut
 {
     GENERATED_BODY()
