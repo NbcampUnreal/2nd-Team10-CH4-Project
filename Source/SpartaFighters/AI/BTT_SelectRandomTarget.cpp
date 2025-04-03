@@ -79,13 +79,11 @@ EBTNodeResult::Type UBTT_SelectRandomTarget::ExecuteTask(UBehaviorTreeComponent&
     // Choice Random Character
     int32 RandomIndex = FMath::RandRange(0, PossibleTargets.Num() - 1);
     AActor* SelectedTarget = PossibleTargets[RandomIndex];
-    UE_LOG(LogTemp, Warning, TEXT("hmm"));
     // Set Blackboard
     UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
     if (BlackboardComp)
     {
         BlackboardComp->SetValueAsObject(TargetKey.SelectedKeyName, SelectedTarget);
-        UE_LOG(LogTemp, Warning, TEXT("TargetKey: %s"), *TargetKey.SelectedKeyName.ToString());
         UE_LOG(LogTemp, Warning, TEXT("Selected Target: %s"), *GetNameSafe(SelectedTarget));
         return EBTNodeResult::Succeeded;
     }
