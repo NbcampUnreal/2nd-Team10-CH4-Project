@@ -21,16 +21,23 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	TArray<USFItemBase*> Inventory;
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void UpdateData();
-	UFUNCTION(BlueprintCallable)
-	void UseConsumable();
-	UFUNCTION(BlueprintCallable)
-	void AddItem(USFItemBase* Item);
-	UFUNCTION(BlueprintCallable)
-	void RemoveItem(USFItemBase*Item);
+	/*UFUNCTION(BlueprintCallable)
+	void UseConsumable();*/
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	bool AddItem(const FName& ItemName, const FSoftObjectPath& ItemIconPath, FText ItemDescription, EItemType ItemType, int32 Quantity);
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	bool RemoveItem(FName ItemNameToRemove, int32 QuantityToRemove);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory")
+	TArray<USFItemBase*> GetInventory() const { return Inventory; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory")
+	USFItemBase* FindItemByName(FName ItemNameToFind) const;
 };

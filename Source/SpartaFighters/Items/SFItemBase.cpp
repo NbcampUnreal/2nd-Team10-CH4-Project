@@ -3,17 +3,38 @@
 
 #include "Items/SFItemBase.h"
 
-USFItemBase::USFItemBase()
+USFItemBase::USFItemBase():
+	ItemIcon(nullptr),
+	ItemName(NAME_None),
+	ItemDescription(FText::GetEmpty()),
+	ItemType(EItemType::Common),
+	ItemQuantity(0)
 {
-	Type = EItemType::Consumable;
 }
 
+//Modify Item Data
+void USFItemBase::SetItemData(const FName& Name, const FSoftObjectPath& IconPath, FText Description,EItemType Type, int32 Quantity)
+{
+	ItemName = Name;
+	ItemIcon = IconPath;
+	ItemDescription = Description;
+	ItemType = Type;
+	ItemQuantity = Quantity;
+}
+
+
+//Initialize Item Data
 void USFItemBase::InitializeItem(const USFItemBase& Item)
 {
-
+	ItemIcon = Item.ItemIcon;
+	ItemName = Item.ItemName;
+	ItemDescription = Item.ItemDescription;
+	ItemType = Item.ItemType;
+	ItemQuantity = Item.ItemQuantity;
 }
+
 
 EItemType USFItemBase::GetItemType() const
 {
-	return Type;
+	return ItemType;
 }
