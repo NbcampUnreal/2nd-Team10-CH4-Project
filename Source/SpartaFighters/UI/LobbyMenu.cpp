@@ -11,28 +11,38 @@ void ULobbyMenu::NativeConstruct()
     Super::NativeConstruct();
 
     if (PlayerInfoButton)
+    {
         PlayerInfoButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnPlayerInfoClicked);
-
+    }
     if (ShopButton)
+    {
         ShopButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnShopClicked);
-
+    }
     if (CreateRoomButton)
+    {
         CreateRoomButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnCreateRoomClicked);
-
+    }
     if (OptionButton)
+    {
         OptionButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnOptionClicked);
+    }
 
     if (QuitGameButton)
+    {
         QuitGameButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnQuitGameClicked);
-
+    }
     if (CooperativeFilterButton)
+    {
         CooperativeFilterButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnCooperativeFilterClicked);
-
+    }
     if (BattleFilterButton)
+    {
         BattleFilterButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnBattleFilterClicked);
-
+    }
     if (ChatTextBox)
+    {
         ChatTextBox->OnTextCommitted.AddDynamic(this, &ULobbyMenu::OnChatTextCommitted);
+    }
 
     if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
     {
@@ -94,7 +104,10 @@ void ULobbyMenu::OnQuitGameClicked()
     if (!QuitGameWidget && QuitGameWidgetClass)
     {
         UWorld* World = GetWorld();
-        if (!World) return;
+        if (!World)
+        {
+            return;
+        }
 
         QuitGameWidget = CreateWidget<UQuitGameWidget>(World, QuitGameWidgetClass);
         if (QuitGameWidget)

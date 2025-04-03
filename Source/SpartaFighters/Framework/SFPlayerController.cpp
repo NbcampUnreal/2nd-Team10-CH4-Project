@@ -10,14 +10,21 @@ void ASFPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	ULocalPlayer* LocalPlayer = GetLocalPlayer();
-	if (!LocalPlayer) return;
-
+	if (!LocalPlayer)
+	{
+		return;
+	}
 
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-	if (!Subsystem) return;
-	
+	if (!Subsystem)
+	{
+		return;
+	}
 
-	if (!DefaultMappingContext) return;
+	if (!DefaultMappingContext)
+	{
+		return;
+	}
 
 	Subsystem->AddMappingContext(DefaultMappingContext, 0);
 }
