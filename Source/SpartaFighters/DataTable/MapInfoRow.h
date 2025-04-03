@@ -1,15 +1,21 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DataTypes/MapInfo.h"
+#include "MapInfoRow.generated.h"
 
-/**
- * 
- */
-class SPARTAFIGHTERS_API MapInfoRow
+USTRUCT(BlueprintType)
+struct FMapInfoRow : public FTableRowBase
 {
-public:
-	MapInfoRow();
-	~MapInfoRow();
+    GENERATED_BODY()
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    int32 MapID;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FMapInfo MapInfo;
+
+    FMapInfoRow()
+    {
+		MapID = GetTypeHash(MapInfo.MapName);
+    }
 };

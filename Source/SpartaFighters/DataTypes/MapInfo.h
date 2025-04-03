@@ -14,4 +14,7 @@ struct FMapInfo
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSoftObjectPtr<UTexture2D> MapThumbnail;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FString GameMode;
 };
