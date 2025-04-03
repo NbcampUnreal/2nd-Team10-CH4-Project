@@ -3,6 +3,9 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 
+#include "Common/DefaultGameIni.h"
+#include "WebAPIClient/Controller/UserController.h"
+
 #define LOCTEXT_NAMESPACE "SpartaFighters"
 
 void UAccountRegisterWidget::NativeConstruct()
@@ -29,30 +32,64 @@ void UAccountRegisterWidget::OnRegisterConfirmClicked()
 
         if (NewID.IsEmpty() || NewPassword.IsEmpty() || ConfirmPassword.IsEmpty())
         {
-            RegisterInstructionText->SetText(FText::FromString("Please fill in all fields."));
-            GetWorld()->GetTimerManager().SetTimer(
-                ResetRegisterInstructionTextTimerHandle,
-                this,
-                &UAccountRegisterWidget::ResetRegisterInstructionText,
-                3.0f,
-                false);
+            OnRegisterFailed("Please fill in all fields.");
+            //RegisterInstructionText->SetText(FText::FromString("Please fill in all fields."));
+            //GetWorld()->GetTimerManager().SetTimer(
+            //    ResetRegisterInstructionTextTimerHandle,
+            //    this,
+            //    &UAccountRegisterWidget::ResetRegisterInstructionText,
+            //    3.0f,
+            //    false);
             return;
         }
 
         if (NewPassword != ConfirmPassword)
         {
-            RegisterInstructionText->SetText(FText::FromString("Password doesn't match."));
-            GetWorld()->GetTimerManager().SetTimer(
-                ResetRegisterInstructionTextTimerHandle,
-                this,
-                &UAccountRegisterWidget::ResetRegisterInstructionText,
-                3.0f,
-                false);
+            OnRegisterFailed("Password doesn't match.");
+            //RegisterInstructionText->SetText(FText::FromString("Password doesn't match."));
+            //GetWorld()->GetTimerManager().SetTimer(
+            //    ResetRegisterInstructionTextTimerHandle,
+            //    this,
+            //    &UAccountRegisterWidget::ResetRegisterInstructionText,
+            //    3.0f,
+            //    false);
             return;
         }
 
         UE_LOG(LogTemp, Log, TEXT("Account Registered: %s"), *NewID);
-        ProcessRegisterSuccess();
+
+        if (UDefaultGameIni::GetInstance()->GetWebAPIUse())
+        {
+            FRequestCreateAccount Request;
+            Request.Account = NewID;
+            Request.Password = NewPassword;
+
+            UUserController::GetInstance()->CreateAccount(Request,
+                [this](TSharedPtr<FResultCreateAccount> Response)
+                {
+                    if (Response.IsValid())
+                    {
+                        EResultCode ResultCode = static_cast<EResultCode>(Response->ResultCode);
+                        switch (ResultCode)
+                        {
+                        case EResultCode::OK:
+                            ProcessRegisterSuccess();
+                            break;
+                        default:
+                            OnRegisterFailed(FString::Printf(TEXT("Fail[%d] : %s"), Response->ResultCode, *Response->ResultMessage));
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        UE_LOG(LogTemp, Error, TEXT("Invalid response or network error occurred"));
+                    }
+                });
+        }
+        else
+        {
+            ProcessRegisterSuccess();
+        }
     }
 }
 
@@ -68,6 +105,18 @@ void UAccountRegisterWidget::ProcessRegisterSuccess()
         1.0f,
         false);
 }
+
+void UAccountRegisterWidget::OnRegisterFailed(FString FailMessage)
+{
+    RegisterInstructionText->SetText(FText::FromString(FailMessage));
+    GetWorld()->GetTimerManager().SetTimer(
+        ResetRegisterInstructionTextTimerHandle,
+        this,
+        &UAccountRegisterWidget::ResetRegisterInstructionText,
+        3.0f,
+        false);
+}
+
 
 void UAccountRegisterWidget::ResetRegisterWidget()
 {
