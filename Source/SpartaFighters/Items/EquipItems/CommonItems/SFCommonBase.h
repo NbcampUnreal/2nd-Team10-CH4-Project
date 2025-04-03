@@ -14,4 +14,6 @@ class SPARTAFIGHTERS_API USFCommonBase : public USFEquipableBase
 {
 	GENERATED_BODY()
 	
+public:
+	USFCommonBase();
 };

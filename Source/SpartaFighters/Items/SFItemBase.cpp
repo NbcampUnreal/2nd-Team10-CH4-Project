@@ -38,3 +38,9 @@ EItemType USFItemBase::GetItemType() const
 {
 	return ItemType;
 }
+
+void USFItemBase::OnItemAcquired_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s Item aquired."), *ItemName.ToString());
+}
+

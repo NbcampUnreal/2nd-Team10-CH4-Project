@@ -48,5 +48,10 @@ public:
 	EItemType GetItemType() const;
 
 	virtual void InitializeItem(const USFItemBase& Item);
+
+	//Event called when item aquired
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Item")
+	void OnItemAcquired();
+	virtual void OnItemAcquired_Implementation();
 	
 };
