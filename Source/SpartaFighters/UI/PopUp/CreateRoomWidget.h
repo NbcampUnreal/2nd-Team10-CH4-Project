@@ -23,6 +23,7 @@ class UTextBlock;
 class UGameModeSelectionWidget;
 class UPlayerCountSelectionWidget;
 class UItemActivationSelectionWidget;
+class URoomWidget;
 
 UCLASS()
 class SPARTAFIGHTERS_API UCreateRoomWidget : public USelectPopUpBase
@@ -33,6 +34,8 @@ protected:
 	virtual void NativeConstruct() override;
 
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "Room")
+	TSoftClassPtr<URoomWidget> RoomWidgetClass;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* RoomNameText;
 	UPROPERTY(meta = (BindWidget))
@@ -46,7 +49,7 @@ private:
 	UButton* CreateRoomButton;
 
 	UFUNCTION(BlueprintCallable)
-	void OnCreateRoomButtonClicked();
+	void CreateAndOpenRoomWidget();
 	UFUNCTION()
 	FString GenerateRandomRoomName();
 
