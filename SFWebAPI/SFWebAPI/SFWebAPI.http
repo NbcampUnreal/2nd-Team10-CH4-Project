@@ -1,0 +1,6 @@
+@SFWebAPI_HostAddress = http://localhost:5145
+
+GET {{SFWebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

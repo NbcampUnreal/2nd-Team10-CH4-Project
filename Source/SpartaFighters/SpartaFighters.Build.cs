@@ -16,6 +16,9 @@ public class SpartaFighters : ModuleRules
             "InputCore",
             "EnhancedInput",
             "UMG",
+            "HTTP",
+            "JsonUtilities",
+            "Json",
             "AIModule",
             "GamePlayTasks",
             "NavigationSystem"

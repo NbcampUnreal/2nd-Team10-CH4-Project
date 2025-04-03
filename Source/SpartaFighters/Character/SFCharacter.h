@@ -1,10 +1,10 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "SFCharacter.generated.h"
+
+class UMovementInputComponent;
 
 UCLASS()
 class SPARTAFIGHTERS_API ASFCharacter : public ACharacter
@@ -12,18 +12,18 @@ class SPARTAFIGHTERS_API ASFCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ASFCharacter();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void Landed(const FHitResult& Hit);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
+	UMovementInputComponent* MovementInputComponent;
+
+public:	
+	virtual void Tick(float DeltaTime) override;
+	
 };

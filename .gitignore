@@ -23,3 +23,7 @@ Saved/
 # Visual Studio cache
 .vs/
 *.ipch
+
+# Build results
+[Bb]in/
+[Oo]bj/
