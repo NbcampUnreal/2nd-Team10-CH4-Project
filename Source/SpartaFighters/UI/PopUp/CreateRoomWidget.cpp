@@ -1,10 +1,13 @@
 #include "UI/PopUp/CreateRoomWidget.h"
+#include "UI/RoomWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "UI/UIObject/GameModeSelectionWidget.h"
 #include "UI/UIObject/PlayerCountSelectionWidget.h"
 #include "UI/UIObject/ItemActivationSelectionWidget.h"
-// #include "SFGameInstanceSubsystem.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
+#include "GameFramework/HUD.h"
 
 void UCreateRoomWidget::NativeConstruct()
 {
@@ -12,7 +15,7 @@ void UCreateRoomWidget::NativeConstruct()
 
 	if (CreateRoomButton)
 	{
-		CreateRoomButton->OnClicked.AddDynamic(this, &UCreateRoomWidget::OnCreateRoomButtonClicked);
+		CreateRoomButton->OnClicked.AddDynamic(this, &UCreateRoomWidget::CreateAndOpenRoomWidget);
 	}
 
 	if (GameModeSelectionWidget.IsValid())
@@ -29,33 +32,40 @@ void UCreateRoomWidget::NativeConstruct()
 	{
 		ItemActivationSelectionWidget->OnSelectionChanged.AddDynamic(this, &UCreateRoomWidget::OnGameModeChanged);
 	}
-
-	if (RoomNameText)
-	{
-		RoomNameText->SetText(FText::FromString(GenerateRandomRoomName()));
-	}
 }
 
-void UCreateRoomWidget::OnCreateRoomButtonClicked()
+void UCreateRoomWidget::CreateAndOpenRoomWidget()
 {
-	GetRoomSettings();
+	if (!RoomWidgetClass.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("RoomWidgetClass is not valid"));
+		return;
+	}
 
-	// Request to create a room (requires integration with server)
+	FRoomSettings NewRoomSettings = GetRoomSettings();
 
-	//USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance());
-	//if (GameInstance)
-	//{
-	//    GameInstance->CreateGameRoom(RoomName, SelectedMode, PlayerCount, bItemsEnabled);
-	//}
-	FRoomSettings RoomSettings = GetRoomSettings();
+	UClass* WidgetClass = RoomWidgetClass.LoadSynchronous();
+	if (!WidgetClass)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load RoomWidgetClass"));
+		return;
+	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Create Room: %s, %s, %d, %d"),
-		*RoomSettings.RoomName,
-		*RoomSettings.GameMode,
-		RoomSettings.PlayerCount,
-		RoomSettings.bItemEnabled);
+	URoomWidget* RoomWidgetInstance = CreateWidget<URoomWidget>(GetWorld(), WidgetClass);
+	if (RoomWidgetInstance)
+	{
+		FRoomInfo RoomInfo;
+		RoomInfo.RoomName = NewRoomSettings.RoomName;
+		RoomWidgetInstance->SetupRoom(RoomInfo);
 
+		RoomWidgetInstance->AddToViewport();
+
+		UE_LOG(LogTemp, Log, TEXT("Room Widget Created and Opened: %s"), *RoomInfo.RoomName);
+	}
+
+	// TODO : Hide Lobby and this Widget(self)
 }
+
 
 FString UCreateRoomWidget::GenerateRandomRoomName()
 {
