@@ -40,7 +40,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, Category = "Item")
-	void SetItemData(const FName& Name, const FSoftObjectPath& IconPath, FText Description, EItemType Type, int32 Quantity);
+	void SetItemData(const FName& Name, const FSoftObjectPath& IconPath, FText Description, EItemType Type);
 
 	//implement on blueprint
 	UFUNCTION(BlueprintImplementableEvent)
@@ -48,5 +48,10 @@ public:
 	EItemType GetItemType() const;
 
 	virtual void InitializeItem(const USFItemBase& Item);
+
+	//Event called when item aquired
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Item")
+	void OnItemAcquired();
+	virtual void OnItemAcquired_Implementation();
 	
 };
