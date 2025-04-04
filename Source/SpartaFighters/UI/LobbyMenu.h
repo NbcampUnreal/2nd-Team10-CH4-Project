@@ -11,6 +11,9 @@ class UVerticalBox;
 class UEditableTextBox;
 class UQuitGameWidget;
 class UCreateRoomWidget;
+class UPlayerSimpleInfoWidget;
+class UGlobalChatWidget;
+class URoomListWidget;
 
 UCLASS()
 class SPARTAFIGHTERS_API ULobbyMenu : public UUserWidget
@@ -21,11 +24,12 @@ protected:
 		virtual void NativeConstruct() override;
 
 private:
-	// Utility Section
+	// Player Info Section
 	UPROPERTY(meta = (BindWidget))
-	UImage* PlayerIcon;
+	UPlayerSimpleInfoWidget* PlayerSimpleInfoWidgetClass;
 	UPROPERTY(meta = (BindWidget))
 	UButton* PlayerInfoButton;
+	// Utility Section
 	UPROPERTY(meta = (BindWidget))
 	UButton* ShopButton;
 	UPROPERTY(meta = (BindWidget))
@@ -40,12 +44,11 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* BattleFilterButton;
 	UPROPERTY(meta = (BindWidget))
-	UVerticalBox* RoomListBox;
+	URoomListWidget* RoomListWidgetClass;
 	// Chat Section
 	UPROPERTY(meta = (BindWidget))
-	UVerticalBox* ChatListBox;
-	UPROPERTY(meta = (BindWidget))
-	UEditableTextBox* ChatTextBox;
+	UGlobalChatWidget* GlobalChatWidgetClass;
+	// User List Section
 	UPROPERTY(meta = (BindWidget))
 	UVerticalBox* UserListBox;
 
@@ -63,18 +66,11 @@ private:
 	void OnCooperativeFilterClicked();
 	UFUNCTION()
 	void OnBattleFilterClicked();
-	UFUNCTION()
-	void OnChatTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UQuitGameWidget> QuitGameWidgetClass;
-	UPROPERTY()
-	UQuitGameWidget* QuitGameWidget;
+	TSoftClassPtr<UQuitGameWidget> QuitGameWidgetClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-    TSubclassOf<UCreateRoomWidget> CreateRoomWidgetClass;
-    UPROPERTY()
-	UCreateRoomWidget* CreateRoomWidget;
-	
+	TSoftClassPtr<UCreateRoomWidget> CreateRoomWidgetClass;
 };

@@ -6,9 +6,9 @@
 #include "RoomWidget.generated.h"
 
 class UTextBlock;
-class UScrollBox;
-class UEditableTextBox;
+class URoomChatWidget;
 class UButton;
+class UPlayerSimpleInfoWidget;
 
 UCLASS()
 class SPARTAFIGHTERS_API URoomWidget : public UUserWidget
@@ -21,23 +21,19 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 
+private:
+	UPROPERTY(meta = (BindWidget))
+	UPlayerSimpleInfoWidget* PlayerSimpleInfoWidgetClass;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* RoomNameText;
 	UPROPERTY(meta = (BindWidget))
-	UScrollBox* PlayerListBox;
-	UPROPERTY(meta = (BindWidget))
-	UScrollBox* ChatBox;
-	UPROPERTY(meta = (BindWidget))
-	UEditableTextBox* ChatInputBox;
+	URoomChatWidget* RoomChatWidgetClass;
 	UPROPERTY(meta = (BindWidget))
 	UButton* LobbyButton;
 
 	UFUNCTION()
 	void OnLobbyButtonClicked();
-	UFUNCTION()
-	void OnChatMessageEntered(const FText& Text, ETextCommit::Type CommitMethod);
 
-private:
 	FRoomInfo CurrentRoomInfo;
 	void UpdatePlayerList();
 
