@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,15 +6,24 @@
 
 class UTextBlock;
 class UButton;
-class UQuitToLobbyWidget;
+class ULobbyMenu;
+class UShopItemListMenu;
 
 UCLASS()
 class SPARTAFIGHTERS_API UShopMenu : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+	ULobbyMenu* GetLobbyMenuWidget() const;
+
 protected:
 	virtual void NativeConstruct() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<ULobbyMenu> LobbyMenuClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UShopItemListMenu> ShopItemListMenuClass;
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -26,9 +33,13 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* CosmeticItemButton;
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* CurrentGoldTextBlock;
-	UPROPERTY(meta=(BindWidget))
 	UButton* ExitButton;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* CurrentGoldTextBlock;
+
+	UShopItemListMenu* ShopItemListMenuWidget;
+	ULobbyMenu* LobbyMenuWidget;
+	
 
 	UFUNCTION()
 	void OnCommonItemClicked();
@@ -36,11 +47,7 @@ private:
 	void OnExclusiveItemClicked();
 	UFUNCTION()
 	void OnCosmeticItemClicked();
-
-public:
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UQuitToLobbyWidget> QuitToLobbyWidgetClass;
-	UPROPERTY()
-	UQuitToLobbyWidget* QuitToLobbyWidget;*/
+	UFUNCTION()
+	void OnExitClicked();
 
 };
