@@ -1,13 +1,12 @@
 #include "Character/Components/MovementInputComponent.h"
+#include "Character/Components/StatusContainerComponent.h"
 #include "EnhancedInputComponent.h"
-#include "Framework/SFPlayerController.h"
 #include "Character/SFCharacter.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "Framework/SFPlayerController.h"
 
 UMovementInputComponent::UMovementInputComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
 	JumpCount = 0;
 
 }
@@ -27,15 +26,6 @@ void UMovementInputComponent::TickComponent(float DeltaTime, ELevelTick TickType
 void UMovementInputComponent::SetupInput(UEnhancedInputComponent* Input, ASFPlayerController* PlayerController, ASFCharacter* SFCharacter)
 {
 	OwnerCharacter = SFCharacter;
-
-
-	if (OwnerCharacter && OwnerCharacter->GetCharacterMovement())
-	{
-		OwnerCharacter->GetCharacterMovement()->JumpZVelocity = 1000.f;
-		OwnerCharacter->GetCharacterMovement()->AirControl = 1.0f;
-		OwnerCharacter->JumpMaxCount = 2;
-		OwnerCharacter->bUseControllerRotationYaw = false;
-	}
 
 	if (IsValid(PlayerController->MoveAction))
 	{

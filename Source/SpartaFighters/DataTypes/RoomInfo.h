@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Framework/SFGameInstanceSubsystem.h"
 #include "RoomInfo.generated.h"
 
 USTRUCT(BlueprintType)
@@ -13,7 +14,7 @@ struct FRoomInfo
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FString RoomName;
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FString GameMode;
+    EGameMode GameMode;
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FString MapName;
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
