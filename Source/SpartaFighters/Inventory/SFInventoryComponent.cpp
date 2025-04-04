@@ -34,6 +34,7 @@ void USFInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void USFInventoryComponent::UpdateData()
 {
+	//Todo
 	//get game instance
 	UGameInstance* Instance = GetWorld()->GetGameInstance();
 	if (Instance)
@@ -49,25 +50,28 @@ void USFInventoryComponent::UpdateData()
 
 
 //bool to check operation
-bool USFInventoryComponent::AddItem(const FName& ItemName, const FSoftObjectPath& ItemIconPath, FText ItemDescription, EItemType ItemType)
+bool USFInventoryComponent::AddItemByClass(TSubclassOf<USFItemBase> ItemClass)
 {
-	USFItemBase* ExistingItem = FindItemByName(ItemName);
-	if (ExistingItem)
+	if (ItemClass)
 	{
-		return true;
-	}
-	else
-	{
-		USFItemBase* NewItem = NewObject<USFItemBase>(this);
-		if (NewItem)
+		FName DefaultItemName = ItemClass.GetDefaultObject()->ItemName;
+		USFItemBase* ExistingItem = FindItemByName(DefaultItemName);
+		if (!ExistingItem)
 		{
-			NewItem->SetItemData(ItemName, ItemIconPath, ItemDescription, ItemType);
-			Inventory.Add(NewItem);
-			UpdateData();
-			return true;
+			USFItemBase* NewItem = NewObject<USFItemBase>(this, ItemClass);
+			if (NewItem)
+			{
+				Inventory.Add(NewItem);
+				UpdateData();
+				return true;
+			}
+		}
+		else
+		{
+			return true; // already existing
 		}
 	}
-	return false;
+	return false; //no class
 }
 
 //bool to check operation
@@ -142,9 +146,18 @@ bool USFInventoryComponent::UnequipItem(SFEquipSlot EquipSlot)
 			USFEquipableBase* EquipItemToUnequip = Cast<USFEquipableBase>(ItemToUnequip);
 			EquipItemToUnequip->OnUnequipped(GetOwner());
 			EquippedItems.Remove(EquipSlot);
-			AddItem(ItemToUnequip->ItemName, ItemToUnequip->GetPathName(), ItemToUnequip->ItemDescription, ItemToUnequip->ItemType);
-			UpdateData();
-			return true;
+			if (AddItemByClass(ItemToUnequip->GetClass()))
+			{
+				UpdateData();
+				return true;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Failed to unequip item into inventory: %s"), *ItemToUnequip->GetName());
+				EquippedItems.Add(EquipSlot, ItemToUnequip);
+				UpdateData();
+				return false;
+			}
 		}
 		EquippedItems.Remove(EquipSlot);
 		UpdateData();

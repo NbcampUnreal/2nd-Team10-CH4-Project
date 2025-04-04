@@ -38,7 +38,7 @@ public:
 
 	//Inventoryfunction
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool AddItem(const FName& ItemName, const FSoftObjectPath& ItemIconPath, FText ItemDescription, EItemType ItemType);
+	bool AddItemByClass(TSubclassOf<USFItemBase> ItemClass);
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool RemoveItem(FName ItemNameToRemove);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory")

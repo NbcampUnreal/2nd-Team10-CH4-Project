@@ -5,7 +5,7 @@
 
 USFSword::USFSword()
 {
-	EquipSlot = SFEquipSlot::Hand; // 주 무기 슬롯
+	EquipSlot = SFEquipSlot::Hand; 
 	AttackDamage = 15.0f;
 	ItemName ="Sword";
 	ItemDescription = FText::FromString(TEXT("Unlock sword skill"));

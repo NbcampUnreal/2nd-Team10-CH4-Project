@@ -15,6 +15,7 @@ void USFExclusiveBase::OnEquipped_Implementation(AActor* Owner)
 
 	if (CanEquip(Owner))
 	{
+		//Todo
 		//add skill
 		/*if (Owner && AttachedSkill)
 		{
@@ -32,7 +33,7 @@ void USFExclusiveBase::OnUnequipped_Implementation(AActor* Owner)
 {
 	Super::OnUnequipped_Implementation(Owner);
 
-	
+	//Todo
 	//if (Owner && AttachedSkill)
 	//{
 	//	//delete skill
@@ -52,6 +53,7 @@ bool USFExclusiveBase::CanEquip(AActor* Owner)
 	 APawn* PawnOwner = Cast<APawn>(Owner);
 	 if (PawnOwner)
 	 {
+		 //Todo
 		//Get character class info by character component
 	 	/*UCharacterClassComponent* ClassComponent = PawnOwner->GetComponentByClass<UCharacterClassComponent>();
 	 	if (ClassComponent && ClassComponent->GetCurrentClass() == RequiredClass)

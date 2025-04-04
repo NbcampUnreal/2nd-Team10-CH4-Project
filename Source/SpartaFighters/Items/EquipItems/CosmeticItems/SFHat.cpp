@@ -21,14 +21,14 @@ void USFHat::ApplyCosmetic_Implementation(AActor* Owner)
 
 	if (Owner)
 	{
-		FName AttachPoint = "head"; // 캐릭터 메시의 머리 본 이름 (실제 프로젝트에 맞게 변경)
+		FName AttachPoint = "head"; 
 		UStaticMeshComponent* HatComponent = NewObject<UStaticMeshComponent>(Owner, FName(*FString::Printf(TEXT("%s_Hat"), *ItemName.ToString())));
-		if (HatComponent && HatMesh.IsValid()) // HatMesh가 로딩되었는지 확인
+		if (HatComponent && HatMesh.IsValid()) 
 		{
-			HatComponent->SetStaticMesh(HatMesh.Get()); // Get() 함수로 실제 UStaticMesh 얻기
+			HatComponent->SetStaticMesh(HatMesh.Get()); 
 			HatComponent->SetupAttachment(Owner->GetRootComponent(), AttachPoint);
 			HatComponent->RegisterComponent();
-			// 필요하다면 Tag 등으로 관리하여 해제 시 찾을 수 있도록 함
+			
 		}
 		else if (!HatMesh.IsValid() && HatMesh.GetAssetName() != "")
 		{
@@ -45,9 +45,9 @@ void USFHat::ApplyCosmetic_Implementation(AActor* Owner)
 void USFHat::RemoveCosmetic_Implementation(AActor* Owner)
 {
 	Super::RemoveCosmetic_Implementation(Owner);
-	UE_LOG(LogTemp, Warning, TEXT("%s 해제!"), *ItemName.ToString());
+	UE_LOG(LogTemp, Warning, TEXT("%s Remove!"), *ItemName.ToString());
 
-	// 예시: 소유자의 머리에 부착된 모자 메시 제거
+	
 	if (Owner)
 	{
 		TArray<UStaticMeshComponent*> Components;
@@ -57,7 +57,7 @@ void USFHat::RemoveCosmetic_Implementation(AActor* Owner)
 			if (Component && Component->GetName().Contains(ItemName.ToString() + "_Hat"))
 			{
 				Component->DestroyComponent();
-				break; // 하나의 모자만 있다고 가정
+				break; 
 			}
 		}
 	}
