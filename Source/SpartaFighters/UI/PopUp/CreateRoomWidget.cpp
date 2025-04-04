@@ -36,6 +36,8 @@ void UCreateRoomWidget::NativeConstruct()
 
 void UCreateRoomWidget::CreateAndOpenRoomWidget()
 {
+	UClass* WidgetClass = RoomWidgetClass.LoadSynchronous();
+
 	if (!RoomWidgetClass.IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("RoomWidgetClass is not valid"));
@@ -44,7 +46,6 @@ void UCreateRoomWidget::CreateAndOpenRoomWidget()
 
 	FRoomSettings NewRoomSettings = GetRoomSettings();
 
-	UClass* WidgetClass = RoomWidgetClass.LoadSynchronous();
 	if (!WidgetClass)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to load RoomWidgetClass"));
@@ -106,7 +107,7 @@ FRoomSettings UCreateRoomWidget::GetRoomSettings() const
 	RoomSettings.RoomName = RoomNameText->GetText().ToString();
 
 	UGameModeSelectionWidget* GameModeSelectionWidgetInstance = GameModeSelectionWidget.Get();
-	RoomSettings.GameMode = GameModeSelectionWidgetInstance->GetCurrentOption<EGameMode>();
+	RoomSettings.GameMode = GameModeSelectionWidgetInstance->GetCurrentOption<EGameModeType>();
 
 	UPlayerCountSelectionWidget* PlayerCountSelectionWidgetInstance = PlayerCountSelectionWidget.Get();
 	RoomSettings.PlayerCount = PlayerCountSelectionWidgetInstance->GetCurrentOption<int32>();
@@ -127,11 +128,11 @@ void UCreateRoomWidget::OnGameModeChanged(int32 SelectedIndex)
 
 	FRoomSettings RoomSettings;
 	RoomSettings.RoomName = RoomNameText ? RoomNameText->GetText().ToString() : TEXT("Default Room");
-	RoomSettings.GameMode = GameModeSelectionWidget->GetCurrentOption<EGameMode>();
+	RoomSettings.GameMode = GameModeSelectionWidget->GetCurrentOption<EGameModeType>();
 	RoomSettings.PlayerCount = PlayerCountSelectionWidget->GetCurrentOption<int32>();
 	RoomSettings.bItemEnabled = ItemActivationSelectionWidget->GetCurrentOption<bool>();
 
-	if (RoomSettings.GameMode == EGameMode::Single)
+	if (RoomSettings.GameMode == EGameModeType::Single)
 	{
 		PlayerCountSelectionWidget->SetCurrentOption(TEXT("1"));
 		PlayerCountSelectionWidget->SetIsEnabled(false);
@@ -142,7 +143,7 @@ void UCreateRoomWidget::OnGameModeChanged(int32 SelectedIndex)
 		CreateRoomButton->SetIsEnabled(true);
 	}
 
-	const UEnum* EnumPtr = StaticEnum<EGameMode>();
+	const UEnum* EnumPtr = StaticEnum<EGameModeType>();
 	FString GameModeName = EnumPtr ? EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(RoomSettings.GameMode)).ToString() : TEXT("Unknown");
 	UE_LOG(LogTemp, Warning, TEXT("Create Room: %s, %s, %d, %d"),
 		*RoomSettings.RoomName,

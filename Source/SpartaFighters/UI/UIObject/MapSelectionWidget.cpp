@@ -2,6 +2,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "UI/RoomWidget.h"
+#include "DataTable/MapInfoRow.h"
 
 void UMapSelectionWidget::NativeConstruct()
 {
@@ -21,7 +22,7 @@ void UMapSelectionWidget::UpdateAvailableMaps()
         return;
     }
 
-    EGameMode CurrentGameMode = RoomWidget->GetCurrentRoomInfo().GameMode;
+    EGameModeType CurrentGameMode = RoomWidget->GetCurrentRoomInfo().GameMode;
 
     TArray<FMapInfoRow*> FilteredMaps;
     static const FString ContextString(TEXT("FilteredMapsDataContext"));
