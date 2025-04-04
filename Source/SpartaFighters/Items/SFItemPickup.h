@@ -15,10 +15,14 @@ class SPARTAFIGHTERS_API ASFItemPickup : public AActor
 public:	
 	ASFItemPickup();
 	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable, Category = "Pickup|Visual")
+	void SetPickupMesh(UStaticMesh* NewMesh);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pickup", meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* OverlapSphere;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pickup", meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* PickupMesh;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pickup")
 	TSubclassOf<USFItemBase> ItemClass;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pickup")

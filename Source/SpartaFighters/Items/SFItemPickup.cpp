@@ -13,10 +13,11 @@ ASFItemPickup::ASFItemPickup()
 	OverlapSphere->SetSphereRadius(100.0f);
 	RootComponent = OverlapSphere;
 
-	// Overlap 이벤트 바인딩
+	PickupMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PickupMesh"));
+	PickupMesh->SetupAttachment(RootComponent);
+
 	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &ASFItemPickup::OnOverlapBegin);
 
-	// PickupItemInstance 초기화
 	PickupItemInstance = nullptr;
 
 }
@@ -70,4 +71,10 @@ void ASFItemPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* 
 }
 
 
-
+void ASFItemPickup::SetPickupMesh(UStaticMesh* NewMesh)
+{
+	if (PickupMesh)
+	{
+		PickupMesh->SetStaticMesh(NewMesh);
+	}
+}
