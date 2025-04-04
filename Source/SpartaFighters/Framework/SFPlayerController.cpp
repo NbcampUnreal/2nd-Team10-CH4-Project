@@ -3,28 +3,37 @@
 
 ASFPlayerController::ASFPlayerController()
 {
+	InputMappingContext = nullptr;
+
+	MoveAction = nullptr;
+	JumpAction = nullptr;
+	RollAction = nullptr;
+	AttackAction = nullptr;
+	SkillAttackAction = nullptr;
+	GuardAction = nullptr;
+	CrouchAction = nullptr;
 }
 
 void ASFPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ULocalPlayer* LocalPlayer = GetLocalPlayer();
-	if (!LocalPlayer)
-	{
-		return;
-	}
+	AddMappingContext();
+}
 
+void ASFPlayerController::AddMappingContext()
+{
+	ULocalPlayer* LocalPlayer = GetLocalPlayer();
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	if (!Subsystem)
 	{
 		return;
 	}
 
-	if (!DefaultMappingContext)
+	if (!InputMappingContext)
 	{
 		return;
 	}
 
-	Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	Subsystem->AddMappingContext(InputMappingContext, 0);
 }
