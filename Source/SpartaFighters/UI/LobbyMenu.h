@@ -72,5 +72,7 @@ public:
 	TSoftClassPtr<UQuitGameWidget> QuitGameWidgetClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	UCreateRoomWidget* CachedCreateRoomWidget = nullptr;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSoftClassPtr<UCreateRoomWidget> CreateRoomWidgetClass;
 };
