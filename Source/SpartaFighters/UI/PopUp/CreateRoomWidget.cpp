@@ -5,9 +5,26 @@
 #include "UI/UIObject/GameModeSelectionWidget.h"
 #include "UI/UIObject/PlayerCountSelectionWidget.h"
 #include "UI/UIObject/ItemActivationSelectionWidget.h"
+#include "UI/LobbyMenu.h"
+#include "UI/UIObject/MapSelectionWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
-#include "GameFramework/HUD.h"
+
+
+FRoomInfo FRoomSettings::ToRoomInfo(int32 RoomID) const
+{
+	FRoomInfo RoomInfo;
+	RoomInfo.RoomID = RoomID;
+	RoomInfo.RoomName = RoomName;
+	RoomInfo.GameMode = GameMode;
+	RoomInfo.MapName = TEXT("");
+	RoomInfo.CurrentPlayers = 1;
+	RoomInfo.MaxPlayers = PlayerCount;
+	RoomInfo.bIsGameInProgress = false;
+	return RoomInfo;
+}
+
 
 void UCreateRoomWidget::NativeConstruct()
 {
@@ -38,15 +55,7 @@ void UCreateRoomWidget::CreateAndOpenRoomWidget()
 {
 	UClass* WidgetClass = RoomWidgetClass.LoadSynchronous();
 
-	if (!RoomWidgetClass.IsValid())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("RoomWidgetClass is not valid"));
-		return;
-	}
-
-	FRoomSettings NewRoomSettings = GetRoomSettings();
-
-	if (!WidgetClass)
+	if (!RoomWidgetClass.IsValid() || !WidgetClass)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to load RoomWidgetClass"));
 		return;
@@ -55,16 +64,35 @@ void UCreateRoomWidget::CreateAndOpenRoomWidget()
 	URoomWidget* RoomWidgetInstance = CreateWidget<URoomWidget>(GetWorld(), WidgetClass);
 	if (RoomWidgetInstance)
 	{
-		FRoomInfo RoomInfo;
-		RoomInfo.RoomName = NewRoomSettings.RoomName;
-		RoomWidgetInstance->SetupRoom(RoomInfo);
+		FRoomSettings RoomSettings = GetRoomSettings();
+		FRoomInfo NewRoomInfo = RoomSettings.ToRoomInfo(FMath::Rand());
+		RoomWidgetInstance->SetupRoom(NewRoomInfo);
 
 		RoomWidgetInstance->AddToViewport();
 
-		UE_LOG(LogTemp, Log, TEXT("Room Widget Created and Opened: %s"), *RoomInfo.RoomName);
+		if (RoomWidgetInstance->MapSelectionWidgetClass)
+		{
+			RoomWidgetInstance->MapSelectionWidgetClass->SetRoomSettings(RoomSettings);
+		}
 	}
 
-	// TODO : Hide Lobby and this Widget(self)
+	APlayerController* PlayerController = GetOwningPlayer();
+	if (PlayerController)
+	{
+		TArray<UUserWidget*> FoundWidgets;
+		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, ULobbyMenu::StaticClass(), false);
+
+		for (UUserWidget* Widget : FoundWidgets)
+		{
+			if (ULobbyMenu* LobbyMenu = Cast<ULobbyMenu>(Widget))
+			{
+				LobbyMenu->SetVisibility(ESlateVisibility::Hidden);
+				break;
+			}
+		}
+	}
+
+	SetVisibility(ESlateVisibility::Hidden);
 }
 
 
@@ -160,3 +188,4 @@ void UCreateRoomWidget::ResetRoomNameText()
 	}
 	UE_LOG(LogTemp, Warning, TEXT("ResetCreateRoomWidget Called"));
 }
+

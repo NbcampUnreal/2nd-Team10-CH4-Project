@@ -62,10 +62,15 @@ void ULobbyMenu::OnShopClicked()
 
 void ULobbyMenu::OnCreateRoomClicked()
 {
-	UE_LOG(LogTemp, Log, TEXT("CreateRoomWidgetClass: %s"), *CreateRoomWidgetClass.ToString());
-	UE_LOG(LogTemp, Log, TEXT("QuitGameWidgetClass: %s"), *QuitGameWidgetClass.ToString());
-
 	UE_LOG(LogTemp, Warning, TEXT("OnCreateRoomClicked!"));
+
+	if (CachedCreateRoomWidget && CachedCreateRoomWidget->IsValidLowLevel())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CachedCreateRoomWidget->IsValidLowLevel()!"));
+		CachedCreateRoomWidget->ResetRoomNameText();
+		CachedCreateRoomWidget->SetVisibility(ESlateVisibility::Visible);
+		return;
+	}
 
 	UClass* WidgetClass = CreateRoomWidgetClass.LoadSynchronous();
 
@@ -81,11 +86,12 @@ void ULobbyMenu::OnCreateRoomClicked()
 		return;
 	}
 
-	USelectPopUpBase* CreateRoomWidgetInstance = CreateWidget<USelectPopUpBase>(GetWorld(), WidgetClass);
-	if (CreateRoomWidgetInstance)
+	CachedCreateRoomWidget = CreateWidget<UCreateRoomWidget>(GetWorld(), WidgetClass);
+	if (CachedCreateRoomWidget)
 	{
-		CreateRoomWidgetInstance->AddToViewport();
-		UE_LOG(LogTemp, Log, TEXT("Quit Game Widget Added to Viewport"));
+		UE_LOG(LogTemp, Warning, TEXT("OnCreateRoomClicked!"));
+		CachedCreateRoomWidget->ResetRoomNameText();
+		CachedCreateRoomWidget->AddToViewport();
 	}
 }
 
