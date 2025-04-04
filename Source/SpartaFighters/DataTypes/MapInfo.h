@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "Framework/SFGameInstanceSubsystem.h"
 #include "MapInfo.generated.h"
 
 USTRUCT(BlueprintType)
@@ -16,5 +17,5 @@ struct FMapInfo
     TSoftObjectPtr<UTexture2D> MapThumbnail;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FString GameMode;
+    EGameMode GameMode;
 };

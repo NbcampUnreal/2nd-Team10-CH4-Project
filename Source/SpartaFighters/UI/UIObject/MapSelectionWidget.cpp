@@ -21,19 +21,21 @@ void UMapSelectionWidget::UpdateAvailableMaps()
         return;
     }
 
-    FString CurrentGameMode = RoomWidget->GetCurrentRoomInfo().GameMode;
+    EGameMode CurrentGameMode = RoomWidget->GetCurrentRoomInfo().GameMode;
 
     TArray<FMapInfoRow*> FilteredMaps;
-    MapDataTable->GetAllRows<FMapInfoRow>(TEXT(""), FilteredMaps);
+    static const FString ContextString(TEXT("FilteredMapsDataContext"));
+    MapDataTable->GetAllRows<FMapInfoRow>(TEXT("ContextString"), FilteredMaps);
 
     AvailableMaps.Empty();
+	Options.Empty();
 
     for (FMapInfoRow* MapRow : FilteredMaps)
     {
         if (MapRow && MapRow->MapInfo.GameMode == CurrentGameMode)
         {
-            Options.Add(AvailableMaps[CurrentIndex]->MapInfo.MapName);
             AvailableMaps.Add(MapRow);
+            Options.Add(AvailableMaps[CurrentIndex]->MapInfo.MapName);
         }
     }
 
