@@ -1,8 +1,7 @@
 
-
-
 #include "Inventory/SFInventoryComponent.h"
 #include "Character/SFCharacter.h"
+#include "Items/EquipItems/SFEquipableBase.h"
 
 // Sets default values for this component's properties
 USFInventoryComponent::USFInventoryComponent()
@@ -47,32 +46,14 @@ void USFInventoryComponent::UpdateData()
 	}
 }
 
-//void USFInventoryComponent::UseConsumable()
-//{
-//	//subtract count by 1 if count is not 1
-//	//UpdateData(); at the end
-//	AActor* PlayerCharacter = GetOwner();
-//	if (PlayerCharacter)
-//	{
-//		ASFCharacter* SFPlayerCharacter = Cast<ASFCharacter>(PlayerCharacter);
-//		if (!SFPlayerCharacter) //|| ItemCount <= 0)
-//		{
-//			return;
-//		}
-//		//ItemCount--;
-//		//SFPlayerCharacter->ApplyConsumableEffect();
-//		UpdateData();
-//	}
-//}
+
 
 //bool to check operation
-bool USFInventoryComponent::AddItem(const FName& ItemName, const FSoftObjectPath& ItemIconPath, FText ItemDescription, EItemType ItemType, int32 Quantity)
+bool USFInventoryComponent::AddItem(const FName& ItemName, const FSoftObjectPath& ItemIconPath, FText ItemDescription, EItemType ItemType)
 {
 	USFItemBase* ExistingItem = FindItemByName(ItemName);
 	if (ExistingItem)
 	{
-		ExistingItem->ItemQuantity += Quantity;
-		UpdateData();
 		return true;
 	}
 	else
@@ -80,46 +61,25 @@ bool USFInventoryComponent::AddItem(const FName& ItemName, const FSoftObjectPath
 		USFItemBase* NewItem = NewObject<USFItemBase>(this);
 		if (NewItem)
 		{
-			NewItem->SetItemData(ItemName, ItemIconPath, ItemDescription, ItemType, Quantity);
+			NewItem->SetItemData(ItemName, ItemIconPath, ItemDescription, ItemType);
 			Inventory.Add(NewItem);
 			UpdateData();
 			return true;
 		}
 	}
-
 	return false;
 }
 
 //bool to check operation
-bool USFInventoryComponent::RemoveItem(FName ItemNameToRemove, int32 QuantityToRemove)
+bool USFInventoryComponent::RemoveItem(FName ItemNameToRemove)
 {
 	for (int32 i = 0; i < Inventory.Num(); ++i)
 	{
 		if (Inventory[i]->ItemName == ItemNameToRemove)
 		{
-			if (Inventory[i]->ItemQuantity > QuantityToRemove)
-			{
-				Inventory[i]->ItemQuantity -= QuantityToRemove;
-				UpdateData();
-				return true;
-			}
-			else if (Inventory[i]->ItemQuantity == QuantityToRemove)
-			{
-				Inventory.RemoveAt(i);
-				UpdateData();
-				return true;
-			}
-			else // Inventory[i]->ItemQuantity < QuantityToRemove
-			{
-				QuantityToRemove -= Inventory[i]->ItemQuantity;
-				Inventory.RemoveAt(i);
-				i--; // arraysize-- index--
-				UpdateData();
-				if (QuantityToRemove == 0)
-				{
-					return true;
-				}
-			}
+			Inventory.RemoveAt(i);
+			UpdateData();
+			return true;
 		}
 	}
 	return false;
@@ -138,3 +98,80 @@ USFItemBase* USFInventoryComponent::FindItemByName(FName Name) const
 	return nullptr;
 }
 
+
+bool USFInventoryComponent::EquipItem(FName ItemNameToEquip, SFEquipSlot EquipSlot)
+{
+	USFItemBase* ItemToEquip = FindItemByName(ItemNameToEquip);
+	if (ItemToEquip && ItemToEquip->IsA(USFEquipableBase::StaticClass()))
+	{
+		USFEquipableBase* EquipItemToEquip = Cast<USFEquipableBase>(ItemToEquip);
+		if (EquipItemToEquip->EquipSlot == EquipSlot)
+		{
+			if (EquippedItems.Contains(EquipSlot))
+			{
+				UnequipItem(EquipSlot);
+			}
+
+			if (RemoveItem(ItemNameToEquip))
+			{
+				EquippedItems.Add(EquipSlot, EquipItemToEquip);
+				EquipItemToEquip->OnEquipped(GetOwner());
+				UpdateData();
+				return true;
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s is unable to equip in %s slot"), *ItemNameToEquip.ToString(), *UEnum::GetValueAsString(EquipSlot));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s is not equipable or not in inventory"), *ItemNameToEquip.ToString());
+	}
+	return false;
+}
+
+bool USFInventoryComponent::UnequipItem(SFEquipSlot EquipSlot)
+{
+	if (EquippedItems.Contains(EquipSlot))
+	{
+		USFItemBase* ItemToUnequip = EquippedItems[EquipSlot];
+		if (ItemToUnequip && ItemToUnequip->IsA(USFEquipableBase::StaticClass()))
+		{
+			USFEquipableBase* EquipItemToUnequip = Cast<USFEquipableBase>(ItemToUnequip);
+			EquipItemToUnequip->OnUnequipped(GetOwner());
+			EquippedItems.Remove(EquipSlot);
+			AddItem(ItemToUnequip->ItemName, ItemToUnequip->GetPathName(), ItemToUnequip->ItemDescription, ItemToUnequip->ItemType);
+			UpdateData();
+			return true;
+		}
+		EquippedItems.Remove(EquipSlot);
+		UpdateData();
+		return true;
+	}
+	return false;
+}
+
+USFItemBase* USFInventoryComponent::GetEquippedItem(SFEquipSlot EquipSlot) const
+{
+	if (EquippedItems.Contains(EquipSlot))
+	{
+		return EquippedItems[EquipSlot];
+	}
+	return nullptr;
+}
+
+//To do 
+// get rid of auto
+bool USFInventoryComponent::IsItemEquipped(FName ItemName) const
+{
+	for (const auto& Pair : EquippedItems)
+	{
+		if (Pair.Value && Pair.Value->ItemName == ItemName)
+		{
+			return true;
+		}
+	}
+	return false;
+}

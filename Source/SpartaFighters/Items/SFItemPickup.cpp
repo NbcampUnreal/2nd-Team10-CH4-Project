@@ -28,7 +28,7 @@ void ASFItemPickup::BeginPlay()
 	Super::BeginPlay();
 	if (ItemClass)
 	{
-		PickupItemInstance = NewObject<USFItemBase>(ItemClass);
+		PickupItemInstance = NewObject<USFConsumableBase>(GetTransientPackage(), ItemClass);
 		if (PickupItemInstance)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("%s successfully generated: %s (%s)"), *GetName(), *PickupItemInstance->ItemName.ToString(), *UEnum::GetValueAsString(PickupItemInstance->ItemType));
@@ -51,7 +51,7 @@ void ASFItemPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* 
 	{
 		if (PickupItemInstance)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s picked up: collide with %s "), *GetName(), *PlayerCharacter->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("%s picked up: collide with %s "), *PickupItemInstance->ItemName.ToString(), *PlayerCharacter->GetName());
 
 			if (PickupItemInstance->IsA(USFConsumableBase::StaticClass()))
 			{

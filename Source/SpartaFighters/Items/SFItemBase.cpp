@@ -13,13 +13,12 @@ USFItemBase::USFItemBase():
 }
 
 //Modify Item Data
-void USFItemBase::SetItemData(const FName& Name, const FSoftObjectPath& IconPath, FText Description,EItemType Type, int32 Quantity)
+void USFItemBase::SetItemData(const FName& Name, const FSoftObjectPath& IconPath, FText Description,EItemType Type)
 {
 	ItemName = Name;
 	ItemIcon = IconPath;
 	ItemDescription = Description;
 	ItemType = Type;
-	ItemQuantity = Quantity;
 }
 
 
@@ -30,7 +29,6 @@ void USFItemBase::InitializeItem(const USFItemBase& Item)
 	ItemName = Item.ItemName;
 	ItemDescription = Item.ItemDescription;
 	ItemType = Item.ItemType;
-	ItemQuantity = Item.ItemQuantity;
 }
 
 

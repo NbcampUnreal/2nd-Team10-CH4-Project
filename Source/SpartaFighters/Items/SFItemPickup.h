@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Items/SFItemBase.h"
+#include "Items/ConsumableItems/SFConsumableBase.h"
 #include "SFItemPickup.generated.h"
+
+class USphereComponent;
 
 UCLASS()
 class SPARTAFIGHTERS_API ASFItemPickup : public AActor
@@ -24,7 +26,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pickup", meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* PickupMesh;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pickup")
-	TSubclassOf<USFItemBase> ItemClass;
+	TSubclassOf<USFConsumableBase> ItemClass;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pickup")
 	class USFItemBase* PickupItemInstance;
 

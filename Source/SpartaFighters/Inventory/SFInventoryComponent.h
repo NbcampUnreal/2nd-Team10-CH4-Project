@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Items/SFItemBase.h"
+#include "Items/EquipItems/SFEquipableBase.h"
 #include "SFInventoryComponent.generated.h"
+
+
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -23,6 +26,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TArray<USFItemBase*> Inventory;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
+	TMap<SFEquipSlot, USFItemBase*> EquippedItems;
 
 public:	
 	// Called every frame
@@ -30,14 +35,24 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void UpdateData();
-	/*UFUNCTION(BlueprintCallable)
-	void UseConsumable();*/
+
+	//Inventoryfunction
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool AddItem(const FName& ItemName, const FSoftObjectPath& ItemIconPath, FText ItemDescription, EItemType ItemType, int32 Quantity);
+	bool AddItem(const FName& ItemName, const FSoftObjectPath& ItemIconPath, FText ItemDescription, EItemType ItemType);
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool RemoveItem(FName ItemNameToRemove, int32 QuantityToRemove);
+	bool RemoveItem(FName ItemNameToRemove);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory")
 	TArray<USFItemBase*> GetInventory() const { return Inventory; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory")
 	USFItemBase* FindItemByName(FName ItemNameToFind) const;
+
+	//Equipment function
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	bool EquipItem(FName ItemNameToEquip, SFEquipSlot EquipSlot);
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	bool UnequipItem(SFEquipSlot EquipSlot);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Equipment")
+	USFItemBase* GetEquippedItem(SFEquipSlot EquipSlot) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Equipment")
+	bool IsItemEquipped(FName ItemName) const;
 };
