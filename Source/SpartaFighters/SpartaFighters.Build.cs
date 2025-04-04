@@ -18,7 +18,10 @@ public class SpartaFighters : ModuleRules
             "UMG",
             "HTTP",
             "JsonUtilities",
-            "Json"
+            "Json",
+            "AIModule",
+            "GamePlayTasks",
+            "NavigationSystem"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[]
