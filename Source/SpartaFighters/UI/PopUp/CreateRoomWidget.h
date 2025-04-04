@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UI/PopUp/SelectPopUpBase.h"
+#include "Framework/SFGameInstanceSubsystem.h"
 #include "CreateRoomWidget.generated.h"
 
 USTRUCT(BlueprintType)
@@ -12,7 +13,7 @@ struct FRoomSettings
 	UPROPERTY(EditAnywhere)
 	FString RoomName;
 	UPROPERTY(EditAnywhere)
-	FString GameMode;
+	EGameMode GameMode;
 	UPROPERTY(EditAnywhere)
 	int32 PlayerCount;
 	UPROPERTY(EditAnywhere)
