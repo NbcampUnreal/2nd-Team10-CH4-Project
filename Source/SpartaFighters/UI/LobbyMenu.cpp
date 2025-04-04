@@ -67,13 +67,14 @@ void ULobbyMenu::OnCreateRoomClicked()
 
 	UE_LOG(LogTemp, Warning, TEXT("OnCreateRoomClicked!"));
 
+	UClass* WidgetClass = CreateRoomWidgetClass.LoadSynchronous();
+
 	if (CreateRoomWidgetClass.IsValid() == false)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CreateRoomWidgetClass is not valid"));
 		return;
 	}
 
-	UClass* WidgetClass = CreateRoomWidgetClass.LoadSynchronous();
 	if (!WidgetClass)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to load QuitGameWidgetClass"));
@@ -98,13 +99,14 @@ void ULobbyMenu::OnQuitGameClicked()
 {
 	UE_LOG(LogTemp, Log, TEXT("Quit Game Button Clicked"));
 
+	UClass* WidgetClass = QuitGameWidgetClass.LoadSynchronous();
+
 	if (QuitGameWidgetClass.IsValid() == false)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("QuitGameWidgetClass is not valid"));
 		return;
 	}
 
-	UClass* WidgetClass = QuitGameWidgetClass.LoadSynchronous();
 	if (!WidgetClass)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to load QuitGameWidgetClass"));

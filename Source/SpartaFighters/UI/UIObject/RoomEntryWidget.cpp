@@ -22,7 +22,7 @@ void URoomEntryWidget::SetRoomInfo(const FRoomInfo& NewRoomInfo)
     }
     if (GameModeText)
     {
-        const UEnum* EnumPtr = StaticEnum<EGameMode>();
+        const UEnum* EnumPtr = StaticEnum<EGameModeType>();
         if (EnumPtr)
         {
             GameModeText->SetText(EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(RoomInfo.GameMode)));

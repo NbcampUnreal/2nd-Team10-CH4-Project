@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Framework/SFGameInstanceSubsystem.h"
+#include "DataTypes/GameModeType.h"
 #include "SelectionWidget.generated.h"
 
 class UButton;
@@ -55,16 +55,16 @@ inline FString USelectionWidget::GetCurrentOption<FString>() const
 }
 
 template<>
-inline EGameMode USelectionWidget::GetCurrentOption<EGameMode>() const
+inline EGameModeType USelectionWidget::GetCurrentOption<EGameModeType>() const
 {
-    const UEnum* EnumPtr = StaticEnum<EGameMode>();
+    const UEnum* EnumPtr = StaticEnum<EGameModeType>();
     if (!EnumPtr || !Options.IsValidIndex(CurrentIndex))
     {
-        return EGameMode::Cooperative; 
+        return EGameModeType::Cooperative;
     }
 
     int64 EnumValue = EnumPtr->GetValueByName(FName(*Options[CurrentIndex]));
-    return static_cast<EGameMode>(EnumValue);
+    return static_cast<EGameModeType>(EnumValue);
 }
 
 template<>
