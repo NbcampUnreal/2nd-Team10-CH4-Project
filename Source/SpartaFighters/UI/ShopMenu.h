@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "ShopMenu.generated.h"
 
-class UEditableTextBox;
+class UTextBlock;
 class UButton;
 class UQuitToLobbyWidget;
 
@@ -26,9 +26,7 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* CosmeticItemButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* ConsumableItemButton;
-	UPROPERTY(meta = (BindWidget))
-	UEditableTextBox* CurrentGoldTextBox;
+	UTextBlock* CurrentGoldTextBlock;
 	UPROPERTY(meta=(BindWidget))
 	UButton* ExitButton;
 
@@ -38,8 +36,6 @@ private:
 	void OnExclusiveItemClicked();
 	UFUNCTION()
 	void OnCosmeticItemClicked();
-	UFUNCTION()
-	void OnConsumableItemClicked();
 
 public:
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")

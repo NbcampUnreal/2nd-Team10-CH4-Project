@@ -18,10 +18,6 @@ void UShopMenu::NativeConstruct()
     {
         CosmeticItemButton->OnClicked.AddDynamic(this, &UShopMenu::OnCosmeticItemClicked);
     }
-    if (ConsumableItemButton)
-    {
-        ConsumableItemButton->OnClicked.AddDynamic(this, &UShopMenu::OnConsumableItemClicked);
-    }
 
     if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
     {
@@ -46,11 +42,5 @@ void UShopMenu::OnExclusiveItemClicked()
 void UShopMenu::OnCosmeticItemClicked()
 {
     UE_LOG(LogTemp, Warning, TEXT("OnCosmeticItemClicked!"));
-   
-}
-
-void UShopMenu::OnConsumableItemClicked()
-{
-    UE_LOG(LogTemp, Warning, TEXT("OnConsumableItemClicked!"));
    
 }
