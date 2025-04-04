@@ -117,7 +117,6 @@ void UAccountRegisterWidget::OnRegisterFailed(FString FailMessage)
         false);
 }
 
-
 void UAccountRegisterWidget::ResetRegisterWidget()
 {
     UE_LOG(LogTemp, Warning, TEXT("ResetRegisterWidget Called"));

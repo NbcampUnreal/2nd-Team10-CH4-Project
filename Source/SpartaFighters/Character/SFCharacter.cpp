@@ -2,18 +2,26 @@
 #include "Framework/SFPlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "Components/MovementInputComponent.h"
+#include "Components/StatusContainerComponent.h"
 
 ASFCharacter::ASFCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	MovementInputComponent = CreateDefaultSubobject<UMovementInputComponent>(TEXT("MoveInputComponent"));
+	StatusContainerComponent = CreateDefaultSubobject<UStatusContainerComponent>(TEXT("StatusContainerComponent"));
+}
+
+UStatusContainerComponent* ASFCharacter::GetStatusContainerComponent() const
+{
+	return StatusContainerComponent;
 }
 
 void ASFCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	InitializeCharacterProperties();
 }
 
 void ASFCharacter::Tick(float DeltaTime)
@@ -37,11 +45,22 @@ void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	}
 }
 
+void ASFCharacter::InitializeCharacterProperties()
+{
+	if (StatusContainerComponent)
+	{
+		StatusContainerComponent->InitializeMovementProperties(this);
+	}
+
+	// later add Example
+	// ex) CombatComponent->InitializeCombatProperties();
+}
+
 void ASFCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
-	// 여기서 InputComponent에 접근해서 점프 카운트 초기화해줘야 함
+	// Needs Reset
 	if (MovementInputComponent)
 	{
 		MovementInputComponent->ResetJumpCount();
