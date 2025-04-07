@@ -32,11 +32,12 @@ UUserController* UUserController::GetInstance()
 void UUserController::Init()
 {
     // TODO : Config에 저장된 서버 URL 받아와서 맵핑해주기
-    //auto config = UDefaultGameIni::GetInstance();
-    //if (IsValid(config))
-    //{
-    //    FString url = config->GetWebAPIServerURL() + "/User";
-    //}
+    auto config = UDefaultGameIni::GetInstance();
+    if (IsValid(config))
+    {
+        FString url = config->GetWebAPIServerURL() + "/User";
+        URL = url;
+    }
 }
 
 void UUserController::GetAllUsers(TFunction<void(TArray<FUser>)> Callback)
