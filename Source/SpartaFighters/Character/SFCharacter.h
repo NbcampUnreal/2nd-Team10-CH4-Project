@@ -45,10 +45,21 @@ public:
 	UDataTable* SkillDataTable;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
-	//FSkillDataRow SkillDataRow;
+	FSkillDataRow* CurrentSkillDataBuffer;
 
 	void PerformAttack(int32 AttackIndex);
 	void AddAttackHandler(UObject* AttackHandler);
+
+	virtual void AttackTrace();
+
+	//UPROPERTY(EditAnywhere, Category = "Combat")
+	//FName RightHandSocketName = "RightHandSocket"; // 소켓 이름 (애니메이션 소켓 기준)
+
+	//UPROPERTY(EditAnywhere, Category = "Combat")
+	//float JabTraceLength = 100.f;
+
+	//UPROPERTY(EditAnywhere, Category = "Combat")
+	//float JabTraceRadius = 15.f;
 
 protected:
 	// TO DO : Seperate Componenets
@@ -58,24 +69,24 @@ protected:
 	// Movement
 	void Move(const FInputActionValue& Value);
 
-	void StartJump(const FInputActionValue& Value);
-	void StopJump(const FInputActionValue& Value);
+	void StartJump();
+	void StopJump();
 
-	void StartRoll(const FInputActionValue& Value);
-	void StopRoll(const FInputActionValue& Value);
+	void StartRoll();
+	void StopRoll();
 
-	void CrouchPressed(const FInputActionValue& Value);
-	void CrouchReleased(const FInputActionValue& Value);
+	void CrouchPressed();
+	void CrouchReleased();
 
 	// Ability
-	void AttackPressed(const FInputActionValue& Value);
-	void AttackReleased(const FInputActionValue& Value);
+	void AttackPressed();
+	void AttackReleased();
 
-	void SkillAttackPressed(const FInputActionValue& Value);
-	void SkillAttackReleased(const FInputActionValue& Value);
+	void SkillAttackPressed();
+	void SkillAttackReleased();
 
-	void GuardPressed(const FInputActionValue& Value);
-	void GuardReleased(const FInputActionValue& Value);
+	void GuardPressed();
+	void GuardReleased();
 
 	virtual float TakeDamage(
 		float DamageAmount,
@@ -94,6 +105,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat")
 	UStatusContainerComponent* StatusContainerComponent;
 
+
+	// TO DO : Low Jump Function
+	UPROPERTY(EditDefaultsOnly, Category = "Jump")
+	float MaxJumpHoldTime = 0.3f; // 최대 유지 시간
+
+	FTimerHandle JumpHoldTimer;
+
+	int32 NomalAttackComboCount = 3;
+	int32 PowerAttackComboCount = 2;
 
 private:
 	bool bIsInAir;

@@ -43,7 +43,7 @@ void UStatusContainerComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	// Test : Decrease HP for 1s
 	//float CurHP = StatusStruct.Get(EStatusType::CurHP);
 	//StatusStruct.Set(EStatusType::CurHP, FMath::Max(CurHP - 1.f * DeltaTime, 0.f));
-
-	//// Print HP
+  
+	// Print HP
 	//UE_LOG(LogTemp, Log, TEXT("Tick HP: %.1f"), StatusStruct.Get(EStatusType::CurHP));
 }
