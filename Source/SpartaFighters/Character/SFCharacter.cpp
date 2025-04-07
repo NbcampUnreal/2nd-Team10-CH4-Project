@@ -91,16 +91,40 @@ void ASFCharacter::StopJump(const FInputActionValue& Value)
 
 }
 
-void ASFCharacter::StartRoll(const FInputActionValue& Value)
+void ASFCharacter::RollPressed(const FInputActionValue& Value)
 {
 	bIsRoll = true;
 
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && SkillDataTable)
+	{
+		static const FString ContextString(TEXT("SkillDataLookup"));
+
+		FName TargetRowName = FName(TEXT("RollSkill"));
+		FSkillDataRow* SkillData = SkillDataTable->FindRow<FSkillDataRow>(TargetRowName, ContextString);
+
+		if (SkillData && SkillData->SkillMontage)
+		{
+			AnimInstance->Montage_Play(SkillData->SkillMontage);
+		}
+	}
 }
 
-void ASFCharacter::StopRoll(const FInputActionValue& Value)
+void ASFCharacter::RollReleased(const FInputActionValue& Value)
 {
-	
+	bIsRoll = false;
 }
+
+//void ASFCharacter::StartRoll(const FInputActionValue& Value)
+//{
+//	bIsRoll = true;
+//
+//}
+//
+//void ASFCharacter::StopRoll(const FInputActionValue& Value)
+//{
+//	
+//}
 
 void ASFCharacter::CrouchPressed(const FInputActionValue& Value)
 {
@@ -185,8 +209,8 @@ void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 			EnhancedInput->BindAction(SFPlayerController->JumpAction, ETriggerEvent::Started, this, &ASFCharacter::StartJump);
 			EnhancedInput->BindAction(SFPlayerController->JumpAction, ETriggerEvent::Completed, this, &ASFCharacter::StopJump);
 
-			EnhancedInput->BindAction(SFPlayerController->RollAction, ETriggerEvent::Started, this, &ASFCharacter::SkillAttackPressed);
-			EnhancedInput->BindAction(SFPlayerController->RollAction, ETriggerEvent::Completed, this, &ASFCharacter::SkillAttackReleased);
+			EnhancedInput->BindAction(SFPlayerController->RollAction, ETriggerEvent::Started, this, &ASFCharacter::RollPressed);
+			EnhancedInput->BindAction(SFPlayerController->RollAction, ETriggerEvent::Completed, this, &ASFCharacter::RollReleased);
 
 			EnhancedInput->BindAction(SFPlayerController->CrouchAction, ETriggerEvent::Started, this, &ASFCharacter::CrouchPressed);
 			EnhancedInput->BindAction(SFPlayerController->CrouchAction, ETriggerEvent::Completed, this, &ASFCharacter::CrouchReleased);

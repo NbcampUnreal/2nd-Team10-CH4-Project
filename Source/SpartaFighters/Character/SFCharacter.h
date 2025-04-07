@@ -61,8 +61,8 @@ protected:
 	void StartJump(const FInputActionValue& Value);
 	void StopJump(const FInputActionValue& Value);
 
-	void StartRoll(const FInputActionValue& Value);
-	void StopRoll(const FInputActionValue& Value);
+	void RollPressed(const FInputActionValue& Value);
+	void RollReleased(const FInputActionValue& Value);
 
 	void CrouchPressed(const FInputActionValue& Value);
 	void CrouchReleased(const FInputActionValue& Value);
@@ -94,6 +94,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat")
 	UStatusContainerComponent* StatusContainerComponent;
 
+	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* RollMontage;*/
 
 private:
 	bool bIsInAir;
@@ -101,4 +103,5 @@ private:
 	bool bIsCrouch;
 	bool bIsAttack;
 	bool bIsGuard;
+
 };
