@@ -1,7 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+//#include "Blueprint/UserWidget.h"
+#include "UI/BaseUserWidget.h"
 #include "LobbyMenu.generated.h"
 
 class UTextBlock;
@@ -14,9 +15,10 @@ class UCreateRoomWidget;
 class UPlayerSimpleInfoWidget;
 class UGlobalChatWidget;
 class URoomListWidget;
+class UShopMenu;
 
 UCLASS()
-class SPARTAFIGHTERS_API ULobbyMenu : public UUserWidget
+class SPARTAFIGHTERS_API ULobbyMenu : public UBaseUserWidget
 {
 	GENERATED_BODY()
 	
@@ -75,4 +77,10 @@ public:
 	UCreateRoomWidget* CachedCreateRoomWidget = nullptr;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSoftClassPtr<UCreateRoomWidget> CreateRoomWidgetClass;
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSoftClassPtr<UShopMenu> ShopMenuWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	UShopMenu* CachedShopMenuWidget;*/
+
 };

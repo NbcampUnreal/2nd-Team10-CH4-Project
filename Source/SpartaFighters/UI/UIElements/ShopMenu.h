@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/BaseUserWidget.h"
 #include "ShopMenu.generated.h"
 
 class UTextBlock;
@@ -10,20 +10,18 @@ class ULobbyMenu;
 class UShopItemListMenu;
 
 UCLASS()
-class SPARTAFIGHTERS_API UShopMenu : public UUserWidget
+class SPARTAFIGHTERS_API UShopMenu : public UBaseUserWidget
 {
 	GENERATED_BODY()
 	
 public:
-	ULobbyMenu* GetLobbyMenuWidget() const;
+	
 
 protected:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<ULobbyMenu> LobbyMenuClass;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UShopItemListMenu> ShopItemListMenuClass;
+	TSoftClassPtr<UShopItemListMenu> ShopItemListMenuClass;
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -36,10 +34,6 @@ private:
 	UButton* ExitButton;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* CurrentGoldTextBlock;
-
-	UShopItemListMenu* ShopItemListMenuWidget;
-	ULobbyMenu* LobbyMenuWidget;
-	
 
 	UFUNCTION()
 	void OnCommonItemClicked();
