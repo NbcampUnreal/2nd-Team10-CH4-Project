@@ -1,13 +1,24 @@
-#include "Framework/SFGameInstanceSubsystem.h"
+#include "SFGameInstanceSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Framework/SFGameModeBase.h"
+#include "Framework/SFSingleGameMode.h"
+#include "Framework/SFBattleGameMode.h"
+#include "Framework/SFCooperativeGameMode.h"
+#include "Framework/SFGameInstance.h"
+#include "DataTypes/GameModeType.h"
+#include "UI/UIManager/UIManager.h"
 
 void USFGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	CurrentGameState = EGameState::LoginMenu;
-	CurrentGameMode = EGameMode::Cooperative;
-	CurrentGameModeInstance = nullptr;
+
+    UIManager = NewObject<UUIManager>(GetGameInstance());
+
+    USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance());
+    if (GameInstance)
+    {
+        GameInstance->LoadMapData(); 
+    }
 }
 
 void USFGameInstanceSubsystem::Deinitialize()
@@ -25,23 +36,51 @@ void USFGameInstanceSubsystem::SetCurrentGameState(EGameState NewGameState)
 	}
 }
 
-void USFGameInstanceSubsystem::SwitchGameMode(EGameMode NewGameMode)
+void USFGameInstanceSubsystem::ChangeLevelByMapID(int32 MapID)
 {
-    if (CurrentGameMode != NewGameMode)
+    if (!MapDataTable)
     {
-        CurrentGameMode = NewGameMode;
-        UE_LOG(LogTemp, Log, TEXT("Game Mode Switched: %d"), static_cast<int32>(NewGameMode));
+        UE_LOG(LogTemp, Warning, TEXT("MapDataTable is not assigned."));
+        return;
+    }
 
-        if (CurrentGameModeInstance)
-        {
-            CurrentGameModeInstance->ConditionalBeginDestroy();
-            CurrentGameModeInstance = nullptr;
-        }
+	static const FString ContextString(TEXT("MapInfo Context"));
+    TArray<FMapInfoRow*> AllMaps;
+    MapDataTable->GetAllRows<FMapInfoRow>(ContextString, AllMaps);
 
-        UWorld* World = GetWorld();
-        if (World)
+    for (FMapInfoRow* MapRow : AllMaps)
+    {
+        if (MapRow && MapRow->MapID == MapID)
         {
-            CurrentGameModeInstance = Cast<ASFGameModeBase>(UGameplayStatics::GetGameMode(World));
+            FString LevelToLoad = MapRow->MapInfo.LevelPath;
+
+            UWorld* World = GetWorld();
+            if (!World)
+            {
+                UE_LOG(LogTemp, Error, TEXT("GetWorld() returned nullptr."));
+                return;
+            }
+
+            APlayerController* PC = World->GetFirstPlayerController();
+            if (!PC)
+            {
+                UE_LOG(LogTemp, Error, TEXT("No PlayerController found in the world."));
+                return;
+            }
+
+            if (IsRunningDedicatedServer())
+            {
+                UE_LOG(LogTemp, Log, TEXT("Changing Level to: %s (Server)"), *LevelToLoad);
+                UGameplayStatics::OpenLevel(World, FName(*LevelToLoad), true);
+            }
+            else
+            {
+                UE_LOG(LogTemp, Log, TEXT("Changing Level to: %s (Client)"), *LevelToLoad);
+                PC->ClientTravel(LevelToLoad, ETravelType::TRAVEL_Absolute);
+            }
+            return;
         }
     }
+
+    UE_LOG(LogTemp, Warning, TEXT("Map not found for ID: %d"), MapID);
 }

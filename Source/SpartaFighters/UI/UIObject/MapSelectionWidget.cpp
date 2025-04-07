@@ -1,60 +1,69 @@
-#include "UI/UIObject/MapSelectionWidget.h"
+#include "MapSelectionWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
-#include "UI/RoomWidget.h"
+#include "UI/UIElements/RoomWidget.h"
+#include "DataTable/MapInfoRow.h"
 
 void UMapSelectionWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 }
 
-void UMapSelectionWidget::SetRoomWidget(URoomWidget* InRoomWidget)
+void UMapSelectionWidget::SetRoomSettings(const FRoomSettings& InRoomSettings)
 {
-    RoomWidget = InRoomWidget;
-    UpdateAvailableMaps();
+	CurrentGameMode = InRoomSettings.GameMode;
+	UpdateAvailableMaps();
 }
 
 void UMapSelectionWidget::UpdateAvailableMaps()
 {
-    if (!RoomWidget || !MapDataTable)  
-    {
-        return;
-    }
+	if (!MapDataTable)
+	{
+		return;
+	}
 
-    EGameMode CurrentGameMode = RoomWidget->GetCurrentRoomInfo().GameMode;
+	TArray<FMapInfoRow*> FilteredMaps;
+	static const FString ContextString(TEXT("FilteredMapsDataContext"));
+	MapDataTable->GetAllRows<FMapInfoRow>(ContextString, FilteredMaps);
 
-    TArray<FMapInfoRow*> FilteredMaps;
-    static const FString ContextString(TEXT("FilteredMapsDataContext"));
-    MapDataTable->GetAllRows<FMapInfoRow>(TEXT("ContextString"), FilteredMaps);
-
-    AvailableMaps.Empty();
+	AvailableMaps.Empty();
 	Options.Empty();
 
-    for (FMapInfoRow* MapRow : FilteredMaps)
-    {
-        if (MapRow && MapRow->MapInfo.GameMode == CurrentGameMode)
-        {
-            AvailableMaps.Add(MapRow);
-            Options.Add(AvailableMaps[CurrentIndex]->MapInfo.MapName);
-        }
-    }
+	for (FMapInfoRow* MapRow : FilteredMaps)
+	{
+		if (MapRow && MapRow->MapInfo.GameMode == CurrentGameMode) 
+		{
+			AvailableMaps.Add(MapRow);
+			Options.Add(MapRow->MapInfo.MapName);
+		}
+	}
 
-    CurrentIndex = 0;
-    UpdateSelectionUI();
+	CurrentIndex = 0;
+	UpdateSelectionUI();
 }
 
 void UMapSelectionWidget::UpdateSelectionUI()
 {
-    if (AvailableMaps.IsValidIndex(CurrentIndex))
-    {
-        if (MapThumbnail)
-        {
-            MapThumbnail->SetBrushFromTexture(AvailableMaps[CurrentIndex]->MapInfo.MapThumbnail.LoadSynchronous());
-        }
-    }
+	if (AvailableMaps.IsValidIndex(CurrentIndex))
+	{
+		if (MapThumbnail)
+		{
+			MapThumbnail->SetBrushFromTexture(AvailableMaps[CurrentIndex]->MapInfo.MapThumbnail.LoadSynchronous());
+		}
+		if (SelectionText)
+		{
+			SelectionText->SetText(FText::FromString(AvailableMaps[CurrentIndex]->MapInfo.MapName));
+		}
+	}
 }
 
 FMapInfo UMapSelectionWidget::GetCurrentSelectedMap() const
 {
-    return AvailableMaps.IsValidIndex(CurrentIndex) ? AvailableMaps[CurrentIndex]->MapInfo : FMapInfo();
+	return AvailableMaps.IsValidIndex(CurrentIndex) ? AvailableMaps[CurrentIndex]->MapInfo : FMapInfo();
+}
+
+void UMapSelectionWidget::SetGameMode(EGameModeType InGameMode)
+{
+	CurrentGameMode = InGameMode;
+	UpdateAvailableMaps();
 }

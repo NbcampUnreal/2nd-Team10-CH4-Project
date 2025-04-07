@@ -3,8 +3,12 @@
 
 #include "Items/ConsumableItems/SFConsumableBase.h"
 
-void USFConsumableBase::ApplyConsumableEffect(ASFCharacter* InPlayerCharacter)
+USFConsumableBase::USFConsumableBase()
 {
-	//Set consumable item count--
-	
+	ItemType = EItemType::Consumable;
+}
+
+void USFConsumableBase::ApplyConsumableEffect_Implementation(ASFCharacter* InPlayerCharacter)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s applied"), *ItemName.ToString());
 }

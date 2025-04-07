@@ -1,10 +1,12 @@
-#include "UI/LobbyMenu.h"
+﻿#include "LobbyMenu.h"
+#include "ShopMenu.h"
 #include "Components/Button.h"
 #include "Components/VerticalBox.h"
 #include "UI/UIObject/PlayerSimpleInfoWidget.h"
 #include "UI/UIObject/GlobalChatWidget.h"
 #include "UI/UIObject/RoomListWidget.h"
-#include "UI/QuitGameWidget.h"
+#include "UI/PopUp/QuitGameWidget.h"
+#include "UI/UIManager/UIManager.h"
 #include "UI/PopUp/CreateRoomWidget.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -46,6 +48,15 @@ void ULobbyMenu::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Error, TEXT("QuitGameWidgetClass is NULL in NativeConstruct"));
 	}
+
+	/*if (ShopMenuWidgetClass) 
+	{
+		UClass* SoftShopMenuClass = ShopMenuWidgetClass.LoadSynchronous();
+
+		CachedShopMenuWidget = CreateWidget<UShopMenu>(GetWorld(), SoftShopMenuClass);
+		CachedShopMenuWidget->AddToViewport();
+		CachedShopMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+	}*/
 }
 
 void ULobbyMenu::OnPlayerInfoClicked()
@@ -57,15 +68,28 @@ void ULobbyMenu::OnPlayerInfoClicked()
 void ULobbyMenu::OnShopClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnShopClicked!"));
-	// Open the Shop menu UI
+	/*SetVisibility(ESlateVisibility::Hidden);*/
+	//CachedShopMenuWidget->SetVisibility(ESlateVisibility::Visible);
+
+	if (UUIManager* UIManager = ResolveUIManager())
+	{
+		UIManager->ShowShopMenu(); 
+	}
 }
 
 void ULobbyMenu::OnCreateRoomClicked()
 {
-	UE_LOG(LogTemp, Log, TEXT("CreateRoomWidgetClass: %s"), *CreateRoomWidgetClass.ToString());
-	UE_LOG(LogTemp, Log, TEXT("QuitGameWidgetClass: %s"), *QuitGameWidgetClass.ToString());
-
 	UE_LOG(LogTemp, Warning, TEXT("OnCreateRoomClicked!"));
+
+	if (CachedCreateRoomWidget && CachedCreateRoomWidget->IsValidLowLevel())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CachedCreateRoomWidget->IsValidLowLevel()!"));
+		CachedCreateRoomWidget->ResetRoomNameText();
+		CachedCreateRoomWidget->SetVisibility(ESlateVisibility::Visible);
+		return;
+	}
+
+	UClass* WidgetClass = CreateRoomWidgetClass.LoadSynchronous();
 
 	if (CreateRoomWidgetClass.IsValid() == false)
 	{
@@ -73,18 +97,18 @@ void ULobbyMenu::OnCreateRoomClicked()
 		return;
 	}
 
-	UClass* WidgetClass = CreateRoomWidgetClass.LoadSynchronous();
 	if (!WidgetClass)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to load QuitGameWidgetClass"));
 		return;
 	}
 
-	USelectPopUpBase* CreateRoomWidgetInstance = CreateWidget<USelectPopUpBase>(GetWorld(), WidgetClass);
-	if (CreateRoomWidgetInstance)
+	CachedCreateRoomWidget = CreateWidget<UCreateRoomWidget>(GetWorld(), WidgetClass);
+	if (CachedCreateRoomWidget)
 	{
-		CreateRoomWidgetInstance->AddToViewport();
-		UE_LOG(LogTemp, Log, TEXT("Quit Game Widget Added to Viewport"));
+		UE_LOG(LogTemp, Warning, TEXT("OnCreateRoomClicked!"));
+		CachedCreateRoomWidget->ResetRoomNameText();
+		CachedCreateRoomWidget->AddToViewport();
 	}
 }
 
@@ -98,13 +122,14 @@ void ULobbyMenu::OnQuitGameClicked()
 {
 	UE_LOG(LogTemp, Log, TEXT("Quit Game Button Clicked"));
 
+	UClass* WidgetClass = QuitGameWidgetClass.LoadSynchronous();
+
 	if (QuitGameWidgetClass.IsValid() == false)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("QuitGameWidgetClass is not valid"));
 		return;
 	}
 
-	UClass* WidgetClass = QuitGameWidgetClass.LoadSynchronous();
 	if (!WidgetClass)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to load QuitGameWidgetClass"));

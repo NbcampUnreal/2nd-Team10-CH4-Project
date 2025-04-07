@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "UI/UIObject/SelectionWidget.h"
 #include "DataTable/MapInfoRow.h"
+#include "UI/PopUp/CreateRoomWidget.h"
 #include "MapSelectionWidget.generated.h"
 
 class UTextBlock;
-class UButton;
 class UImage;
 class URoomWidget;
 
@@ -18,20 +18,25 @@ class SPARTAFIGHTERS_API UMapSelectionWidget : public USelectionWidget
 protected:
 	virtual void NativeConstruct() override;
 
-	UPROPERTY(meta = (BindWidget))
-	UImage* MapThumbnail;
+private:
+    UPROPERTY()
+    URoomWidget* RoomWidget;
+    UPROPERTY(EditDefaultsOnly, Category = "Map")
+    UDataTable* MapDataTable;
+    UPROPERTY(meta = (BindWidget))
+    UImage* MapThumbnail;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Selection")
-	UDataTable* MapDataTable;
+    TArray<FMapInfoRow*> AvailableMaps;
+    int32 CurrentIndex = 0;
 
-	TArray<FMapInfoRow*> AvailableMaps;
+    void UpdateSelectionUI();
 
 public:
-	void UpdateAvailableMaps();
-	void SetRoomWidget(URoomWidget* InRoomWidget);
-	FMapInfo GetCurrentSelectedMap() const;
+    void SetRoomSettings(const FRoomSettings& InRoomSettings);
+    void UpdateAvailableMaps();
+    FMapInfo GetCurrentSelectedMap() const;
+    void SetGameMode(EGameModeType InGameMode);
 
 private:
-	TSoftObjectPtr<URoomWidget> RoomWidget;
-	void UpdateSelectionUI();
+    EGameModeType CurrentGameMode;
 };

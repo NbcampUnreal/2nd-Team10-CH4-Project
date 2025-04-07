@@ -1,11 +1,11 @@
-﻿#include "UI/LoginMenu.h"
+﻿#include "LoginMenu.h"
 #include "Framework/SFPlayerController.h"
 #include "Components/EditableTextBox.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
-#include "UI/AccountRegisterWidget.h"
-#include "UI/QuitGameWidget.h"
-#include "UI/LobbyMenu.h"
+#include "UI/PopUp/AccountRegisterWidget.h"
+#include "UI/PopUp/QuitGameWidget.h"
+#include "UI/UIManager/UIManager.h"
 
 #include "Common/DefaultGameIni.h"
 #include "WebAPIClient/Controller/UserController.h"
@@ -223,10 +223,15 @@ void ULoginMenu::EnterLobby()
 
 	RemoveFromParent();
 
-	LobbyMenu = CreateWidget<ULobbyMenu>(GetWorld(), LobbyMenuClass);
+	/*LobbyMenu = CreateWidget<ULobbyMenu>(GetWorld(), LobbyMenuClass);
 	if (LobbyMenu)
 	{
 		LobbyMenu->AddToViewport();
+	}*/
+
+	if (UUIManager* UIManager = ResolveUIManager())
+	{
+		UIManager->ShowLobbyMenu();
 	}
 }
 

@@ -2,7 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "UI/PopUp/SelectPopUpBase.h"
-#include "Framework/SFGameInstanceSubsystem.h"
+#include "DataTypes/GameModeType.h"
+#include "DataTypes/RoomInfo.h"
 #include "CreateRoomWidget.generated.h"
 
 USTRUCT(BlueprintType)
@@ -13,11 +14,13 @@ struct FRoomSettings
 	UPROPERTY(EditAnywhere)
 	FString RoomName;
 	UPROPERTY(EditAnywhere)
-	EGameMode GameMode;
+	EGameModeType GameMode;
 	UPROPERTY(EditAnywhere)
 	int32 PlayerCount;
 	UPROPERTY(EditAnywhere)
 	bool bItemEnabled;
+
+	FRoomInfo ToRoomInfo(int32 RoomID) const;
 };
 
 class UTextBlock;

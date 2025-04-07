@@ -15,6 +15,12 @@ class SPARTAFIGHTERS_API USFConsumableBase : public USFItemBase
 {
 	GENERATED_BODY()
 	
-public:
+public: 
+	USFConsumableBase();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Consumable")
 	void ApplyConsumableEffect(ASFCharacter* InPlayerCharacter);
+	virtual void ApplyConsumableEffect_Implementation(ASFCharacter* InPlayerCharacter);
+
+
+
 };

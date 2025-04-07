@@ -31,7 +31,10 @@ void USelectionWidget::InitializeSelection(const TArray<FString>& InOptions, int
 
 void USelectionWidget::OnLeftArrowClicked()
 {
-    if (Options.Num() == 0) return;
+    if (Options.Num() == 0)
+    {
+        return;
+    }
 
     CurrentIndex = (CurrentIndex - 1 + Options.Num()) % Options.Num();
     SelectionText->SetText(FText::FromString(Options[CurrentIndex]));
@@ -41,8 +44,11 @@ void USelectionWidget::OnLeftArrowClicked()
 
 void USelectionWidget::OnRightArrowClicked()
 {
-    if (Options.Num() == 0) return;
-
+    if (Options.Num() == 0)
+    {
+        return;
+    }
+    
     CurrentIndex = (CurrentIndex + 1) % Options.Num();
     SelectionText->SetText(FText::FromString(Options[CurrentIndex]));
 

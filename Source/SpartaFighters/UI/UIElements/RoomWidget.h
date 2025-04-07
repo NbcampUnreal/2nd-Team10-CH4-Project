@@ -9,6 +9,7 @@ class UTextBlock;
 class URoomChatWidget;
 class UButton;
 class UPlayerSimpleInfoWidget;
+class UMapSelectionWidget;
 
 UCLASS()
 class SPARTAFIGHTERS_API URoomWidget : public UUserWidget
@@ -23,11 +24,11 @@ protected:
 
 private:
 	UPROPERTY(meta = (BindWidget))
-	UPlayerSimpleInfoWidget* PlayerSimpleInfoWidgetClass;
+	TSoftObjectPtr<UPlayerSimpleInfoWidget> PlayerSimpleInfoWidgetClass;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* RoomNameText;
 	UPROPERTY(meta = (BindWidget))
-	URoomChatWidget* RoomChatWidgetClass;
+	TSoftObjectPtr<URoomChatWidget> RoomChatWidgetClass;
 	UPROPERTY(meta = (BindWidget))
 	UButton* LobbyButton;
 
@@ -38,5 +39,8 @@ private:
 	void UpdatePlayerList();
 
 public:
+	UPROPERTY(meta = (BindWidget))
+	TSoftObjectPtr<UMapSelectionWidget> MapSelectionWidgetClass;
+
 	FRoomInfo GetCurrentRoomInfo() const { return CurrentRoomInfo; }
 };

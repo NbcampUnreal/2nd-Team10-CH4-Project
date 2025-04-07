@@ -15,7 +15,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName SkillName; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UAnimMontage> SkillMontage;
+	TObjectPtr<UAnimMontage> SkillMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AttackPower;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
