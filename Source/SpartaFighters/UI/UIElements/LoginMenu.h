@@ -1,7 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+//#include "Blueprint/UserWidget.h"
+#include "UI/BaseUserWidget.h"
 #include "LoginMenu.generated.h"
 
 class UEditableTextBox;
@@ -11,7 +12,7 @@ class UAccountRegisterWidget;
 class UQuitGameWidget;
 class ULobbyMenu;
 UCLASS()
-class SPARTAFIGHTERS_API ULoginMenu : public UUserWidget
+class SPARTAFIGHTERS_API ULoginMenu : public UBaseUserWidget
 {
 	GENERATED_BODY()
 	
@@ -58,11 +59,6 @@ public:
     TSubclassOf<UQuitGameWidget> QuitGameWidgetClass;
     UPROPERTY()
     UQuitGameWidget* QuitGameWidget;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-    TSubclassOf<ULobbyMenu> LobbyMenuClass;
-    UPROPERTY()
-    ULobbyMenu* LobbyMenu;
 
 private:
     UPROPERTY()

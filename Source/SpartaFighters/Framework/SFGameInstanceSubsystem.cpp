@@ -1,14 +1,18 @@
-#include "Framework/SFGameInstanceSubsystem.h"
+#include "SFGameInstanceSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Framework/SFGameModeBase.h"
 #include "Framework/SFSingleGameMode.h"
 #include "Framework/SFBattleGameMode.h"
 #include "Framework/SFCooperativeGameMode.h"
 #include "DataTypes/GameModeType.h"
+#include "UI/UIManager/UIManager.h"
 
 void USFGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+    UIManager = NewObject<UUIManager>(GetGameInstance());
+
     if (!MapDataTable)
     {
         UE_LOG(LogTemp, Warning, TEXT("MapDataTable is not assigned in USFGameInstanceSubsystem."));

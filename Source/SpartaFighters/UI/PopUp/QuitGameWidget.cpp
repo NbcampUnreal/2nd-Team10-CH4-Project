@@ -1,4 +1,4 @@
-#include "UI/QuitGameWidget.h"
+#include "QuitGameWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Kismet/KismetSystemLibrary.h"
