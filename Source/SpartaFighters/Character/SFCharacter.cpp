@@ -15,7 +15,7 @@
 
 ASFCharacter::ASFCharacter()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	// Init Character Movement
 	bUseControllerRotationPitch = false;
@@ -55,12 +55,6 @@ void ASFCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	//InitializeCharacterProperties();
-}
-
-void ASFCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 void ASFCharacter::Move(const FInputActionValue& Value)
@@ -122,24 +116,7 @@ void ASFCharacter::CrouchReleased(const FInputActionValue& Value)
 
 void ASFCharacter::AttackPressed(const FInputActionValue& Value)
 {
-	bIsAttack = true;
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance)
-	{
-		TArray<FSkillDataRow*> AllSkils;
-		static const FString ContextString(TEXT("SkillDataText"));
-		SkillDataTable->GetAllRows(ContextString, AllSkils);
-
-
-		if (AllSkils[0])
-		{
-			if (AllSkils[0]->SkillMontage)
-			{
-				AnimInstance->Montage_Play(AllSkils[0]->SkillMontage);
-			}
-		}
-	}
+	PerformAttack(0); // Example of performing the first attack in the array
 }
 
 void ASFCharacter::AttackReleased(const FInputActionValue& Value)
@@ -251,3 +228,37 @@ void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 //		MovementInputComponent->ResetJumpCount();
 //	}
 //}
+
+void ASFCharacter::PerformAttack(int32 AttackIndex)
+{
+	bIsAttack = true;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		TArray<FSkillDataRow*> AllSkils;
+		static const FString ContextString(TEXT("SkillDataText"));
+		SkillDataTable->GetAllRows(ContextString, AllSkils);
+
+		if (AllSkils[0])
+		{
+			if (AllSkils[0]->SkillMontage)
+			{
+				AnimInstance->Montage_Play(AllSkils[0]->SkillMontage);
+			}
+		}
+	}
+
+	if (AttackHandlers.IsValidIndex(AttackIndex))
+	{
+		if (IHandleAttack* Handler = Cast<IHandleAttack>(AttackHandlers[AttackIndex]))
+		{
+			Handler->PerformAttack();
+		}
+	}
+}
+
+void ASFCharacter::AddAttackHandler(UObject* AttackHandler)
+{
+	AttackHandlers.Add(AttackHandler);
+}
