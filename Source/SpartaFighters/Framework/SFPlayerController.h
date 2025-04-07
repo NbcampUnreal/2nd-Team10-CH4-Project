@@ -43,5 +43,6 @@ public:
 
 private:
 	void AddMappingContext();
+	void InitUI();
 
 };

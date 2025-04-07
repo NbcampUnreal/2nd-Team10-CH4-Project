@@ -19,6 +19,8 @@ enum class EGameState : uint8
 
 class ASFGameModeBase;
 class UDataTable;
+class UUIManager;
+class UUIManagerSettings;
 
 UCLASS()
 class SPARTAFIGHTERS_API USFGameInstanceSubsystem : public UGameInstanceSubsystem
@@ -28,8 +30,12 @@ class SPARTAFIGHTERS_API USFGameInstanceSubsystem : public UGameInstanceSubsyste
 private:
 	EGameState CurrentGameState;
 	EGameModeType CurrentGameMode;
+
 	UPROPERTY()
 	ASFGameModeBase* CurrentGameModeInstance;
+
+	UPROPERTY()
+	UUIManager* UIManager;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Data")
@@ -44,4 +50,7 @@ public:
 	void SetCurrentGameState(EGameState NewGameState);
 	EGameModeType GetCurrentGameMode() const { return CurrentGameMode; }
 	void ChangeLevelByMapID(int32 MapID);
+
+	UUIManager* GetUIManager() const { return UIManager; }
+	
 };
