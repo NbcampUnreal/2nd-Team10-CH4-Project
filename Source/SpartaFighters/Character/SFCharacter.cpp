@@ -2,9 +2,11 @@
 
 #include "EnhancedInputComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "TimerManager.h"
 
 #include "Framework/SFPlayerController.h"
 #include "Components/MovementInputComponent.h"
@@ -63,68 +65,106 @@ void ASFCharacter::Move(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		// find out which way is forward
+		// Find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
+		// Get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-		// get right vector 
+		// Get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		// add movement 
+		// Add movement 
 		AddMovementInput(ForwardDirection, MovementVector.X);
 		AddMovementInput(RightDirection, MovementVector.Y);
 	}
 }
 
-void ASFCharacter::StartJump(const FInputActionValue& Value)
+void ASFCharacter::StartJump()
 {
 	ACharacter::Jump();
-
+	// TO DO : Low Jump Function
+	//GetWorld()->GetTimerManager().SetTimer(JumpHoldTimer, this, &ASFCharacter::StopJump, MaxJumpHoldTime, false);
 }
 
-void ASFCharacter::StopJump(const FInputActionValue& Value)
+void ASFCharacter::StopJump()
 {
 	ACharacter::StopJumping();
 
+	// TO DO : Low Jump Function
+	//GetWorldTimerManager().ClearTimer(JumpHoldTimer);
 }
 
-void ASFCharacter::StartRoll(const FInputActionValue& Value)
+void ASFCharacter::StartRoll()
 {
 	bIsRoll = true;
 
 }
 
-void ASFCharacter::StopRoll(const FInputActionValue& Value)
+void ASFCharacter::StopRoll()
 {
 	
 }
 
-void ASFCharacter::CrouchPressed(const FInputActionValue& Value)
+void ASFCharacter::CrouchPressed()
 {
 	bIsCrouch = true;
 
 }
 
-void ASFCharacter::CrouchReleased(const FInputActionValue& Value)
+void ASFCharacter::CrouchReleased()
 {
 	bIsCrouch = false;
 
 }
 
-void ASFCharacter::AttackPressed(const FInputActionValue& Value)
+void ASFCharacter::AttackPressed()
 {
-	PerformAttack(0); // Example of performing the first attack in the array
+	//PerformAttack(0); // Example of performing the first attack in the array
+
+	bIsAttack = true;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && SkillDataTable)
+	{
+		FName TargetRowName;
+
+		// TO DO : Sperate State 
+		if (GetCharacterMovement()->IsFalling())
+		{
+			TargetRowName = FName(TEXT("JumpBaseAttack"));
+		}
+		else if (bIsCrouch)
+		{
+			TargetRowName = FName(TEXT("CrouchBaseAttack"));
+		}
+		else if (UKismetMathLibrary::VSizeXY(GetCharacterMovement()->Velocity) >= 3
+			&& GetCharacterMovement()->GetCurrentAcceleration() != FVector().Zero())
+		{
+			TargetRowName = FName(TEXT("MoveBaseAttack"));
+		}
+		else
+		{
+			TargetRowName = FName(TEXT("BaseAttack_1"));
+		}
+
+		static const FString ContextString(TEXT("SkillDataLookup"));
+		CurrentSkillDataBuffer = SkillDataTable->FindRow<FSkillDataRow>(TargetRowName, ContextString);
+
+		if (CurrentSkillDataBuffer && CurrentSkillDataBuffer->SkillMontage)
+		{
+			AnimInstance->Montage_Play(CurrentSkillDataBuffer->SkillMontage);
+		}
+	}
 }
 
-void ASFCharacter::AttackReleased(const FInputActionValue& Value)
+void ASFCharacter::AttackReleased()
 {
 
 }
 
-void ASFCharacter::SkillAttackPressed(const FInputActionValue& Value)
+void ASFCharacter::SkillAttackPressed()
 {
 	bIsAttack = true;
 
@@ -144,18 +184,18 @@ void ASFCharacter::SkillAttackPressed(const FInputActionValue& Value)
 
 }
 
-void ASFCharacter::SkillAttackReleased(const FInputActionValue& Value)
+void ASFCharacter::SkillAttackReleased()
 {
 
 }
 
-void ASFCharacter::GuardPressed(const FInputActionValue& Value)
+void ASFCharacter::GuardPressed()
 {
 	bIsGuard = true;
 
 }
 
-void ASFCharacter::GuardReleased(const FInputActionValue& Value)
+void ASFCharacter::GuardReleased()
 {
 	bIsGuard = false;
 
@@ -201,7 +241,7 @@ void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 			EnhancedInput->BindAction(SFPlayerController->GuardAction, ETriggerEvent::Started, this, &ASFCharacter::GuardPressed);
 			EnhancedInput->BindAction(SFPlayerController->GuardAction, ETriggerEvent::Completed, this, &ASFCharacter::GuardReleased);
 
-			// Other SetupInput() gogogo
+			// TO DO : Other Setup ex) Pause, ......
 		}
 	}
 
@@ -261,4 +301,52 @@ void ASFCharacter::PerformAttack(int32 AttackIndex)
 void ASFCharacter::AddAttackHandler(UObject* AttackHandler)
 {
 	AttackHandlers.Add(AttackHandler);
+}
+
+
+void ASFCharacter::AttackTrace()
+{
+	FVector SocketLocation = GetMesh()->GetSocketLocation(CurrentSkillDataBuffer->SocketLocation);
+
+	float TraceLength = CurrentSkillDataBuffer->TraceLength;
+	float TraceLadius = CurrentSkillDataBuffer->TraceRadius;
+
+	FVector StartLocation = SocketLocation - GetActorForwardVector() * TraceLength / 2;
+	FVector EndLocation = SocketLocation + GetActorForwardVector() * TraceLength / 2;
+
+	FHitResult HitResult;
+
+	// Capsule Trace
+	bool bHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		StartLocation,
+		EndLocation,
+		FQuat::Identity,
+		ECollisionChannel::ECC_Pawn,
+		FCollisionShape::MakeCapsule(TraceLadius, TraceLadius)
+	);
+
+	DrawDebugCapsule(
+		GetWorld(),
+		(StartLocation + EndLocation) / 2,
+		TraceLength / 2,
+		TraceLadius,
+		FRotationMatrix::MakeFromZ(EndLocation - StartLocation).ToQuat(),
+		bHit ? FColor::Red : FColor::Green,
+		false, 1.0f
+	);
+
+	if (bHit && HitResult.GetActor())
+	{
+		// 데미지 적용
+		UGameplayStatics::ApplyPointDamage(
+			HitResult.GetActor(),
+			10.f,
+			EndLocation - StartLocation,
+			HitResult,
+			GetController(),
+			this,
+			UDamageType::StaticClass()
+		);
+	}
 }
