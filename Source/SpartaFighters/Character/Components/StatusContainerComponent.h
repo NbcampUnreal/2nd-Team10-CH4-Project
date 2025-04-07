@@ -15,8 +15,6 @@ class SPARTAFIGHTERS_API UStatusContainerComponent : public UActorComponent
 public:	
 	UStatusContainerComponent();
 
-	/*virtual UStatusContainerComponent* GetStatusContainerComponent() const override;*/
-
 	FStatusStruct GetStruct() const;
 
 	void InitializeMovementProperties(ASFCharacter* SFCharacter);
