@@ -4,6 +4,9 @@
 #include "GameFramework/Character.h"
 #include "Character/Stats/StatusContainerInterface.h"
 #include "DataTable/SkillDataRow.h"
+
+#include "Character/AttackSystem/HandleAttack.h"
+
 #include "SFCharacter.generated.h"
 
 class USpringArmComponent;
@@ -28,9 +31,10 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY()
+	TArray<TObjectPtr<UObject>> AttackHandlers;
 
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;
 
@@ -42,6 +46,9 @@ public:
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
 	//FSkillDataRow SkillDataRow;
+
+	void PerformAttack(int32 AttackIndex);
+	void AddAttackHandler(UObject* AttackHandler);
 
 protected:
 	// TO DO : Seperate Componenets
@@ -94,5 +101,4 @@ private:
 	bool bIsCrouch;
 	bool bIsAttack;
 	bool bIsGuard;
-	
 };
