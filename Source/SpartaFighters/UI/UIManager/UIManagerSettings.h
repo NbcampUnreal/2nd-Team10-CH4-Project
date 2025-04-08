@@ -16,11 +16,11 @@ class SPARTAFIGHTERS_API UUIManagerSettings : public UDataAsset
 	
 public:
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSoftClassPtr<ULobbyMenu> LobbyMenuClass;
+	TSubclassOf<ULobbyMenu> FromBPLobbyMenuClass;
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSoftClassPtr<UShopMenu> ShopMenuClass;
+	TSubclassOf<UShopMenu> FromBPShopMenuClass;
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSoftClassPtr<ULoginMenu> LoginMenuClass;
+	TSubclassOf<ULoginMenu> FromBPLoginMenuClass;
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSoftClassPtr<UShopItemListMenu> ShopItemListMenuClass;
+	TSubclassOf<UShopItemListMenu> FromBPShopItemListMenuClass;
 };
