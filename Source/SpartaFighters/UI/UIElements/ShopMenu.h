@@ -13,15 +13,9 @@ UCLASS()
 class SPARTAFIGHTERS_API UShopMenu : public UBaseUserWidget
 {
 	GENERATED_BODY()
-	
-public:
-	
 
 protected:
 	virtual void NativeConstruct() override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSoftClassPtr<UShopItemListMenu> ShopItemListMenuClass;
 
 private:
 	UPROPERTY(meta = (BindWidget))

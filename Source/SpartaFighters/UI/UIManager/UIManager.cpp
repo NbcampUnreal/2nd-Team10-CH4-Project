@@ -14,34 +14,34 @@ void UUIManager::Init(APlayerController* PlayerController)
 	{
 		if (const UUIManagerSettings* Settings = GameInstance->GetUISettings())
 		{
-			SoftLobbyMenuClass = Settings->LobbyMenuClass;
-			SoftShopMenuClass = Settings->ShopMenuClass;
-			SoftLoginMenuClass = Settings->LoginMenuClass;
-			SoftShopItemListMenuClass = Settings->ShopItemListMenuClass;
+			LobbyMenuClass = Settings->FromBPLobbyMenuClass;
+			ShopMenuClass = Settings->FromBPShopMenuClass;
+			LoginMenuClass = Settings->FromBPLoginMenuClass;
+			ShopItemListMenuClass = Settings->FromBPShopItemListMenuClass;
 
-			if (SoftLoginMenuClass.IsNull() == false)
+			if (LoginMenuClass)
 			{
-				CachedLoginMenu = CreateWidget<ULoginMenu>(OwningPlayer, SoftLoginMenuClass.LoadSynchronous());
+				CachedLoginMenu = CreateWidget<ULoginMenu>(OwningPlayer, LoginMenuClass);
 				CachedLoginMenu->AddToViewport();
 			}
 
-			if (SoftLobbyMenuClass.IsNull() == false)
+			if (LobbyMenuClass)
 			{
-				CachedLobbyMenu = CreateWidget<ULobbyMenu>(OwningPlayer, SoftLobbyMenuClass.LoadSynchronous());
+				CachedLobbyMenu = CreateWidget<ULobbyMenu>(OwningPlayer, LobbyMenuClass);
 				CachedLobbyMenu->AddToViewport();
 				CachedLobbyMenu->SetVisibility(ESlateVisibility::Hidden);
 			}
 
-			if (SoftShopMenuClass.IsNull() == false)
+			if (ShopMenuClass)
 			{
-				CachedShopMenu = CreateWidget<UShopMenu>(OwningPlayer, SoftShopMenuClass.LoadSynchronous());
+				CachedShopMenu = CreateWidget<UShopMenu>(OwningPlayer, ShopMenuClass);
 				CachedShopMenu->AddToViewport();
 				CachedShopMenu->SetVisibility(ESlateVisibility::Hidden);
 			}
 
-			if (SoftShopItemListMenuClass.IsNull() == false)
+			if (ShopItemListMenuClass)
 			{
-				CachedShopItemListMenu = CreateWidget<UShopItemListMenu>(OwningPlayer, SoftShopItemListMenuClass.LoadSynchronous());
+				CachedShopItemListMenu = CreateWidget<UShopItemListMenu>(OwningPlayer, ShopItemListMenuClass);
 				CachedShopItemListMenu->AddToViewport();
 				CachedShopItemListMenu->SetVisibility(ESlateVisibility::Hidden);
 			}

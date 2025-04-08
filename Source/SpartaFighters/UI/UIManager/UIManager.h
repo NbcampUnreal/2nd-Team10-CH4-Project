@@ -31,13 +31,13 @@ public:
 private:
     /* Soft Widget Class */
     UPROPERTY(EditDefaultsOnly, Category = "UI")
-    TSoftClassPtr<ULobbyMenu> SoftLobbyMenuClass;
+    TSubclassOf<ULobbyMenu> LobbyMenuClass;
     UPROPERTY(EditDefaultsOnly, Category = "UI")
-    TSoftClassPtr<UShopMenu> SoftShopMenuClass;
+    TSubclassOf<UShopMenu> ShopMenuClass;
     UPROPERTY(EditDefaultsOnly, Category = "UI")
-    TSoftClassPtr<ULoginMenu> SoftLoginMenuClass;
+    TSubclassOf<ULoginMenu> LoginMenuClass;
     UPROPERTY(EditDefaultsOnly, Category = "UI")
-    TSoftClassPtr<UShopItemListMenu> SoftShopItemListMenuClass;
+    TSubclassOf<UShopItemListMenu> ShopItemListMenuClass;
 
     /* Chacing Widget */
     UPROPERTY()
