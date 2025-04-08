@@ -1,12 +1,20 @@
 #include "RoomWidget.h"
 #include "LobbyMenu.h"
+
 #include "Components/TextBlock.h"
 #include "Components/ScrollBox.h"
 #include "Components/EditableTextBox.h"
 #include "Components/Button.h"
+#include "Components/UniformGridPanel.h"
+#include "Components/UniformGridSlot.h"
+
 #include "UI/UIObject/RoomChatWidget.h"
 #include "UI/UIObject/MapSelectionWidget.h"
+#include "UI/UIObject/PlayerSlotWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+
+#include "DataTypes/PlayerInfo.h"
+#include "DataTypes/GameModeType.h"
 
 void URoomWidget::NativeConstruct()
 {
@@ -15,6 +23,10 @@ void URoomWidget::NativeConstruct()
 	if (LobbyButton)
 	{
 		LobbyButton->OnClicked.AddDynamic(this, &URoomWidget::OnLobbyButtonClicked);
+	}
+	if (ReadyOrStartButton)
+	{
+		ReadyOrStartButton->OnClicked.AddDynamic(this, &URoomWidget::OnReadyOrStartButtonClicked);
 	}
 }
 
@@ -59,9 +71,61 @@ void URoomWidget::SetupRoom(const FRoomInfo& RoomInfo)
 	UpdatePlayerList();
 }
 
+void URoomWidget::SetPlayerList(const TArray<FPlayerInfo>& NewPlayerList)
+{
+	PlayerList = NewPlayerList;
+	UpdatePlayerList();
+}
+
 void URoomWidget::UpdatePlayerList()
 {
-	// TODO: Update the player list UI with the current room information
+	UE_LOG(LogTemp, Warning, TEXT("PlayerList.Num() = %d"), PlayerList.Num());
+	for (const auto& Player : PlayerList)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerName = %s, IsReady = %d"), *Player.PlayerID, Player.bIsReady);
+	}
+
+	bool bIsSingleMode = (CurrentRoomInfo.GameMode == EGameModeType::Single);
+
+	int32 RequiredSlots = bIsSingleMode ? 1 : MaxPlayers;
+
+	while (PlayerSlots.Num() < RequiredSlots)
+	{
+		if (PlayerSlotWidgetClass)
+		{
+			UPlayerSlotWidget* NewSlot = CreateWidget<UPlayerSlotWidget>(GetWorld(), PlayerSlotWidgetClass);
+			if (NewSlot)
+			{
+				PlayerSlots.Add(NewSlot);
+				int32 Index = PlayerSlots.Num() - 1;
+				PlayerGridPanel->AddChildToUniformGrid(NewSlot, Index / NumColumns, Index % NumColumns);
+			}
+		}
+	}
+
+	// Setup Slots
+	for (int32 i = 0; i < RequiredSlots; ++i)
+	{
+		if (i < PlayerList.Num())
+		{
+			const FPlayerInfo& PlayerInfo = PlayerList[i];
+			UPlayerSlotWidget* CurrentPlayerSlot = PlayerSlots[i];
+			if (CurrentPlayerSlot)
+			{
+				CurrentPlayerSlot->SetupPlayerSlot(PlayerInfo.PlayerID, PlayerInfo.CharacterTexture, PlayerInfo.bIsReady);
+				CurrentPlayerSlot->SetVisibility(ESlateVisibility::Visible);
+			}
+		}
+		else
+		{
+			UPlayerSlotWidget* EmptyPlayerSlot = PlayerSlots[i];
+			if (EmptyPlayerSlot)
+			{
+				EmptyPlayerSlot->SetEmpty();
+				EmptyPlayerSlot->SetVisibility(ESlateVisibility::Visible);
+			}
+		}
+	}
 }
 
 void URoomWidget::OnLobbyButtonClicked()
@@ -84,4 +148,18 @@ void URoomWidget::OnLobbyButtonClicked()
 	}
 
 	RemoveFromParent();
+}
+
+void URoomWidget::OnReadyOrStartButtonClicked()
+{
+	// Create a NewPlayerList for test
+	TArray<FPlayerInfo> NewPlayerList;
+
+	FPlayerInfo Player;
+	Player.PlayerID = TEXT("TestPlayer");
+	Player.bIsReady = true;
+
+	NewPlayerList.Add(Player);
+	// 
+	SetPlayerList(NewPlayerList);
 }
