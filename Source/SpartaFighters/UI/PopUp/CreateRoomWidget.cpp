@@ -1,12 +1,17 @@
 #include "UI/PopUp/CreateRoomWidget.h"
 #include "UI/UIElements/RoomWidget.h"
 #include "UI/UIElements/LobbyMenu.h"
+
 #include "UI/UIObject/GameModeSelectionWidget.h"
 #include "UI/UIObject/PlayerCountSelectionWidget.h"
 #include "UI/UIObject/ItemActivationSelectionWidget.h"
 #include "UI/UIObject/MapSelectionWidget.h"
+
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+
+#include "DataTypes/PlayerInfo.h"
+
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -68,6 +73,15 @@ void UCreateRoomWidget::CreateAndOpenRoomWidget()
 		FRoomInfo NewRoomInfo = RoomSettings.ToRoomInfo(FMath::Rand());
 		RoomWidgetInstance->SetupRoom(NewRoomInfo);
 
+		// Create a NewPlayerList for test
+		TArray<FPlayerInfo> NewPlayerList;
+
+		FPlayerInfo Player;
+		Player.PlayerID = TEXT("TestPlayer");
+		Player.bIsReady = false;
+		NewPlayerList.Add(Player);
+		RoomWidgetInstance->SetPlayerList(NewPlayerList);
+		// 
 		RoomWidgetInstance->AddToViewport();
 
 		if (RoomWidgetInstance->MapSelectionWidgetClass)

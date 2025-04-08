@@ -13,8 +13,12 @@ class SPARTAFIGHTERS_API UPlayerSlotWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	UFUNCTION()
 	void SetupPlayerSlot(const FString& PlayerName, UTexture2D* CharacterPreview, bool bIsReady);
-	void ClearSlot;
+	UFUNCTION()
+	void SetReadyState(bool bIsReady);
+	UFUNCTION()
+	void SetEmpty();
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -22,5 +26,7 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UImage* CharacterPreviewImage;
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* ReadyStatusText;
+	UTextBlock* ReadyStateText;
+	UPROPERTY(meta = (BindWidget))
+	class UBorder* SlotBorder;
 };

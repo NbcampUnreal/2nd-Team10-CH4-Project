@@ -19,27 +19,27 @@ void UUIManager::Init(APlayerController* PlayerController)
 			SoftLoginMenuClass = Settings->LoginMenuClass;
 			SoftShopItemListMenuClass = Settings->ShopItemListMenuClass;
 
-			if (SoftLoginMenuClass)
+			if (SoftLoginMenuClass.IsNull() == false)
 			{
 				CachedLoginMenu = CreateWidget<ULoginMenu>(OwningPlayer, SoftLoginMenuClass.LoadSynchronous());
 				CachedLoginMenu->AddToViewport();
 			}
 
-			if (SoftLobbyMenuClass)
+			if (SoftLobbyMenuClass.IsNull() == false)
 			{
 				CachedLobbyMenu = CreateWidget<ULobbyMenu>(OwningPlayer, SoftLobbyMenuClass.LoadSynchronous());
 				CachedLobbyMenu->AddToViewport();
 				CachedLobbyMenu->SetVisibility(ESlateVisibility::Hidden);
 			}
 
-			if (SoftShopMenuClass)
+			if (SoftShopMenuClass.IsNull() == false)
 			{
 				CachedShopMenu = CreateWidget<UShopMenu>(OwningPlayer, SoftShopMenuClass.LoadSynchronous());
 				CachedShopMenu->AddToViewport();
 				CachedShopMenu->SetVisibility(ESlateVisibility::Hidden);
 			}
 
-			if (SoftShopItemListMenuClass)
+			if (SoftShopItemListMenuClass.IsNull() == false)
 			{
 				CachedShopItemListMenu = CreateWidget<UShopItemListMenu>(OwningPlayer, SoftShopItemListMenuClass.LoadSynchronous());
 				CachedShopItemListMenu->AddToViewport();

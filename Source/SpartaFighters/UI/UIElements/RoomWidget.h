@@ -34,6 +34,8 @@ private:
 	TSoftObjectPtr<URoomChatWidget> RoomChatWidgetClass;
 	UPROPERTY(meta = (BindWidget))
 	UButton* LobbyButton;
+	UPROPERTY(meta = (BindWidget))
+	UButton* ReadyOrStartButton;
 
 	UPROPERTY(meta = (BindWidget))
 	UUniformGridPanel* PlayerGridPanel;
@@ -52,12 +54,17 @@ private:
 
 	UFUNCTION()
 	void OnLobbyButtonClicked();
-
-	void UpdatePlayerList();
+	UFUNCTION()
+	void OnReadyOrStartButtonClicked();
 
 public:
 	UPROPERTY(meta = (BindWidget))
-	TSoftObjectPtr<UMapSelectionWidget> MapSelectionWidgetClass;
+	UMapSelectionWidget* MapSelectionWidgetClass;
+
+	UFUNCTION()
+	void SetPlayerList(const TArray<FPlayerInfo>& NewPlayerList);
+	UFUNCTION()
+	void UpdatePlayerList();
 
 	FRoomInfo GetCurrentRoomInfo() const { return CurrentRoomInfo; }
 };

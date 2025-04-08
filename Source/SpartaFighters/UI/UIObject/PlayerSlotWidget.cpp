@@ -1,6 +1,7 @@
 #include "UI/UIObject/PlayerSlotWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Components/Border.h"
 
 void UPlayerSlotWidget::SetupPlayerSlot(const FString& PlayerName, UTexture2D* CharacterPreview, bool bIsReady)
 {
@@ -8,37 +9,46 @@ void UPlayerSlotWidget::SetupPlayerSlot(const FString& PlayerName, UTexture2D* C
 	{
 		PlayerNameText->SetText(FText::FromString(PlayerName));
 	}
-
 	if (CharacterPreviewImage && CharacterPreview)
 	{
 		CharacterPreviewImage->SetBrushFromTexture(CharacterPreview);
 	}
-
-	if (ReadyStatusText)
+	if (ReadyStateText)
 	{
-		ReadyStatusText->SetText(bIsReady ? FText::FromString(TEXT("Ready")) : FText::FromString(TEXT("Not Ready")));
+		ReadyStateText->SetText(bIsReady ? FText::FromString(TEXT("Ready")) : FText::FromString(TEXT("Not Ready")));
 	}
 
 	SetVisibility(ESlateVisibility::Visible);
-
 }
 
-void UPlayerSlotWidget::ClearSlot()
+void UPlayerSlotWidget::SetReadyState(bool bIsReady)
 {
-	if (PlayerNameText)
-	{
-		PlayerNameText->SetText(FText::FromString(TEXT("비어있음")));
-	}
+    if (ReadyStateText)
+    {
+        ReadyStateText->SetText(FText::FromString(bIsReady ? TEXT("Ready") : TEXT("Not Ready")));
+    }
+    if (SlotBorder)
+    {
+        SlotBorder->SetBrushColor(bIsReady ? FLinearColor::Green : FLinearColor::White);
+    }
+}
 
-	if (ReadyStatusText)
-	{
-		ReadyStatusText->SetText(FText::FromString(TEXT("-")));
-	}
-
-	if (CharacterPreviewImage)
-	{
-		CharacterPreviewImage->SetBrushFromTexture(nullptr);  // 캐릭터 프리뷰 없애기
-	}
-
-	SetVisibility(ESlateVisibility::Visible);
+void UPlayerSlotWidget::SetEmpty()
+{
+    if (CharacterPreviewImage)
+    {
+        CharacterPreviewImage->SetBrushFromTexture(nullptr);
+    }
+    if (PlayerNameText)
+    {
+        PlayerNameText->SetText(FText::FromString(TEXT("Empty Slot")));
+    }
+    if (ReadyStateText)
+    {
+        ReadyStateText->SetText(FText::GetEmpty());
+    }
+    if (SlotBorder)
+    {
+        SlotBorder->SetBrushColor(FLinearColor::Gray);
+    }
 }
