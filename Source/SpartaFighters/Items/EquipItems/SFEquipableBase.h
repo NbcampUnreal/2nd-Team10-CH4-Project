@@ -9,12 +9,9 @@
 UENUM(BlueprintType)
 enum class SFEquipSlot : uint8
 {
-	Head UMETA(DisplayName = "Head"),
-	Neck UMETA(DisplayName = "Neck"),
-	Wrist UMETA(DisplayName = "Wrist"),
-	Legs UMETA(DisplayName = "Legs"),
-	Feet UMETA(DisplayName = "Feet"),
-	Hand UMETA(DisplayName = "Hand")
+	CommonSlot UMETA(DisplayName = "Common"),
+	ExclusiveSlot UMETA(DisplayName = "Exclusive"),
+	CosmeticSlot UMETA(DisplayName = "Cosmetic"),
 };
 
 

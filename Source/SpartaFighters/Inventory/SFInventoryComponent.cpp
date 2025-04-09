@@ -2,15 +2,15 @@
 #include "Inventory/SFInventoryComponent.h"
 #include "Character/SFCharacter.h"
 #include "Items/EquipItems/SFEquipableBase.h"
+#include "Net/UnrealNetwork.h"
+#include "Framework/SFPlayerState.h"
 
-// Sets default values for this component's properties
+
 USFInventoryComponent::USFInventoryComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
+	SetIsReplicatedByDefault(true);
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// ...
 }
 
 
@@ -32,61 +32,88 @@ void USFInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	// ...
 }
 
-void USFInventoryComponent::UpdateData()
+void USFInventoryComponent::Internal_UpdateData()
 {
-	//Todo
-	//get game instance
-	UGameInstance* Instance = GetWorld()->GetGameInstance();
-	if (Instance)
+	if (GetOwnerRole() == ROLE_Authority)
 	{
-		/*USFGameInstance* SFGameInstance = Cast<USFGameInstance>(Instance);
-		if (SFGameInstance)
+		ASFCharacter* OwnerCharacter = Cast<ASFCharacter>(GetOwner());
+		if (OwnerCharacter)
 		{
-			SFGameInstance->Has... = Potion;
-		}*/
-	}
-}
-
-
-
-//bool to check operation
-bool USFInventoryComponent::AddItemByClass(TSubclassOf<USFItemBase> ItemClass)
-{
-	if (ItemClass)
-	{
-		FName DefaultItemName = ItemClass.GetDefaultObject()->ItemName;
-		USFItemBase* ExistingItem = FindItemByName(DefaultItemName);
-		if (!ExistingItem)
-		{
-			USFItemBase* NewItem = NewObject<USFItemBase>(this, ItemClass);
-			if (NewItem)
+			// Get Player Controller
+			APlayerController* OwnerController = OwnerCharacter->GetController<APlayerController>();
+			if (OwnerController)
 			{
-				Inventory.Add(NewItem);
-				UpdateData();
-				return true;
+				// Get Player State
+				ASFPlayerState* OwnerState = OwnerController->GetPlayerState<ASFPlayerState>();
+				if (OwnerState)
+				{
+					// Save inventory info on PlayerState
+					// OwnerState->SetCharacterInventory(Inventory);
+					// OwnerState->SetCharacterEquipment(EquippedItems);
+
+					// Save inventory info on GameInstance 
+					UGameInstance* GameInstance = GetWorld()->GetGameInstance();
+					if (GameInstance)
+					{
+						// USFGameInstance* SFGameInstance = Cast<USFGameInstance>(GameInstance);
+						// if (SFGameInstance)
+						// {
+						//     SFGameInstance->UpdatePlayerInventory(OwnerState->GetUniqueId(), Inventory);
+						//     SFGameInstance->UpdatePlayerEquipment(OwnerState->GetUniqueId(), EquippedItems);
+						// }
+					}
+				}
 			}
 		}
-		else
-		{
-			return true; // already existing
-		}
 	}
-	return false; //no class
 }
 
-//bool to check operation
-bool USFInventoryComponent::RemoveItem(FName ItemNameToRemove)
+
+
+//server rpc: add item request
+void USFInventoryComponent::Server_AddItemByClass_Implementation(TSubclassOf<USFItemBase> ItemClass)
 {
-	for (int32 i = 0; i < Inventory.Num(); ++i)
+	if (GetOwnerRole() == ROLE_Authority)
 	{
-		if (Inventory[i]->ItemName == ItemNameToRemove)
+		if (ItemClass)
 		{
-			Inventory.RemoveAt(i);
-			UpdateData();
-			return true;
-		}
+			FName DefaultItemName = ItemClass.GetDefaultObject()->ItemName;
+			USFItemBase* ExistingItem = FindItemByName(DefaultItemName);
+			if (!ExistingItem)
+			{
+				USFItemBase* NewItem = NewObject<USFItemBase>(this, ItemClass);
+				if (NewItem)
+				{
+					Inventory.Add(NewItem);
+					//Internal_UpdateData();
+					bInventoryUpdated = !bInventoryUpdated;
+				}
+			}
+			else
+			{
+				bInventoryUpdated = !bInventoryUpdated; // already existing
+			}
+		} //no class
 	}
-	return false;
+}
+
+//server rpc: remove item request
+void USFInventoryComponent::Server_RemoveItem_Implementation(FName ItemNameToRemove)
+{
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		for (int32 i = 0; i < Inventory.Num(); ++i)
+		{
+			if (Inventory[i]->ItemName == ItemNameToRemove)
+			{
+				Inventory.RemoveAt(i);
+				//Internal_UpdateData();
+				bInventoryUpdated = !bInventoryUpdated;
+				return;
+			}
+		}
+		//no item
+	}
 }
 	
 
@@ -103,67 +130,88 @@ USFItemBase* USFInventoryComponent::FindItemByName(FName Name) const
 }
 
 
-bool USFInventoryComponent::EquipItem(FName ItemNameToEquip, SFEquipSlot EquipSlot)
+void USFInventoryComponent::Server_EquipItem_Implementation(FName ItemNameToEquip, SFEquipSlot EquipSlot)
 {
-	USFItemBase* ItemToEquip = FindItemByName(ItemNameToEquip);
-	if (ItemToEquip && ItemToEquip->IsA(USFEquipableBase::StaticClass()))
+	if (GetOwnerRole() == ROLE_Authority) 
 	{
-		USFEquipableBase* EquipItemToEquip = Cast<USFEquipableBase>(ItemToEquip);
-		if (EquipItemToEquip->EquipSlot == EquipSlot)
+		USFItemBase* ItemToEquip = FindItemByName(ItemNameToEquip);
+		if (ItemToEquip && ItemToEquip->IsA(USFEquipableBase::StaticClass()))
 		{
-			if (EquippedItems.Contains(EquipSlot))
+			USFEquipableBase* EquipItemToEquip = Cast<USFEquipableBase>(ItemToEquip);
+			if (EquipItemToEquip->EquipSlot == EquipSlot)
 			{
-				UnequipItem(EquipSlot);
-			}
+				if (EquippedItems.Contains(EquipSlot))
+				{
+					Server_UnequipItem(EquipSlot);
+				}
 
-			if (RemoveItem(ItemNameToEquip))
+				if (Inventory.RemoveSingleSwap(ItemToEquip))
+				{
+					EquippedItems.Add(EquipSlot, EquipItemToEquip);
+					EquipItemToEquip->OnEquipped(GetOwner());
+					Internal_UpdateData();
+					bInventoryUpdated = !bInventoryUpdated;
+					bEquippedItemsUpdated = !bEquippedItemsUpdated;
+				}
+			}
+			else
 			{
-				EquippedItems.Add(EquipSlot, EquipItemToEquip);
-				EquipItemToEquip->OnEquipped(GetOwner());
-				UpdateData();
-				return true;
+				UE_LOG(LogTemp, Warning, TEXT("%s is unable to equip in %s slot"), *ItemNameToEquip.ToString(), *UEnum::GetValueAsString(EquipSlot));
 			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s is unable to equip in %s slot"), *ItemNameToEquip.ToString(), *UEnum::GetValueAsString(EquipSlot));
+			UE_LOG(LogTemp, Warning, TEXT("%s is not equipable or not in inventory"), *ItemNameToEquip.ToString());
 		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s is not equipable or not in inventory"), *ItemNameToEquip.ToString());
-	}
-	return false;
 }
 
-bool USFInventoryComponent::UnequipItem(SFEquipSlot EquipSlot)
+void USFInventoryComponent::Server_UnequipItem_Implementation(SFEquipSlot EquipSlot)
 {
-	if (EquippedItems.Contains(EquipSlot))
+	if (GetOwnerRole() == ROLE_Authority) 
 	{
-		USFItemBase* ItemToUnequip = EquippedItems[EquipSlot];
-		if (ItemToUnequip && ItemToUnequip->IsA(USFEquipableBase::StaticClass()))
+		if (EquippedItems.Contains(EquipSlot))
 		{
-			USFEquipableBase* EquipItemToUnequip = Cast<USFEquipableBase>(ItemToUnequip);
-			EquipItemToUnequip->OnUnequipped(GetOwner());
+			USFItemBase* ItemToUnequip = EquippedItems[EquipSlot];
 			EquippedItems.Remove(EquipSlot);
-			if (AddItemByClass(ItemToUnequip->GetClass()))
+			if (ItemToUnequip)
 			{
-				UpdateData();
-				return true;
+				// Server_AddItemByClass 
+				TSubclassOf<USFItemBase> ItemClass = ItemToUnequip->GetClass();
+				if (ItemClass)
+				{
+					FName DefaultItemName = ItemClass.GetDefaultObject()->ItemName;
+					USFItemBase* ExistingItem = FindItemByName(DefaultItemName);
+					if (!ExistingItem)
+					{
+						USFItemBase* NewItem = NewObject<USFItemBase>(this, ItemClass);
+						if (NewItem)
+						{
+							Inventory.Add(NewItem);
+							//Internal_UpdateData();
+							bInventoryUpdated = !bInventoryUpdated;
+						}
+					}
+					else
+					{
+						bInventoryUpdated = !bInventoryUpdated; //already existing
+					}
+				}
+
+				if (USFEquipableBase* EquipItemToUnequip = Cast<USFEquipableBase>(ItemToUnequip))
+				{
+					EquipItemToUnequip->OnUnequipped(GetOwner());
+				}
+				Internal_UpdateData();
+				bEquippedItemsUpdated = !bEquippedItemsUpdated;
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Failed to unequip item into inventory: %s"), *ItemToUnequip->GetName());
-				EquippedItems.Add(EquipSlot, ItemToUnequip);
-				UpdateData();
-				return false;
+				Internal_UpdateData();
+				bEquippedItemsUpdated = !bEquippedItemsUpdated; //empty slot
 			}
 		}
-		EquippedItems.Remove(EquipSlot);
-		UpdateData();
-		return true;
 	}
-	return false;
 }
 
 USFItemBase* USFInventoryComponent::GetEquippedItem(SFEquipSlot EquipSlot) const
@@ -187,4 +235,26 @@ bool USFInventoryComponent::IsItemEquipped(FName ItemName) const
 		}
 	}
 	return false;
+}
+
+//Lifetime
+void USFInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(USFInventoryComponent, Inventory);
+	DOREPLIFETIME(USFInventoryComponent, bInventoryUpdated);
+	DOREPLIFETIME(USFInventoryComponent, bEquippedItemsUpdated);
+
+}
+
+//Inv UI Update
+void USFInventoryComponent::OnRep_InventoryUpdated()
+{
+	
+}
+//Eq UI Update
+void USFInventoryComponent::OnRep_EquippedItemsUpdated()
+{
+	
 }
