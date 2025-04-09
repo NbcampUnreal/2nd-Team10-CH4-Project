@@ -29,16 +29,13 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void UpdateData();
-
 	//Inventoryfunction
 	//Server
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool AddItemByClass(TSubclassOf<USFItemBase> ItemClass);
+	void Server_AddItemByClass(TSubclassOf<USFItemBase> ItemClass);
 	//Server
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool RemoveItem(FName ItemNameToRemove);
+	void Server_RemoveItem(FName ItemNameToRemove);
 	//Client
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory")
 	TArray<USFItemBase*> GetInventory() const { return Inventory; }
@@ -49,11 +46,11 @@ public:
 	//Equipment function
 	//Server
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	bool EquipItem(FName ItemNameToEquip, SFEquipSlot EquipSlot);
+	void Server_EquipItem(FName ItemNameToEquip, SFEquipSlot EquipSlot);
 	//Server
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	bool UnequipItem(SFEquipSlot EquipSlot);
-	//Clietn
+	void Server_UnequipItem(SFEquipSlot EquipSlot);
+	//Client
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Equipment")
 	USFItemBase* GetEquippedItem(SFEquipSlot EquipSlot) const;
 	//Client
