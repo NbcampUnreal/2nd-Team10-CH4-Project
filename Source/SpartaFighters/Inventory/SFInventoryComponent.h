@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Items/SFItemBase.h"
 #include "Items/EquipItems/SFEquipableBase.h"
+#include "Net/UnrealNetwork.h"
 #include "SFInventoryComponent.generated.h"
 
 
@@ -31,10 +32,10 @@ public:
 
 	//Inventoryfunction
 	//Server
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	UFUNCTION(Server,Reliable,BlueprintCallable, Category = "Inventory")
 	void Server_AddItemByClass(TSubclassOf<USFItemBase> ItemClass);
 	//Server
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Inventory")
 	void Server_RemoveItem(FName ItemNameToRemove);
 	//Client
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory")
@@ -45,10 +46,10 @@ public:
 
 	//Equipment function
 	//Server
-	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Equipment")
 	void Server_EquipItem(FName ItemNameToEquip, SFEquipSlot EquipSlot);
 	//Server
-	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Equipment")
 	void Server_UnequipItem(SFEquipSlot EquipSlot);
 	//Client
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Equipment")

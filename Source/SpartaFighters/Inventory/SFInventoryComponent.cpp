@@ -71,7 +71,7 @@ void USFInventoryComponent::Internal_UpdateData()
 
 
 //server rpc: add item request
-void USFInventoryComponent::Server_AddItemByClass(TSubclassOf<USFItemBase> ItemClass)
+void USFInventoryComponent::Server_AddItemByClass_Implementation(TSubclassOf<USFItemBase> ItemClass)
 {
 	if (GetOwnerRole() == ROLE_Authority)
 	{
@@ -98,7 +98,7 @@ void USFInventoryComponent::Server_AddItemByClass(TSubclassOf<USFItemBase> ItemC
 }
 
 //server rpc: remove item request
-void USFInventoryComponent::Server_RemoveItem(FName ItemNameToRemove)
+void USFInventoryComponent::Server_RemoveItem_Implementation(FName ItemNameToRemove)
 {
 	if (GetOwnerRole() == ROLE_Authority)
 	{
@@ -130,7 +130,7 @@ USFItemBase* USFInventoryComponent::FindItemByName(FName Name) const
 }
 
 
-void USFInventoryComponent::Server_EquipItem(FName ItemNameToEquip, SFEquipSlot EquipSlot)
+void USFInventoryComponent::Server_EquipItem_Implementation(FName ItemNameToEquip, SFEquipSlot EquipSlot)
 {
 	if (GetOwnerRole() == ROLE_Authority) 
 	{
@@ -166,7 +166,7 @@ void USFInventoryComponent::Server_EquipItem(FName ItemNameToEquip, SFEquipSlot 
 	}
 }
 
-void USFInventoryComponent::Server_UnequipItem(SFEquipSlot EquipSlot)
+void USFInventoryComponent::Server_UnequipItem_Implementation(SFEquipSlot EquipSlot)
 {
 	if (GetOwnerRole() == ROLE_Authority) 
 	{
