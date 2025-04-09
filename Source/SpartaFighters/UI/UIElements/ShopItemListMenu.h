@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/BaseUserWidget.h"
 #include "ShopItemListMenu.generated.h"
 
 class UTextBlock;
@@ -10,18 +10,12 @@ class ULobbyMenu;
 class UShopMenu;
 
 UCLASS()
-class SPARTAFIGHTERS_API UShopItemListMenu : public UUserWidget
+class SPARTAFIGHTERS_API UShopItemListMenu : public UBaseUserWidget
 {
 	GENERATED_BODY()
 
 protected:
 	virtual void NativeConstruct() override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<ULobbyMenu> LobbyMenuClass;
-
-	UPROPERTY()
-	UShopMenu* ParentShopMenu;
 
 private:
 	UPROPERTY(meta = (BindWidget))

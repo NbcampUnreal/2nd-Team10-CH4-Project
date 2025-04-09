@@ -10,4 +10,6 @@ class SPARTAFIGHTERS_API ASFFighterCharacter : public ASFCharacter
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void BeginPlay() override;
 };

@@ -1,7 +1,7 @@
-#include "UI/UIObject/MapSelectionWidget.h"
+#include "MapSelectionWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
-#include "UI/RoomWidget.h"
+#include "UI/UIElements/RoomWidget.h"
 #include "DataTable/MapInfoRow.h"
 
 void UMapSelectionWidget::NativeConstruct()

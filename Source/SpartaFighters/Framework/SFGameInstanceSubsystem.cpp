@@ -1,28 +1,23 @@
-#include "Framework/SFGameInstanceSubsystem.h"
+#include "SFGameInstanceSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Framework/SFGameModeBase.h"
 #include "Framework/SFSingleGameMode.h"
 #include "Framework/SFBattleGameMode.h"
 #include "Framework/SFCooperativeGameMode.h"
+#include "Framework/SFGameInstance.h"
 #include "DataTypes/GameModeType.h"
+#include "UI/UIManager/UIManager.h"
 
 void USFGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-    if (!MapDataTable)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("MapDataTable is not assigned in USFGameInstanceSubsystem."));
-        return;
-    }
 
-    static const FString ContextString(TEXT("Map Lookup"));
-    TArray<FMapInfoRow*> AllMaps;
-    MapDataTable->GetAllRows<FMapInfoRow>(ContextString, AllMaps);
+    UIManager = NewObject<UUIManager>(GetGameInstance());
 
-    if (AllMaps.Num() > 0)
+    USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance());
+    if (GameInstance)
     {
-        CurrentMapInfoRow = *AllMaps[0];
-        UE_LOG(LogTemp, Log, TEXT("Loaded first map from DataTable: %s"), *CurrentMapInfoRow.MapInfo.MapName);
+        GameInstance->LoadMapData(); 
     }
 }
 
