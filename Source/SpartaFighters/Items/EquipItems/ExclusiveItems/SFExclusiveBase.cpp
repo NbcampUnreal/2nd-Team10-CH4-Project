@@ -6,6 +6,8 @@
 
 USFExclusiveBase::USFExclusiveBase()
 {
+	ItemType = EItemType::Exclusive;
+	EquipSlot = SFEquipSlot::ExclusiveSlot;
 	RequiredClass = ESFRequiredClass::None; 
 }
 

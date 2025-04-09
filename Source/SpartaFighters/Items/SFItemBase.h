@@ -35,8 +35,7 @@ public:
 	FText ItemDescription;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
 	EItemType ItemType;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
-	int32 ItemQuantity;
+	
 
 
 	UFUNCTION(BlueprintCallable, Category = "Item")
