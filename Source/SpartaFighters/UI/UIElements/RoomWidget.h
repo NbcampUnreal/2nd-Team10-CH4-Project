@@ -3,13 +3,16 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "DataTypes/RoomInfo.h"
+#include "DataTypes/PlayerInfo.h"
 #include "RoomWidget.generated.h"
 
 class UTextBlock;
 class URoomChatWidget;
+class UUniformGridPanel;
 class UButton;
 class UPlayerSimpleInfoWidget;
 class UMapSelectionWidget;
+class UPlayerSlotWidget;
 
 UCLASS()
 class SPARTAFIGHTERS_API URoomWidget : public UUserWidget
@@ -31,16 +34,37 @@ private:
 	TSoftObjectPtr<URoomChatWidget> RoomChatWidgetClass;
 	UPROPERTY(meta = (BindWidget))
 	UButton* LobbyButton;
+	UPROPERTY(meta = (BindWidget))
+	UButton* ReadyOrStartButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UUniformGridPanel* PlayerGridPanel;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UPlayerSlotWidget> PlayerSlotWidgetClass;
+	TArray<UPlayerSlotWidget*> PlayerSlots;
+
+	UPROPERTY()
+	FRoomInfo CurrentRoomInfo;
+
+	UPROPERTY()
+	TArray<FPlayerInfo> PlayerList;
+
+	const int32 MaxPlayers = 4;
+	const int32 NumColumns = 2;
 
 	UFUNCTION()
 	void OnLobbyButtonClicked();
-
-	FRoomInfo CurrentRoomInfo;
-	void UpdatePlayerList();
+	UFUNCTION()
+	void OnReadyOrStartButtonClicked();
 
 public:
 	UPROPERTY(meta = (BindWidget))
-	TSoftObjectPtr<UMapSelectionWidget> MapSelectionWidgetClass;
+	UMapSelectionWidget* MapSelectionWidgetClass;
+
+	UFUNCTION()
+	void SetPlayerList(const TArray<FPlayerInfo>& NewPlayerList);
+	UFUNCTION()
+	void UpdatePlayerList();
 
 	FRoomInfo GetCurrentRoomInfo() const { return CurrentRoomInfo; }
 };
