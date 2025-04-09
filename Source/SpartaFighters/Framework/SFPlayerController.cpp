@@ -21,7 +21,7 @@ void ASFPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	AddMappingContext();
-	InitUI();
+	/*InitUI();*/
 }
 
 void ASFPlayerController::AddMappingContext()

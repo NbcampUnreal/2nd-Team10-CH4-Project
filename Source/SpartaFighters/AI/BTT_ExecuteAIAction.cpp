@@ -3,6 +3,9 @@
 
 #include "BTT_ExecuteAIAction.h"
 #include "AI/AICharacterController.h"
+#include "Character/SFCharacter.h"
+#include "AI/Character/Enum/AIActionState.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 #include "Animation/AnimInstance.h"
 
@@ -18,72 +21,112 @@ EBTNodeResult::Type UBTT_ExecuteAIAction::ExecuteTask(UBehaviorTreeComponent& Ow
 
     CachedOwnerComp = &OwnerComp;
 
-    // AI 컨트롤러 가져오기
     AAIController* AIController = OwnerComp.GetAIOwner();
     if (!AIController)
     {
         UE_LOG(LogTemp, Error, TEXT("UBTT_ExecuteAIAction::ExecuteTask - AIController is Null"));
         return EBTNodeResult::Failed;
     }
-    UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction::ExecuteTask - AIController Check"));
 
-    // 소유 캐릭터 가져오기
+    UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+    if (!BlackboardComp)
+    {
+        UE_LOG(LogTemp, Error, TEXT("UBTT_ExecuteAIAction::ExecuteTask - BlackboardComp is Null"));
+        return EBTNodeResult::Failed;
+    }
+
     ACharacter* AICharacter = Cast<ACharacter>(AIController->GetPawn());
     if (!AICharacter)
     {
         UE_LOG(LogTemp, Error, TEXT("UBTT_ExecuteAIAction::ExecuteTask - AICharacter is Null"));
         return EBTNodeResult::Failed;
     }
-    UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction::ExecuteTask - AICharacter Check"));
 
-    // 애니메이션 인스턴스 가져오기
     UAnimInstance* AnimInstance = AICharacter->GetMesh()->GetAnimInstance();
     if (!AnimInstance)
     {
         UE_LOG(LogTemp, Error, TEXT("UBTT_ExecuteAIAction::ExecuteTask - AnimInstance is Null"));
         return EBTNodeResult::Failed;
     }
-    UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction::ExecuteTask - AnimInstance Check"));
 
-    if (!MontageToPlay)
+    ASFCharacter* SFCharacter = Cast<ASFCharacter>(AICharacter);
+    if (!SFCharacter)
     {
-        UE_LOG(LogTemp, Error, TEXT("UBTT_ExecuteAIAction::ExecuteTask - MontageToPlay is Null"));
+        UE_LOG(LogTemp, Error, TEXT("UBTT_ExecuteAIAction::ExecuteTask - Cast to ASFCharacter failed"));
         return EBTNodeResult::Failed;
     }
 
-    // 몽타주 종료 이벤트 바인딩
-    // End Delegate 등록
-    MontageEndDelegate.BindUObject(this, &UBTT_ExecuteAIAction::OnMontageEnded);
-    AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, MontageToPlay);
+    uint8 AIAction = BlackboardComp->GetValueAsEnum(AIActionKey.SelectedKeyName);
 
-    // Blending Out Delegate 등록
-    BlendingOutDelegate.BindUObject(this, &UBTT_ExecuteAIAction::OnMontageBlendingOut);
-    AnimInstance->Montage_SetBlendingOutDelegate(BlendingOutDelegate, MontageToPlay);
-    UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction::ExecuteTask - MontageEndDelegate Bind Complete"));
+    EAIActionType AIActionType = static_cast<EAIActionType>(AIAction);
 
-    GetWorld()->GetTimerManager().SetTimer(
-        TimerHandle,
-        [this, AICharacter, AnimInstance]() {
-            if (CachedOwnerComp && !AnimInstance->Montage_IsPlaying(MontageToPlay)) {
-                UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction - Montage stopped playing, finishing task"));
-                FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
-                GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
-            }
-        },
-        0.1f, // 0.1초마다 확인
-        true  // 반복
-    );
-
-    // 몽타주 재생
-    float PlayRate = AnimInstance->Montage_Play(MontageToPlay);
-    if (PlayRate <= 0.f)
+    switch (AIActionType)
     {
-        UE_LOG(LogTemp, Error, TEXT("UBTT_ExecuteAIAction::ExecuteTask - Montage dont play"));
+    case EAIActionType::Attack:
+        SFCharacter->PerformAttack(0);
+        break;
+
+    case EAIActionType::Guard:
+        SFCharacter->PerformAttack(0);
+        break;
+
+    case EAIActionType::Evade:
+        SFCharacter->PerformAttack(0);
+        break;
+
+    case EAIActionType::Retreat:
+        SFCharacter->PerformAttack(0);
+        break;
+        
+    case EAIActionType::Chase:
+        return EBTNodeResult::Failed;
+
+    default:
+        UE_LOG(LogTemp, Warning, TEXT("Invalid AIAction Enum."));
         return EBTNodeResult::Failed;
     }
-    UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction::ExecuteTask - Montage play, PlayRate: %f"), PlayRate);
 
-    return EBTNodeResult::InProgress;
+    return EBTNodeResult::Succeeded;
+
+    //if (!MontageToPlay)
+    //{
+    //    UE_LOG(LogTemp, Error, TEXT("UBTT_ExecuteAIAction::ExecuteTask - MontageToPlay is Null"));
+    //    return EBTNodeResult::Failed;
+    //}
+
+    // 몽타주 종료 이벤트 바인딩 (이젠 필요가 없을지도...)
+    //// End Delegate 등록
+    //MontageEndDelegate.BindUObject(this, &UBTT_ExecuteAIAction::OnMontageEnded);
+    //AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, MontageToPlay);
+
+    //// Blending Out Delegate 등록
+    //BlendingOutDelegate.BindUObject(this, &UBTT_ExecuteAIAction::OnMontageBlendingOut);
+    //AnimInstance->Montage_SetBlendingOutDelegate(BlendingOutDelegate, MontageToPlay);
+    //UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction::ExecuteTask - MontageEndDelegate Bind Complete"));
+
+    //GetWorld()->GetTimerManager().SetTimer(
+    //    TimerHandle,
+    //    [this, AICharacter, AnimInstance]() {
+    //        if (CachedOwnerComp && !AnimInstance->Montage_IsPlaying(MontageToPlay)) {
+    //            UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction - Montage stopped playing, finishing task"));
+    //            FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
+    //            GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+    //        }
+    //    },
+    //    0.1f,
+    //    true
+    //);
+
+    //// 몽타주 재생
+    //float PlayRate = AnimInstance->Montage_Play(MontageToPlay);
+    //if (PlayRate <= 0.f)
+    //{
+    //    UE_LOG(LogTemp, Error, TEXT("UBTT_ExecuteAIAction::ExecuteTask - Montage dont play"));
+    //    return EBTNodeResult::Failed;
+    //}
+    //UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction::ExecuteTask - Montage play, PlayRate: %f"), PlayRate);
+
+    //return EBTNodeResult::InProgress;
 }
 
 void UBTT_ExecuteAIAction::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)

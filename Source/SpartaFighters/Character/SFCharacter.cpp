@@ -297,6 +297,14 @@ void ASFCharacter::PerformAttack(int32 AttackIndex)
 {
 	bIsAttack = true;
 
+	// This was added arbitrarily because it caused crashes.
+	if (SkillDataTable)
+	{
+		static const FString ContextString(TEXT("SkillDataLookup"));
+		// 적절한 행을 결정하는 방식은 개발 로직에 따라 결정
+		CurrentSkillDataBuffer = SkillDataTable->FindRow<FSkillDataRow>(FName(TEXT("BaseAttack_1")), ContextString);
+	}
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{
@@ -330,6 +338,9 @@ void ASFCharacter::AddAttackHandler(UObject* AttackHandler)
 
 void ASFCharacter::AttackTrace()
 {
+	// This was added arbitrarily because it caused crashes.
+	if (!CurrentSkillDataBuffer) return;
+
 	FVector SocketLocation = GetMesh()->GetSocketLocation(CurrentSkillDataBuffer->SocketLocation);
 
 	float TraceLength = CurrentSkillDataBuffer->TraceLength;

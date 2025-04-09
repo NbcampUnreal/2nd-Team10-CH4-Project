@@ -13,6 +13,8 @@ class SPARTAFIGHTERS_API UBTT_RandomTypeAttack : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
+	
+
 	// TODO : Get PlayerCharacter CurrentState
 	// TODO : 
 	// TODO : 

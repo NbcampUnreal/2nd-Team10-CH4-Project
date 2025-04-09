@@ -38,4 +38,7 @@ private:
     UBehaviorTreeComponent* CachedOwnerComp;
 
     FTimerHandle TimerHandle;
+
+    UPROPERTY(EditAnywhere, Category = "Blackboard")
+    struct FBlackboardKeySelector AIActionKey;
 };
