@@ -23,11 +23,11 @@ private:
     FRoomInfo RoomInfo;
 
     UPROPERTY(meta = (BindWidget))
+    UTextBlock* RoomIDText;
+    UPROPERTY(meta = (BindWidget))
     UTextBlock* RoomNameText;
     UPROPERTY(meta = (BindWidget))
     UTextBlock* GameModeText;
-    UPROPERTY(meta = (BindWidget))
-    UTextBlock* MapNameText;
     UPROPERTY(meta = (BindWidget))
     UTextBlock* PlayerCountText;
     UPROPERTY(meta = (BindWidget))

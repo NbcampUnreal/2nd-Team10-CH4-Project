@@ -43,6 +43,7 @@ public:
 
 private:
 	void AddMappingContext();
-	void InitUI();
+	// Move to SFLobbyPlayerController.cpp
+	//void InitUI();
 
 };

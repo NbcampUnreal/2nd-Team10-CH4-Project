@@ -38,8 +38,6 @@ protected:
 	virtual void NativeConstruct() override;
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Room")
-	TSoftClassPtr<URoomWidget> RoomWidgetClass;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* RoomNameText;
 	UPROPERTY(meta = (BindWidget))

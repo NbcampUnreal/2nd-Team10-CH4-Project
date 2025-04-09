@@ -10,11 +10,14 @@ void USFGameInstance::LoadMapData()
 
     static const FString ContextString(TEXT("Map Lookup"));
     TArray<FMapInfoRow*> AllMaps;
-    MapDataTable->GetAllRows<FMapInfoRow>(ContextString, AllMaps);
+    MapDataTable->GetAllRows(ContextString, AllMaps);
 
-    if (AllMaps.Num() > 0)
+    for (FMapInfoRow* MapInfoRow : AllMaps)
     {
-        CurrentMapInfoRow = *AllMaps[0];
-        UE_LOG(LogTemp, Log, TEXT("Loaded first map from DataTable: %s"), *CurrentMapInfoRow.MapInfo.MapName);
+        if (MapInfoRow)
+        {
+            MapInfoRow->MapID = GetTypeHash(MapInfoRow->MapInfo.MapName);
+            UE_LOG(LogTemp, Log, TEXT("Loaded map: %s"), *MapInfoRow->MapInfo.MapName);
+        }
     }
 }

@@ -2,6 +2,8 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 
+#include "Framework/SFLobbyPlayerController.h"
+
 void URoomEntryWidget::NativeConstruct()
 {
     Super::NativeConstruct();
@@ -15,7 +17,11 @@ void URoomEntryWidget::NativeConstruct()
 void URoomEntryWidget::SetRoomInfo(const FRoomInfo& NewRoomInfo)
 {
     RoomInfo = NewRoomInfo;
-
+    if (RoomIDText)
+    {
+		FString RoomIDString = FString::Printf(TEXT("%d"), RoomInfo.RoomID);
+        RoomIDText->SetText(FText::FromString(RoomIDString));
+    }
     if (RoomNameText)
     {
         RoomNameText->SetText(FText::FromString(RoomInfo.RoomName));
@@ -27,10 +33,6 @@ void URoomEntryWidget::SetRoomInfo(const FRoomInfo& NewRoomInfo)
         {
             GameModeText->SetText(EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(RoomInfo.GameMode)));
         }
-    }
-    if (MapNameText)
-    {
-        MapNameText->SetText(FText::FromString(RoomInfo.MapName));
     }
     if (PlayerCountText)
     {
@@ -45,7 +47,13 @@ void URoomEntryWidget::SetRoomInfo(const FRoomInfo& NewRoomInfo)
 
 void URoomEntryWidget::OnJoinRoomClicked()
 {
-    UE_LOG(LogTemp, Log, TEXT("방 입장 시도: %d"), RoomInfo.RoomID);
+    UE_LOG(LogTemp, Log, TEXT("OnJoinRoomClicked : %d"), RoomInfo.RoomID);
 
-    // 방 입장 처리 (네트워크 요청 또는 게임 모드 전환)
+    if (APlayerController* PC = GetOwningPlayer())
+    {
+        if (ASFLobbyPlayerController* LobbyPC = Cast<ASFLobbyPlayerController>(PC))
+        {
+            LobbyPC->Server_JoinRoom(RoomInfo.RoomID);
+        }
+    }
 }

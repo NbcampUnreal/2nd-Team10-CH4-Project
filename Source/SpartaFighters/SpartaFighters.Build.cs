@@ -14,6 +14,7 @@ public class SpartaFighters : ModuleRules
             "CoreUObject",
             "Engine",
             "InputCore",
+            "NetCore",
             "EnhancedInput",
             "UMG",
             "HTTP",

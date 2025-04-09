@@ -1,8 +1,13 @@
 ﻿#include "LoginMenu.h"
-#include "Framework/SFPlayerController.h"
+#include "Framework/SFGameInstance.h"
+#include "Framework/SFGameInstanceSubsystem.h"
+#include "Framework/SFLobbyPlayerController.h"
+#include "Framework/SFPlayerState.h"
+
 #include "Components/EditableTextBox.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+
 #include "UI/PopUp/AccountRegisterWidget.h"
 #include "UI/PopUp/QuitGameWidget.h"
 #include "UI/UIManager/UIManager.h"
@@ -219,25 +224,31 @@ void ULoginMenu::ResetInstructionText()
 
 void ULoginMenu::EnterLobby()
 {
-	UE_LOG(LogTemp, Log, TEXT("Entering Lobby..."));
-
-	RemoveFromParent();
-
-	/*LobbyMenu = CreateWidget<ULobbyMenu>(GetWorld(), LobbyMenuClass);
-	if (LobbyMenu)
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
 	{
-		LobbyMenu->AddToViewport();
-	}*/
-
-	if (UUIManager* UIManager = ResolveUIManager())
-	{
-		UIManager->ShowLobbyMenu();
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			const FString LobbyMapName = TEXT("LobbyMenu");
+			Subsystem->ChangeLevelByMapName(LobbyMapName);
+		}
 	}
 }
 
 void ULoginMenu::OnLogInSucces()
 {
 	UE_LOG(LogTemp, Log, TEXT("Login Successful"));
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		ASFPlayerState* SFPlayerState = PlayerController->GetPlayerState<ASFPlayerState>();
+		if (SFPlayerState)
+		{
+			FString ID = IDTextBox->GetText().ToString();
+			SFPlayerState->Server_SetPlayerInfoID(ID);
+		}
+	}
+
 	if (InstructionText)
 	{
 		InstructionText->SetText(LOCTEXT("LoginSuccess", "Login Success! Start the game."));

@@ -4,6 +4,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "SFGameModeBase.generated.h"
 
+class ASFLobbyPlayerController;
 UCLASS()
 class SPARTAFIGHTERS_API ASFGameModeBase : public AGameModeBase
 {
@@ -11,4 +12,5 @@ class SPARTAFIGHTERS_API ASFGameModeBase : public AGameModeBase
 	
 public:
 	ASFGameModeBase();
+	void UpdateRoomInfo();
 };

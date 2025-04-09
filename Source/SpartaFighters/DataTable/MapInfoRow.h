@@ -14,9 +14,4 @@ struct FMapInfoRow : public FTableRowBase
     int32 MapID;
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FMapInfo MapInfo;
-
-    FMapInfoRow()
-    {
-		MapID = GetTypeHash(MapInfo.MapName);
-    }
 };

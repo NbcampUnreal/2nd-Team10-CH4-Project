@@ -1,5 +1,4 @@
 #include "UI/PopUp/CreateRoomWidget.h"
-#include "UI/UIElements/RoomWidget.h"
 #include "UI/UIElements/LobbyMenu.h"
 
 #include "UI/UIObject/GameModeSelectionWidget.h"
@@ -12,10 +11,10 @@
 
 #include "DataTypes/PlayerInfo.h"
 
-#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 
+#include "Framework/SFLobbyPlayerController.h"
 
 FRoomInfo FRoomSettings::ToRoomInfo(int32 RoomID) const
 {
@@ -23,10 +22,10 @@ FRoomInfo FRoomSettings::ToRoomInfo(int32 RoomID) const
 	RoomInfo.RoomID = RoomID;
 	RoomInfo.RoomName = RoomName;
 	RoomInfo.GameMode = GameMode;
-	RoomInfo.MapName = TEXT("");
 	RoomInfo.CurrentPlayers = 1;
 	RoomInfo.MaxPlayers = PlayerCount;
 	RoomInfo.bIsGameInProgress = false;
+	RoomInfo.OwnerPlayerID = TEXT("");
 	return RoomInfo;
 }
 
@@ -58,52 +57,59 @@ void UCreateRoomWidget::NativeConstruct()
 
 void UCreateRoomWidget::CreateAndOpenRoomWidget()
 {
-	UClass* WidgetClass = RoomWidgetClass.LoadSynchronous();
+	//UClass* WidgetClass = RoomWidgetClass.LoadSynchronous();
 
-	if (!RoomWidgetClass.IsValid() || !WidgetClass)
+	//if (!RoomWidgetClass.IsValid() || !WidgetClass)
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("Failed to load RoomWidgetClass"));
+	//	return;
+	//}
+
+	//URoomWidget* RoomWidgetInstance = CreateWidget<URoomWidget>(GetWorld(), WidgetClass);
+	//if (RoomWidgetInstance)
+	//{
+	//	FRoomSettings RoomSettings = GetRoomSettings();
+	//	FRoomInfo NewRoomInfo = RoomSettings.ToRoomInfo(FMath::Rand());
+	//	RoomWidgetInstance->SetupRoom(NewRoomInfo);
+
+	//	// Create a NewPlayerList for test
+	//	TArray<FPlayerInfo> NewPlayerList;
+
+	//	FPlayerInfo Player;
+	//	Player.PlayerID = TEXT("TestPlayer");
+	//	Player.bIsReady = false;
+	//	NewPlayerList.Add(Player);
+	//	RoomWidgetInstance->SetPlayerList(NewPlayerList);
+	//	// 
+	//	RoomWidgetInstance->AddToViewport();
+
+	//	if (RoomWidgetInstance->MapSelectionWidgetClass)
+	//	{
+	//		RoomWidgetInstance->MapSelectionWidgetClass->SetRoomSettings(RoomSettings);
+	//	}
+	//}
+
+	//APlayerController* PlayerController = GetOwningPlayer();
+	//if (PlayerController)
+	//{
+	//	TArray<UUserWidget*> FoundWidgets;
+	//	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, ULobbyMenu::StaticClass(), false);
+
+	//	for (UUserWidget* Widget : FoundWidgets)
+	//	{
+	//		if (ULobbyMenu* LobbyMenu = Cast<ULobbyMenu>(Widget))
+	//		{
+	//			LobbyMenu->SetVisibility(ESlateVisibility::Hidden);
+	//			break;
+	//		}
+	//	}
+	//}
+
+	APlayerController* PC = GetOwningPlayer();
+	if (ASFLobbyPlayerController* LobbyPC = Cast<ASFLobbyPlayerController>(PC))
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to load RoomWidgetClass"));
-		return;
-	}
-
-	URoomWidget* RoomWidgetInstance = CreateWidget<URoomWidget>(GetWorld(), WidgetClass);
-	if (RoomWidgetInstance)
-	{
-		FRoomSettings RoomSettings = GetRoomSettings();
-		FRoomInfo NewRoomInfo = RoomSettings.ToRoomInfo(FMath::Rand());
-		RoomWidgetInstance->SetupRoom(NewRoomInfo);
-
-		// Create a NewPlayerList for test
-		TArray<FPlayerInfo> NewPlayerList;
-
-		FPlayerInfo Player;
-		Player.PlayerID = TEXT("TestPlayer");
-		Player.bIsReady = false;
-		NewPlayerList.Add(Player);
-		RoomWidgetInstance->SetPlayerList(NewPlayerList);
-		// 
-		RoomWidgetInstance->AddToViewport();
-
-		if (RoomWidgetInstance->MapSelectionWidgetClass)
-		{
-			RoomWidgetInstance->MapSelectionWidgetClass->SetRoomSettings(RoomSettings);
-		}
-	}
-
-	APlayerController* PlayerController = GetOwningPlayer();
-	if (PlayerController)
-	{
-		TArray<UUserWidget*> FoundWidgets;
-		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, ULobbyMenu::StaticClass(), false);
-
-		for (UUserWidget* Widget : FoundWidgets)
-		{
-			if (ULobbyMenu* LobbyMenu = Cast<ULobbyMenu>(Widget))
-			{
-				LobbyMenu->SetVisibility(ESlateVisibility::Hidden);
-				break;
-			}
-		}
+		FRoomSettings Settings = GetRoomSettings();
+		LobbyPC->Server_RequestCreateRoom(Settings);
 	}
 
 	SetVisibility(ESlateVisibility::Hidden);
@@ -187,11 +193,11 @@ void UCreateRoomWidget::OnGameModeChanged(int32 SelectedIndex)
 
 	const UEnum* EnumPtr = StaticEnum<EGameModeType>();
 	FString GameModeName = EnumPtr ? EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(RoomSettings.GameMode)).ToString() : TEXT("Unknown");
-	UE_LOG(LogTemp, Warning, TEXT("Create Room: %s, %s, %d, %d"),
+	/*UE_LOG(LogTemp, Warning, TEXT("Create Room: %s, %s, %d, %d"),
 		*RoomSettings.RoomName,
 		*GameModeName,
 		RoomSettings.PlayerCount,
-		RoomSettings.bItemEnabled);
+		RoomSettings.bItemEnabled);*/
 }
 
 void UCreateRoomWidget::ResetRoomNameText()

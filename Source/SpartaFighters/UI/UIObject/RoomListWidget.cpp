@@ -23,12 +23,12 @@ void URoomListWidget::UpdateRoomList(const TArray<FRoomInfo>& NewRoomList)
 	RoomScrollBox->ClearChildren();
 	RoomList = NewRoomList;
 
-	for (const FRoomInfo& Room : RoomList)
+	for (const FRoomInfo& RoomInfo : RoomList)
 	{
-		URoomEntryWidget* RoomEntry = CreateWidget<URoomEntryWidget>(GetWorld(), RoomEntryWidgetClass);
+		URoomEntryWidget* RoomEntry = CreateWidget<URoomEntryWidget>(this, RoomEntryWidgetClass);
 		if (RoomEntry)
 		{
-			RoomEntry->SetRoomInfo(Room);
+			RoomEntry->SetRoomInfo(RoomInfo);
 			RoomScrollBox->AddChild(RoomEntry);
 		}
 	}

@@ -48,7 +48,10 @@ public:
 
 	EGameState GetCurrentGameState() const { return CurrentGameState; }
 	void SetCurrentGameState(EGameState NewGameState);
+
 	EGameModeType GetCurrentGameMode() const { return CurrentGameMode; }
+
+	void ChangeLevelByMapName(const FString& MapName);
 	void ChangeLevelByMapID(int32 MapID);
 
 	UUIManager* GetUIManager() const { return UIManager; }

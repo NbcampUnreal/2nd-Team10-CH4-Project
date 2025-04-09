@@ -1,7 +1,5 @@
 #include "SFPlayerController.h"
 #include "EnhancedInputSubsystems.h"
-#include "Framework/SFGameInstanceSubsystem.h"
-#include "UI/UIManager/UIManager.h"
 
 ASFPlayerController::ASFPlayerController()
 {
@@ -21,7 +19,6 @@ void ASFPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	AddMappingContext();
-	InitUI();
 }
 
 void ASFPlayerController::AddMappingContext()
@@ -41,14 +38,15 @@ void ASFPlayerController::AddMappingContext()
 	Subsystem->AddMappingContext(InputMappingContext, 0);
 }
 
-void ASFPlayerController::InitUI()
-{
-	if (USFGameInstanceSubsystem* Subsystem = GetGameInstance()->GetSubsystem<USFGameInstanceSubsystem>())
-	{
-		if (UUIManager* UIManager = Subsystem->GetUIManager())
-		{
-			// DataAsset도 같이 넘겨주자
-			UIManager->Init(this);
-		}
-	}
-}
+// Move to SFLobbyPlayerController.cpp
+//void ASFPlayerController::InitUI()
+//{
+//	if (USFGameInstanceSubsystem* Subsystem = GetGameInstance()->GetSubsystem<USFGameInstanceSubsystem>())
+//	{
+//		if (UUIManager* UIManager = Subsystem->GetUIManager())
+//		{
+//			// DataAsset도 같이 넘겨주자
+//			UIManager->Init(this);
+//		}
+//	}
+//}

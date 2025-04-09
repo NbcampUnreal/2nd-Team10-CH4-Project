@@ -22,7 +22,7 @@ public:
 	FMapInfoRow CurrentMapInfoRow;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Data")
-	TObjectPtr<UDataTable> MapDataTable;
+	UDataTable* MapDataTable;
 
 	void LoadMapData();
 };

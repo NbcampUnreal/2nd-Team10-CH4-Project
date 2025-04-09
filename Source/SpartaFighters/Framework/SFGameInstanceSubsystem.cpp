@@ -17,6 +17,7 @@ void USFGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance());
     if (GameInstance)
     {
+        MapDataTable = GameInstance->MapDataTable;
         GameInstance->LoadMapData(); 
     }
 }
@@ -34,6 +35,12 @@ void USFGameInstanceSubsystem::SetCurrentGameState(EGameState NewGameState)
 		CurrentGameState = NewGameState;
 		UE_LOG(LogTemp, Log, TEXT("Game State changed to: %s"), *UEnum::GetValueAsString(CurrentGameState));
 	}
+}
+
+void USFGameInstanceSubsystem::ChangeLevelByMapName(const FString& MapName)
+{
+    const int32 MapID = GetTypeHash(MapName);
+    ChangeLevelByMapID(MapID);
 }
 
 void USFGameInstanceSubsystem::ChangeLevelByMapID(int32 MapID)
