@@ -20,14 +20,10 @@ public:
 	// Sets default values for this component's properties
 	USFInventoryComponent();
 
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-	TArray<USFItemBase*> Inventory;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
-	TMap<SFEquipSlot, USFItemBase*> EquippedItems;
 
 public:	
 	// Called every frame
@@ -37,22 +33,56 @@ public:
 	void UpdateData();
 
 	//Inventoryfunction
+	//Server
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool AddItemByClass(TSubclassOf<USFItemBase> ItemClass);
+	//Server
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool RemoveItem(FName ItemNameToRemove);
+	//Client
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory")
 	TArray<USFItemBase*> GetInventory() const { return Inventory; }
+	//Client
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inventory")
 	USFItemBase* FindItemByName(FName ItemNameToFind) const;
 
 	//Equipment function
+	//Server
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	bool EquipItem(FName ItemNameToEquip, SFEquipSlot EquipSlot);
+	//Server
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	bool UnequipItem(SFEquipSlot EquipSlot);
+	//Clietn
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Equipment")
 	USFItemBase* GetEquippedItem(SFEquipSlot EquipSlot) const;
+	//Client
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Equipment")
 	bool IsItemEquipped(FName ItemName) const;
+
+	//Multiplay related props
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	TArray<USFItemBase*> Inventory;
+	//TODO:get rid of TMAP(unable to replicate)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
+	TMap<SFEquipSlot, USFItemBase*> EquippedItems;
+
+	//Tell client when inventory is updated
+	UPROPERTY(ReplicatedUsing = OnRep_InventoryUpdated)
+	bool bInventoryUpdated;
+	UFUNCTION()
+	virtual void OnRep_InventoryUpdated();
+
+	//Tell client when Equipment is updated
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedItemsUpdated)
+	bool bEquippedItemsUpdated;
+	UFUNCTION()
+	virtual void OnRep_EquippedItemsUpdated();
+
+	//Update data locally in server
+	void Internal_UpdateData();
+
+
+	
+
 };

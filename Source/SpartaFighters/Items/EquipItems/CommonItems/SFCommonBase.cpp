@@ -5,4 +5,6 @@
 
 USFCommonBase::USFCommonBase()
 {
+	ItemType = EItemType::Common;
+	EquipSlot = SFEquipSlot::CommonSlot;
 }

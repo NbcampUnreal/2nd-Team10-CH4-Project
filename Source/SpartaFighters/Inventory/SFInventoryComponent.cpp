@@ -2,15 +2,14 @@
 #include "Inventory/SFInventoryComponent.h"
 #include "Character/SFCharacter.h"
 #include "Items/EquipItems/SFEquipableBase.h"
+#include "Net/UnrealNetwork.h"
 
-// Sets default values for this component's properties
+
 USFInventoryComponent::USFInventoryComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
+	SetIsReplicatedByDefault(true);
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// ...
 }
 
 
@@ -187,4 +186,26 @@ bool USFInventoryComponent::IsItemEquipped(FName ItemName) const
 		}
 	}
 	return false;
+}
+
+//Lifetime
+void USFInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(USFInventoryComponent, Inventory);
+	DOREPLIFETIME(USFInventoryComponent, bInventoryUpdated);
+	DOREPLIFETIME(USFInventoryComponent, bEquippedItemsUpdated);
+
+}
+
+//Inv UI Update
+void USFInventoryComponent::OnRep_InventoryUpdated()
+{
+	
+}
+//Eq UI Update
+void USFInventoryComponent::OnRep_EquippedItemsUpdated()
+{
+	
 }
