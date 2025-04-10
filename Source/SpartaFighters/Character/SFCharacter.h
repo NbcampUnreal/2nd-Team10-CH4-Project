@@ -61,9 +61,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable* ItemSkillDataTable;
 
-private:
-	FSkillDataRow* CurrentSkillDataBuffer;
-
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UAnimMontage> OnDamageMontage;
@@ -71,7 +68,6 @@ public:
 protected:
 	// TO DO : Seperate Componenets
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	//ASFPlayerController* PlayerController;
 
 	// Movement
 	void Move(const FInputActionValue& Value);
@@ -91,12 +87,6 @@ protected:
 	void AttackPressed();
 	void AttackReleased();
 
-	UFUNCTION(Server, Reliable)
-	void Server_HandleAttack();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_HandleAttack();
-
 	void SkillAttackPressed();
 	void SkillAttackReleased();
 
@@ -108,10 +98,7 @@ protected:
 	void SettingPressed();	// TO DO : Show Setting UI
 
 
-	void HandleAttack();
-	void PlayAnimMontage(FName RowName);
-	virtual void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
+	// TO DO : Seperate Componet
 	virtual float TakeDamage(
 		float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
@@ -133,10 +120,5 @@ protected:
 	TArray<TObjectPtr<UObject>> AttackHandlers;
 
 private:
-	bool bIsInAir;
-	bool bIsRoll;
-	bool bIsAttack;
-	bool bIsGuard;
-
 	bool bIsItemEquipped;
 };

@@ -3,12 +3,11 @@
 #include "Animation/AnimInstance.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
-//#include "Character/Components/StateComponent.h"
-//#include "DataTable/SkillDataRow.h"
+
 
 USkillComponent::USkillComponent()
 {
-	//bIsAttacking = false;
+
 }
 
 void USkillComponent::Initialize(UDataTable* InSkillDataTable, UStateComponent* InStateComp, ACharacter* Character)
@@ -46,30 +45,7 @@ void USkillComponent::Server_HandleBasicAttack_Implementation()
 
 void USkillComponent::Multicast_HandleBasicAttack_Implementation(ECharacterState State)
 {
-	//StateComponent->UpdateState(OwnerCharacter);
 	HandleBasicAttack(State);
-}
-
-void USkillComponent::HandleStateBasedAttack(ECharacterState CurrentState)
-{
-	if (!StateComponent || StateComponent->IsInAction()) return;
-
-	FName RowName = TEXT("BaseAttack_1");
-
-	switch (CurrentState)
-	{
-	case ECharacterState::Moving:
-		RowName = FName("MoveBaseAttack");
-		break;
-	case ECharacterState::InAir:
-		RowName = FName("JumpBaseAttack");
-		break;
-	case ECharacterState::Crouching:
-		RowName = FName("CrouchBaseAttack");
-		break;
-	}
-
-	//HandleBasicAttack(RowName);
 }
 
 void USkillComponent::HandleBasicAttack(ECharacterState CurrentState)
@@ -92,24 +68,12 @@ void USkillComponent::HandleBasicAttack(ECharacterState CurrentState)
 	}
 
 	PlayAnimMontage(RowName);
+}
 
-	//const FString ContextString = TEXT("SkillLookup");
-	//CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>(RowName, ContextString);
+void USkillComponent::HandleInputSkillAttack()
+{
+	// TO DO : Handling
 
-	//if (CurrentSkillData && CurrentSkillData->SkillMontage)
-	//{
-	//	if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
-	//	{
-	//		AnimInstance->Montage_Play(CurrentSkillData->SkillMontage);
-	//		
-	//		FOnMontageEnded EndDelegate;
-	//		EndDelegate.BindUObject(this, &USkillComponent::OnMontageEnded);
-	//		
-	//		AnimInstance->Montage_SetEndDelegate(EndDelegate, CurrentSkillData->SkillMontage);
-
-	//		StateComponent->SetIsInAction(true);
-	//	}
-	//}
 }
 
 void USkillComponent::PlayAnimMontage(const FName& RowName)

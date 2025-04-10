@@ -1,23 +1,16 @@
 #include "Character/SFCharacter.h"
 
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "TimerManager.h"
 #include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 
 #include "Framework/SFPlayerController.h"
-
-#include "Components/MovementInputComponent.h"
 #include "Components/StatusContainerComponent.h"
 #include "Components/StateComponent.h"
 #include "Components/SkillComponent.h"
 
 #include "DataTable/SkillDataRow.h"
-#include "Animation/AnimInstance.h"
 
 #include "Net/UnrealNetwork.h"
 
@@ -105,16 +98,6 @@ void ASFCharacter::Move(const FInputActionValue& Value)
 
 		AddMovementInput(ForwardDirection, MovementVector.X);
 		AddMovementInput(RightDirection, MovementVector.Y);
-
-		// Add movement 
-		//if (!bIsAttack && !bIsGuard)
-		//{
-		//}
-
-		//if (StateComponent)
-		//{
-		//	StateComponent->UpdateState(this);
-		//}
 	}
 }
 
@@ -123,42 +106,23 @@ void ASFCharacter::StartJump()
 	if (!StateComponent->CanJump()) return;
 
 	ACharacter::Jump();
-
-	//if (StateComponent)
-	//{
-	//	StateComponent->UpdateState(this);
-	//}
-
-	// TO DO : Low Jump Function
 }
 
 void ASFCharacter::StopJump()
 {
 	ACharacter::StopJumping();
 
-	//if (StateComponent)
-	//{
-	//	StateComponent->UpdateState(this);
-	//}
-
-	// TO DO : Low Jump Function
 }
 
 void ASFCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
-
-	//if (StateComponent)
-	//{
-	//	StateComponent->UpdateState(this);
-	//}
 }
 
 void ASFCharacter::RollPressed()
 {
+	// TO DO : Move To SKill Component
 	if (!StateComponent->IsInAction()) return;
-
-	bIsRoll = true;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && SkillDataTable)
@@ -177,7 +141,7 @@ void ASFCharacter::RollPressed()
 
 void ASFCharacter::RollReleased()
 {
-	bIsRoll = false;
+
 }
 
 
@@ -187,55 +151,17 @@ void ASFCharacter::CrouchPressed()
 
 	Crouch();
 
-	//if (StateComponent)
-	//{
-	//	StateComponent->UpdateState(this);
-	//}
-
 }
 
 void ASFCharacter::CrouchReleased()
 {
 	UnCrouch();
-
-	//if (StateComponent)
-	//{
-	//	StateComponent->UpdateState(this);
-	//}
 }
 
 void ASFCharacter::AttackPressed()
 {
-	//if (StateComponent)
-	//{
-	//	StateComponent->UpdateState(this);
-	//}
-
-	//if (StateComponent->IsInAction()) return;
-
-	//StateComponent->SetIsInAction(true);
-
-	//ECharacterState CurrentState = StateComponent->GetState();
 	if (!SkillComponent || !StateComponent) return;
 	SkillComponent->HandleInputBasicAttack();
-	//if (HasAuthority())
-	//{
-	//	Multicast_HandleAttack();
-	//}
-	//else
-	//{
-	//	Server_HandleAttack();
-	//}
-}
-
-void ASFCharacter::Server_HandleAttack_Implementation()
-{
-	Multicast_HandleAttack();
-}
-
-void ASFCharacter::Multicast_HandleAttack_Implementation()
-{
-	HandleAttack();
 }
 
 void ASFCharacter::AttackReleased()
@@ -246,11 +172,8 @@ void ASFCharacter::AttackReleased()
 
 void ASFCharacter::SkillAttackPressed()
 {
-	//if (bIsAttack) return;
-
-	//bIsAttack = true;
-
-	PlayAnimMontage(FName("IdleSkill"));
+	if (!SkillComponent || !StateComponent) return;
+	SkillComponent->HandleInputSkillAttack();
 }
 
 void ASFCharacter::SkillAttackReleased()
@@ -260,13 +183,12 @@ void ASFCharacter::SkillAttackReleased()
 
 void ASFCharacter::GuardPressed()
 {
-	bIsGuard = true;
+
 
 }
 
 void ASFCharacter::GuardReleased()
 {
-	bIsGuard = false;
 
 }
 
@@ -280,149 +202,12 @@ void ASFCharacter::SettingPressed()
 
 }
 
-
-void ASFCharacter::HandleAttack()
-{
-	//if (!HasAuthority()) return;
-	if (bIsAttack) return;
-
-	bIsAttack = true;
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && SkillDataTable)
-	{
-		FName TargetRowName;
-
-		// TO DO : Sperate State 
-		if (GetCharacterMovement()->IsFalling())
-		{
-			TargetRowName = FName(TEXT("JumpBaseAttack"));
-		}
-		else if (bIsCrouched)
-		{
-			TargetRowName = FName(TEXT("CrouchBaseAttack"));
-		}
-		else if (UKismetMathLibrary::VSizeXY(GetCharacterMovement()->Velocity) >= 3
-			&& GetCharacterMovement()->GetCurrentAcceleration() != FVector().Zero())
-		{
-			TargetRowName = FName(TEXT("MoveBaseAttack"));
-		}
-		else
-		{
-			//FString RowNameString = FString::Printf(TEXT("BaseAttack_%d"), ComboCount + 1);
-			//TargetRowName = FName(RowNameString);
-			TargetRowName = FName(TEXT("BaseAttack_1"));
-		}
-
-		PlayAnimMontage(TargetRowName);
-	}
-}
-
-void ASFCharacter::PlayAnimMontage(FName RowName)
-{
-	if (!SkillDataTable) return;
-
-	FSkillDataRow* SkillData = SkillDataTable->FindRow<FSkillDataRow>(RowName, TEXT("SkillDataLookup"));
-
-	if (!SkillData || !SkillData->SkillMontage) return;
-
-	CurrentSkillDataBuffer = SkillData;
-
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &ASFCharacter::OnMontageEnded);
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && SkillData->SkillMontage)
-	{
-		AnimInstance->Montage_Play(SkillData->SkillMontage);
-		AnimInstance->Montage_SetEndDelegate(EndDelegate, SkillData->SkillMontage);
-	}
-	//if (AnimInstance && SkillDataTable)
-	//{
-	//	static const FString ContextString(TEXT("SkillDataLookup"));
-	//	CurrentSkillDataBuffer = SkillDataTable->FindRow<FSkillDataRow>(RowName, ContextString);
-	//	if (CurrentSkillDataBuffer)
-	//	{
-	//		if (CurrentSkillDataBuffer->SkillMontage)
-	//		{
-	//			auto AnimMontage = CurrentSkillDataBuffer->SkillMontage;
-
-	//			if (CurrentSkillDataBuffer && AnimMontage)
-	//			{
-	//				AnimInstance->Montage_Play(AnimMontage);
-
-	//				FOnMontageEnded EndDelegate;
-	//				EndDelegate.BindUObject(this, &ASFCharacter::OnMontageEnded);
-	//				AnimInstance->Montage_SetEndDelegate(EndDelegate, AnimMontage);
-	//			}
-	//		}
-	//	}
-	//}
-}
-
-void ASFCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-	bIsAttack = false;
-}
-
 void ASFCharacter::AttackTrace()
 {
 	if (SkillComponent)
 	{
 		SkillComponent->PerformAttackTrace();
 	}
-
-	//if (CurrentSkillDataBuffer == nullptr) return;
-
-	//FVector SocketLocation = GetMesh()->GetSocketLocation(CurrentSkillDataBuffer->SocketLocation);
-
-	//float TraceLength = CurrentSkillDataBuffer->TraceLength;
-	//float TraceLadius = CurrentSkillDataBuffer->TraceRadius;
-
-	//FVector StartLocation = SocketLocation - GetActorForwardVector() * TraceLength / 2;
-	//FVector EndLocation = SocketLocation + GetActorForwardVector() * TraceLength / 2;
-
-	//FHitResult HitResult;
-
-	//FCollisionQueryParams Params;
-	//Params.AddIgnoredActor(this);
-
-	//// Capsule Trace
-	//bool bHit = GetWorld()->SweepSingleByChannel(
-	//	HitResult,
-	//	StartLocation,
-	//	EndLocation,
-	//	FQuat::Identity,
-	//	ECollisionChannel::ECC_Pawn,
-	//	FCollisionShape::MakeCapsule(TraceLadius, TraceLadius),
-	//	Params
-	//);
-
-	//if (HasAuthority())
-	//{
-	//	if (bHit && HitResult.GetActor())
-	//	{
-	//		UGameplayStatics::ApplyPointDamage(
-	//			HitResult.GetActor(),
-	//			CurrentSkillDataBuffer->AttackPower,
-	//			EndLocation - StartLocation,
-	//			HitResult,
-	//			GetController(),
-	//			this,
-	//			UDamageType::StaticClass()
-	//		);
-	//	}
-	//}
-
-	//DrawDebugCapsule(
-	//	GetWorld(),
-	//	(StartLocation + EndLocation) / 2,
-	//	TraceLength / 2,
-	//	TraceLadius,
-	//	FRotationMatrix::MakeFromZ(EndLocation - StartLocation).ToQuat(),
-	//	bHit ? FColor::Red : FColor::Green,
-	//	false, 1.0f
-	//);
 }
 
 
@@ -432,7 +217,6 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	auto hasAuthority = HasAuthority();
 	ensureAlways(hasAuthority);
 
-	// On
 	if (StatusContainerComponent)
 	{
 		StatusContainerComponent->ModifyStatus(EStatusType::CurHP, DamageAmount);
@@ -505,7 +289,7 @@ void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void ASFCharacter::PerformAttack(int32 AttackIndex)
 {
-	bIsAttack = true;
+	//bIsAttack = true;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance)

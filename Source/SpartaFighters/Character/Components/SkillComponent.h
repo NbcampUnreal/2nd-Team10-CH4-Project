@@ -32,6 +32,7 @@ public:
 
 	void Initialize(UDataTable* InSkillDataTable, UStateComponent* InStateComp, ACharacter* Character);
 
+	// Handle Basic Attack
 	void HandleInputBasicAttack();
 
 	UFUNCTION(Server, Reliable)
@@ -43,18 +44,19 @@ public:
 	void HandleBasicAttack(ECharacterState CurrentState);
 
 
-	void HandleStateBasedAttack(ECharacterState State);
-
+	// Handle Skill Attack
+	void HandleInputSkillAttack();
 
 	void HandleSkillAttack(const FName& RowName);
 
+
+	// Handle Animation
 	void PlayAnimMontage(const FName& RowName);
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
+
 	void PerformAttackTrace();
 
-	//bool IsSkillPerforming() const { return bIsAttacking; }
-	
 
 private:
 	UPROPERTY()
