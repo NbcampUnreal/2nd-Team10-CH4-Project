@@ -11,7 +11,9 @@ class SPARTAFIGHTERS_API ASFMageCharacter : public ASFCharacter
 	
 public:
 	ASFMageCharacter();
+
 	void CastingFireBall();
+	void TeleportForward();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
@@ -19,4 +21,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	UStaticMeshComponent* HatMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Teleport")
+	float TeleportDistance;
 };

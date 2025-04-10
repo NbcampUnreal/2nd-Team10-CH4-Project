@@ -6,6 +6,8 @@ ASFMageCharacter::ASFMageCharacter()
     HatMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HatMesh"));
     HatMesh->SetupAttachment(GetMesh(), FName("head"));
     HatMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    TeleportDistance = 600.f;
 }
 
 void ASFMageCharacter::CastingFireBall()
@@ -25,4 +27,13 @@ void ASFMageCharacter::CastingFireBall()
         FireBall->FireInDirection(CastingRotation.Vector());
         UE_LOG(LogTemp, Warning, TEXT("Casting Fire Ball!!"));
     }
+}
+
+void ASFMageCharacter::TeleportForward()
+{
+    FVector Forward = GetActorForwardVector();
+    FVector CurrentLocation = GetActorLocation();
+    FVector TeleportLocation = CurrentLocation + Forward * TeleportDistance;
+
+    SetActorLocation(TeleportLocation, true, nullptr);  // TODO : If you want not sweep.. true->false change.
 }
