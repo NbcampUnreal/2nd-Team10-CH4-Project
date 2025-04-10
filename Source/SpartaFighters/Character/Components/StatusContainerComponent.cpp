@@ -1,11 +1,20 @@
 #include "Character/Components/StatusContainerComponent.h"
 #include "Character/SFCharacter.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 UStatusContainerComponent::UStatusContainerComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	SetIsReplicatedByDefault(true);
+	bWantsInitializeComponent = true;
 
+}
+
+void UStatusContainerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UStatusContainerComponent, CurrentHP);
+	DOREPLIFETIME(UStatusContainerComponent, MaxHP);
 }
 
 void UStatusContainerComponent::BeginPlay()
@@ -14,36 +23,88 @@ void UStatusContainerComponent::BeginPlay()
 
 }
 
+//void UStatusContainerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+//{
+	//Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+//}
+
 FStatusStruct UStatusContainerComponent::GetStruct() const
 {
 	return StatusStruct;
 }
 
-void UStatusContainerComponent::InitializeMovementProperties(ASFCharacter* SFCharacter)
+float UStatusContainerComponent::GetStatusValue(EStatusType Type)
 {
-	ASFCharacter* OwnerCharacter = SFCharacter;
-
-	if (!OwnerCharacter || !OwnerCharacter->GetCharacterMovement()) { return; }
-
-	FStatusStruct StatStruct = OwnerCharacter->GetStatusContainerComponent()->GetStruct();
-	UCharacterMovementComponent* Movement = OwnerCharacter->GetCharacterMovement();
-
-	Movement->JumpZVelocity = StatStruct.Get(EStatusType::JumpPower);
-	Movement->MaxWalkSpeed = StatStruct.Get(EStatusType::MoveSpeed);
-	Movement->AirControl = 1.0f;  // TODO : can be changed value
-	OwnerCharacter->JumpMaxCount = 2; // TODO : can be changed value
-	OwnerCharacter->bUseControllerRotationYaw = false;
+	if (StatusStruct.StatusValues.Contains(Type))
+	{
+		return StatusStruct.StatusValues[Type];
+	}
+	else
+	{
+		ensureAlways(TEXT("Status Type is Empty"));
+		return 0.0f;
+	}
 }
 
-// Temporary for test
-void UStatusContainerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UStatusContainerComponent::InitStatusComponent(ACharacter* Character)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	InitializeMovementProperties(Character);
 
-	// Test : Decrease HP for 1s
-	//float CurHP = StatusStruct.Get(EStatusType::CurHP);
-	//StatusStruct.Set(EStatusType::CurHP, FMath::Max(CurHP - 1.f * DeltaTime, 0.f));
-  
-	// Print HP
-	//UE_LOG(LogTemp, Log, TEXT("Tick HP: %.1f"), StatusStruct.Get(EStatusType::CurHP));
+	MaxHP = StatusStruct.Get(EStatusType::MaxHP);
+	CurrentHP = StatusStruct.Get(EStatusType::CurHP);
+}
+
+void UStatusContainerComponent::InitializeMovementProperties(ACharacter* Character)
+{
+	ACharacter* OwnerCharacter = Character;
+
+	//ASFCharacter* SFCharacter = Cast<ASFCharacter>(OwnerCharacter);
+
+	if (!OwnerCharacter || !OwnerCharacter->GetCharacterMovement()) { return; }
+	//FStatusStruct CharacterStatus = SFCharacter->GetStatusContainerComponent()->GetStruct();
+	UCharacterMovementComponent* Movement = OwnerCharacter->GetCharacterMovement();
+
+	Movement->JumpZVelocity = StatusStruct.Get(EStatusType::JumpPower);
+	Movement->MaxWalkSpeed = StatusStruct.Get(EStatusType::MoveSpeed);
+	
+	//Movement->AirControl = 1.0f;  // TODO : can be changed value
+	//OwnerCharacter->JumpMaxCount = 2; // TODO : can be changed value
+	//OwnerCharacter->bUseControllerRotationYaw = false;	
+}
+
+void UStatusContainerComponent::ModifyStatus(EStatusType Type, float Amount)
+{
+	switch (Type)
+	{
+	case EStatusType::CurHP:
+		SetHP(Amount);
+		break;
+	default:
+		float OriginValue = StatusStruct.Get(Type);
+		float ChangedValue = OriginValue + Amount;
+		StatusStruct.Set(Type, ChangedValue);
+		break;
+	}
+}
+
+void UStatusContainerComponent::SetHP(float Amount)
+{
+	CurrentHP = FMath::Clamp(CurrentHP + Amount, 0.0f, MaxHP);
+	StatusStruct.Set((EStatusType::CurHP), CurrentHP);
+
+	UE_LOG(LogTemp, Display, TEXT("CurrentHP Changed"));
+
+	ENetMode NetMode = GetNetMode();
+	if (NetMode == NM_Standalone || NetMode == NM_ListenServer)
+	{
+		OnRep_CurrentHP();
+	}
+}
+
+void UStatusContainerComponent::OnRep_CurrentHP()
+{
+	UE_LOG(LogTemp, Display, TEXT("OnRep_CurrentHP"));
+
+	// TO DO : Update UI Or Something
+
 }

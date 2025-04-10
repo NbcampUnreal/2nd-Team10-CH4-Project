@@ -20,8 +20,11 @@ void ASFPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AddMappingContext();
-	InitUI();
+	if (IsLocalController())
+	{
+		AddMappingContext();
+		//InitUI();
+	}
 }
 
 void ASFPlayerController::AddMappingContext()
