@@ -15,24 +15,38 @@ class UMovementInputComponent;
 class ASFPlayerController;
 
 class UStatusContainerComponent;
+class UStateComponent;
+class USkillComponent;
+
 struct FInputActionValue;
 struct FSkillDataRow;
 
+class UInputMappingContext;
+class UInputAction;
+
+class UAnimMontage;
+
 UCLASS()
-class SPARTAFIGHTERS_API ASFCharacter : public ACharacter, public IStatusContainerInterface
+class SPARTAFIGHTERS_API ASFCharacter : public ACharacter//, public IStatusContainerInterface
 {
 	GENERATED_BODY()
 
 public:
 	ASFCharacter();
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	virtual UStatusContainerComponent* GetStatusContainerComponent() const override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat")
+	TObjectPtr<UStatusContainerComponent> StatusContainerComponent;
+	//virtual UStatusContainerComponent* GetStatusContainerComponent() const override;
+
+	TObjectPtr<UStateComponent> StateComponent;
+	TObjectPtr<USkillComponent> SkillComponent;
 
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY()
-	TArray<TObjectPtr<UObject>> AttackHandlers;
+public:
+	virtual void InitCharacter();
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -44,27 +58,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable* SkillDataTable;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UDataTable* ItemSkillDataTable;
+
+private:
 	FSkillDataRow* CurrentSkillDataBuffer;
 
-	void PerformAttack(int32 AttackIndex);
-	void AddAttackHandler(UObject* AttackHandler);
-
-	virtual void AttackTrace();
-
-	//UPROPERTY(EditAnywhere, Category = "Combat")
-	//FName RightHandSocketName = "RightHandSocket"; // 소켓 이름 (애니메이션 소켓 기준)
-
-	//UPROPERTY(EditAnywhere, Category = "Combat")
-	//float JabTraceLength = 100.f;
-
-	//UPROPERTY(EditAnywhere, Category = "Combat")
-	//float JabTraceRadius = 15.f;
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UAnimMontage> OnDamageMontage;
 
 protected:
 	// TO DO : Seperate Componenets
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	ASFPlayerController* PlayerController;
+	//ASFPlayerController* PlayerController;
 
 	// Movement
 	void Move(const FInputActionValue& Value);
@@ -72,8 +79,10 @@ protected:
 	void StartJump();
 	void StopJump();
 
-	void RollPressed(const FInputActionValue& Value);
-	void RollReleased(const FInputActionValue& Value);
+	void Landed(const FHitResult& Hit) override;
+
+	void RollPressed();
+	void RollReleased();
 
 	void CrouchPressed();
 	void CrouchReleased();
@@ -82,11 +91,25 @@ protected:
 	void AttackPressed();
 	void AttackReleased();
 
+	UFUNCTION(Server, Reliable)
+	void Server_HandleAttack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_HandleAttack();
+
 	void SkillAttackPressed();
 	void SkillAttackReleased();
 
 	void GuardPressed();
 	void GuardReleased();
+
+	// Equip Item
+	void InteractionPressed();
+
+
+	void HandleAttack();
+	void PlayAnimMontage(FName RowName);
+	virtual void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	virtual float TakeDamage(
 		float DamageAmount,
@@ -94,32 +117,25 @@ protected:
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_TakeDamageOnServer(const float Damage, const FDamageEvent& DamageEvent, AActor* DamageCauser);
 
-//protected:
-//	void InitializeCharacterProperties();
-//	void Landed(const FHitResult& Hit);
-//
-//	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MovementInput")
-//	UMovementInputComponent* MovementInputComponent;
-//
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat")
-	UStatusContainerComponent* StatusContainerComponent;
+public:
+	virtual void AttackTrace();	// For AnimNotify
 
+public:
+	void PerformAttack(int32 AttackIndex);
+	void AddAttackHandler(UObject* AttackHandler);
 
-	// TO DO : Low Jump Function
-	UPROPERTY(EditDefaultsOnly, Category = "Jump")
-	float MaxJumpHoldTime = 0.3f; // 최대 유지 시간
-
-	FTimerHandle JumpHoldTimer;
-
-	int32 NomalAttackComboCount = 3;
-	int32 PowerAttackComboCount = 2;
+protected:
+	UPROPERTY()
+	TArray<TObjectPtr<UObject>> AttackHandlers;
 
 private:
 	bool bIsInAir;
 	bool bIsRoll;
-	bool bIsCrouch;
 	bool bIsAttack;
 	bool bIsGuard;
 
+	bool bIsItemEquipped;
 };
