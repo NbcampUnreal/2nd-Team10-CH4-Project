@@ -103,8 +103,9 @@ protected:
 	void GuardPressed();
 	void GuardReleased();
 
-	// Equip Item
-	void InteractionPressed();
+	void InteractionPressed(); // TO DO : Equip Item
+
+	void SettingPressed();	// TO DO : Show Setting UI
 
 
 	void HandleAttack();

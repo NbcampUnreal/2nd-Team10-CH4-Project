@@ -272,6 +272,12 @@ void ASFCharacter::GuardReleased()
 
 void ASFCharacter::InteractionPressed()
 {
+
+}
+
+void ASFCharacter::SettingPressed()
+{
+
 }
 
 
@@ -487,6 +493,7 @@ void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 			EnhancedInput->BindAction(SFPlayerController->GuardAction, ETriggerEvent::Completed, this, &ASFCharacter::GuardReleased);
 
 			// TO DO : Other Setup ex) Pause, ......
+			EnhancedInput->BindAction(SFPlayerController->InteractionAction, ETriggerEvent::Started, this, &ASFCharacter::InteractionPressed);
 			EnhancedInput->BindAction(SFPlayerController->InteractionAction, ETriggerEvent::Started, this, &ASFCharacter::InteractionPressed);
 		}
 	}
