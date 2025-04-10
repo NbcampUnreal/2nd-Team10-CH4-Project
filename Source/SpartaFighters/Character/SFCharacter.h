@@ -72,8 +72,8 @@ protected:
 	void StartJump();
 	void StopJump();
 
-	void RollPressed(const FInputActionValue& Value);
-	void RollReleased(const FInputActionValue& Value);
+	void SpecialMovePressed(const FInputActionValue& Value);
+	void SpecialMoveReleased(const FInputActionValue& Value);
 
 	void CrouchPressed();
 	void CrouchReleased();
@@ -121,5 +121,6 @@ private:
 	bool bIsCrouch;
 	bool bIsAttack;
 	bool bIsGuard;
+	bool bIsSpecialMove;
 
 };
