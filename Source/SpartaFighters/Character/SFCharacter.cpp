@@ -122,14 +122,14 @@ void ASFCharacter::Landed(const FHitResult& Hit)
 void ASFCharacter::RollPressed()
 {
 	// TO DO : Move To SKill Component
-	if (!StateComponent->IsInAction()) return;
+	if (StateComponent->IsInAction()) return;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && SkillDataTable)
 	{
 		static const FString ContextString(TEXT("SkillDataLookup"));
 
-		FName TargetRowName = FName(TEXT("RollSkill"));
+		FName TargetRowName = FName(TEXT("SpecialMoveSkill"));
 		FSkillDataRow* SkillData = SkillDataTable->FindRow<FSkillDataRow>(TargetRowName, ContextString);
 
 		if (SkillData && SkillData->SkillMontage)
@@ -229,6 +229,7 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 void ASFCharacter::Multicast_TakeDamageOnServer_Implementation(const float Damage, const FDamageEvent& DamageEvent, AActor* DamageCauser)
 {
+
 	// TO DO : 
 	if (OnDamageMontage)
 	{
@@ -287,37 +288,37 @@ void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	}
 }
 
-void ASFCharacter::PerformAttack(int32 AttackIndex)
-{
-	//bIsAttack = true;
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance)
-	{
-		TArray<FSkillDataRow*> AllSkils;
-		static const FString ContextString(TEXT("SkillDataText"));
-		SkillDataTable->GetAllRows(ContextString, AllSkils);
-
-		if (AllSkils[0])
-		{
-			if (AllSkils[0]->SkillMontage)
-			{
-				AnimInstance->Montage_Play(AllSkils[0]->SkillMontage);
-			}
-		}
-	}
-
-	if (AttackHandlers.IsValidIndex(AttackIndex))
-	{
-		if (IHandleAttack* Handler = Cast<IHandleAttack>(AttackHandlers[AttackIndex]))
-		{
-			Handler->PerformAttack();
-		}
-	}
-}
-
-void ASFCharacter::AddAttackHandler(UObject* AttackHandler)
-{
-	AttackHandlers.Add(AttackHandler);
-}
+//void ASFCharacter::PerformAttack(int32 AttackIndex)
+//{
+//	//bIsAttack = true;
+//
+//	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+//	if (AnimInstance)
+//	{
+//		TArray<FSkillDataRow*> AllSkils;
+//		static const FString ContextString(TEXT("SkillDataText"));
+//		SkillDataTable->GetAllRows(ContextString, AllSkils);
+//
+//		if (AllSkils[0])
+//		{
+//			if (AllSkils[0]->SkillMontage)
+//			{
+//				AnimInstance->Montage_Play(AllSkils[0]->SkillMontage);
+//			}
+//		}
+//	}
+//
+//	if (AttackHandlers.IsValidIndex(AttackIndex))
+//	{
+//		if (IHandleAttack* Handler = Cast<IHandleAttack>(AttackHandlers[AttackIndex]))
+//		{
+//			Handler->PerformAttack();
+//		}
+//	}
+//}
+//
+//void ASFCharacter::AddAttackHandler(UObject* AttackHandler)
+//{
+//	AttackHandlers.Add(AttackHandler);
+//}
 
