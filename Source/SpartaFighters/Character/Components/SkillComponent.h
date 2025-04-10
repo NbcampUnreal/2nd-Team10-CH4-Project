@@ -47,7 +47,13 @@ public:
 	// Handle Skill Attack
 	void HandleInputSkillAttack();
 
-	void HandleSkillAttack(const FName& RowName);
+	UFUNCTION(Server, Reliable)
+	void Server_HandleSkillAttack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_HandleSkillAttack(ECharacterState State);
+
+	void HandleSkillAttack(ECharacterState CurrentState);
 
 
 	// Handle Animation

@@ -21,7 +21,6 @@ void USkillComponent::HandleInputBasicAttack()
 {
 	if (!IsValid(OwnerCharacter) || !IsValid(SkillDataTable)) return;
 
-
 	if (OwnerCharacter->HasAuthority())
 	{
 		StateComponent->UpdateState(OwnerCharacter);
@@ -73,7 +72,52 @@ void USkillComponent::HandleBasicAttack(ECharacterState CurrentState)
 void USkillComponent::HandleInputSkillAttack()
 {
 	// TO DO : Handling
+	if (!IsValid(OwnerCharacter) || !IsValid(SkillDataTable)) return;
 
+	if (OwnerCharacter->HasAuthority())
+	{
+		StateComponent->UpdateState(OwnerCharacter);
+		Multicast_HandleSkillAttack(StateComponent->GetState());
+	}
+	else
+	{
+		Server_HandleSkillAttack();
+	}
+}
+
+void USkillComponent::Server_HandleSkillAttack_Implementation()
+{
+	if (StateComponent && OwnerCharacter)
+	{
+		StateComponent->UpdateState(OwnerCharacter);
+	}
+
+	Multicast_HandleSkillAttack(StateComponent->GetState());
+}
+
+void USkillComponent::Multicast_HandleSkillAttack_Implementation(ECharacterState State)
+{
+	HandleSkillAttack(State);
+}
+
+void USkillComponent::HandleSkillAttack(ECharacterState CurrentState)
+{
+	FName RowName = TEXT("IdleSkill");
+
+	switch (CurrentState)
+	{
+	case ECharacterState::Moving:
+		RowName = FName("MoveSkill");
+		break;
+	case ECharacterState::InAir:
+		RowName = FName("JumpBaseAttack");
+		break;
+	case ECharacterState::Crouching:
+		RowName = FName("CrouchBaseAttack");
+		break;
+	}
+
+	PlayAnimMontage(RowName);
 }
 
 void USkillComponent::PlayAnimMontage(const FName& RowName)
