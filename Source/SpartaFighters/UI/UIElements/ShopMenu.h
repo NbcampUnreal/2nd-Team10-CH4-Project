@@ -16,7 +16,6 @@ class SPARTAFIGHTERS_API UShopMenu : public USelectPopUpBase
 
 protected:
 	virtual void NativeConstruct() override;
-
 	virtual void NativeDestruct() override;
 
 private:

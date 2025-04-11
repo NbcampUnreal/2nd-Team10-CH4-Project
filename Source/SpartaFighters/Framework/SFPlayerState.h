@@ -13,23 +13,22 @@ class SPARTAFIGHTERS_API ASFPlayerState : public APlayerState
 public:
 	ASFPlayerState();
 
-	UPROPERTY(Replicated= OnRep_PlayerUniqueUD)
-	FString PlayerUniqueID;
+	UPROPERTY(ReplicatedUsing = OnRep_bIsReady)
+	bool bIsReady = false;
+
+	UPROPERTY(ReplicatedUsing = OnRep_bIsRoomOwner)
+	bool bIsRoomOwner = false;
 
 	UPROPERTY(Replicated)
-	FString SelectedCharacterName;
+	bool bIsAI = false;
 
 	UPROPERTY(Replicated)
-	FString CharacterTexturePath;
+	FName CharacterRowName;
 
 	UPROPERTY(Replicated)
-	TArray<FString> EquippedItems;
+	FString CustomPlayerID;
 
-	UFUNCTION(Server, Unreliable)
-	void Server_SetPlayerID(const FString& InPlayerID);
-
-	UFUNCTION()
-	void OnRep_PlayerUniqueID();
+	FString GetUniqueID() const;
 
 public:
 	void AddDeathCount();
@@ -38,6 +37,12 @@ public:
 protected:
 	UPROPERTY(Replicated)
 	int32 DeathCount = 0;
+
+	UFUNCTION()
+	void OnRep_bIsReady();
+
+	UFUNCTION()
+	void OnRep_bIsRoomOwner();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

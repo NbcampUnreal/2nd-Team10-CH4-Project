@@ -12,6 +12,7 @@ class SPARTAFIGHTERS_API UQuitGameWidget : public USelectPopUpBase
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -21,5 +22,5 @@ private:
 
 	UFUNCTION()
 	void OnQuitGameClicked();
-	
+
 };
