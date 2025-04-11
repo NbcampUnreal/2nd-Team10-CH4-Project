@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/Popup/SelectPopUpBase.h"
 #include "DataTypes/GameModeType.h"
 #include "SelectionWidget.generated.h"
 
@@ -11,7 +11,7 @@ class UTextBlock;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, int32, NewIndex);
 
 UCLASS()
-class SPARTAFIGHTERS_API USelectionWidget : public UUserWidget
+class SPARTAFIGHTERS_API USelectionWidget : public USelectPopUpBase
 {
     GENERATED_BODY()
 

@@ -6,16 +6,9 @@
 #include "LobbyMenu.generated.h"
 
 class UTextBlock;
-class UImage;
 class UButton;
-class UVerticalBox;
-class UEditableTextBox;
 class UQuitGameWidget;
-class UCreateRoomWidget;
-class UPlayerSimpleInfoWidget;
-class UGlobalChatWidget;
-class URoomListWidget;
-class UShopMenu;
+// class UGlobalChatWidget;
 
 UCLASS()
 class SPARTAFIGHTERS_API ULobbyMenu : public UBaseUserWidget
@@ -25,58 +18,46 @@ class SPARTAFIGHTERS_API ULobbyMenu : public UBaseUserWidget
 protected:
 		virtual void NativeConstruct() override;
 
+		virtual void NativeDestruct() override;
+
 private:
-	// Player Info Section
-	UPROPERTY(meta = (BindWidget))
-	UPlayerSimpleInfoWidget* PlayerSimpleInfoWidgetClass;
 	UPROPERTY(meta = (BindWidget))
 	UButton* PlayerInfoButton;
-	// Utility Section
 	UPROPERTY(meta = (BindWidget))
 	UButton* ShopButton;
-	UPROPERTY(meta = (BindWidget))
-	UButton* CreateRoomButton;
 	UPROPERTY(meta = (BindWidget))
 	UButton* OptionButton;
 	UPROPERTY(meta = (BindWidget))
 	UButton* QuitGameButton;
-	// Room Section
+	
 	UPROPERTY(meta = (BindWidget))
-	UButton* CooperativeFilterButton;
+	UButton* SingleGameModeButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* BattleFilterButton;
+	UButton* CoopGameModeButton;
 	UPROPERTY(meta = (BindWidget))
-	URoomListWidget* RoomListWidgetClass;
-	// Chat Section
-	UPROPERTY(meta = (BindWidget))
-	UGlobalChatWidget* GlobalChatWidgetClass;
-	// User List Section
-	UPROPERTY(meta = (BindWidget))
-	UVerticalBox* UserListBox;
+	UButton* BattleGameModeButton;
+
+	UFUNCTION()
+	void OnSingleGameModeClicked();
+	UFUNCTION()
+	void OnCoopGameModeClicked();
+	UFUNCTION()
+	void OnBattleGameModeClicked();
 
 	UFUNCTION()
 	void OnPlayerInfoClicked();
 	UFUNCTION()
 	void OnShopClicked();
 	UFUNCTION()
-	void OnCreateRoomClicked();
-	UFUNCTION()
 	void OnOptionClicked();
 	UFUNCTION()
 	void OnQuitGameClicked();
-	UFUNCTION()
-	void OnCooperativeFilterClicked();
-	UFUNCTION()
-	void OnBattleFilterClicked();
 
 public:
+	// TODO : Use ResolveUIManager
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSoftClassPtr<UQuitGameWidget> QuitGameWidgetClass;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	UCreateRoomWidget* CachedCreateRoomWidget = nullptr;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSoftClassPtr<UCreateRoomWidget> CreateRoomWidgetClass;
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSoftClassPtr<UShopMenu> ShopMenuWidgetClass;
 

@@ -1,13 +1,14 @@
 ﻿#include "LobbyMenu.h"
+#include "Framework/SFGameInstance.h"
+#include "Framework/SFGameInstanceSubsystem.h"
 #include "ShopMenu.h"
 #include "Components/Button.h"
-#include "Components/VerticalBox.h"
+
 #include "UI/UIObject/PlayerSimpleInfoWidget.h"
-#include "UI/UIObject/GlobalChatWidget.h"
-#include "UI/UIObject/RoomListWidget.h"
+//#include "UI/UIObject/GlobalChatWidget.h"
 #include "UI/PopUp/QuitGameWidget.h"
 #include "UI/UIManager/UIManager.h"
-#include "UI/PopUp/CreateRoomWidget.h"
+
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 
@@ -23,10 +24,6 @@ void ULobbyMenu::NativeConstruct()
 	{
 		ShopButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnShopClicked);
 	}
-	if (CreateRoomButton)
-	{
-		CreateRoomButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnCreateRoomClicked);
-	}
 	if (OptionButton)
 	{
 		OptionButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnOptionClicked);
@@ -35,28 +32,59 @@ void ULobbyMenu::NativeConstruct()
 	{
 		QuitGameButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnQuitGameClicked);
 	}
-	if (CooperativeFilterButton)
+
+	if (SingleGameModeButton)
 	{
-		CooperativeFilterButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnCooperativeFilterClicked);
+		SingleGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnSingleGameModeClicked);
 	}
-	if (BattleFilterButton)
+	if (CoopGameModeButton)
 	{
-		BattleFilterButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnBattleFilterClicked);
+		CoopGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnCoopGameModeClicked);
+	}
+	if (BattleGameModeButton)
+	{
+		BattleGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnBattleGameModeClicked);
 	}
 
 	if (QuitGameWidgetClass.IsNull())
 	{
 		UE_LOG(LogTemp, Error, TEXT("QuitGameWidgetClass is NULL in NativeConstruct"));
 	}
+}
 
-	/*if (ShopMenuWidgetClass) 
+void ULobbyMenu::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	if (PlayerInfoButton)
 	{
-		UClass* SoftShopMenuClass = ShopMenuWidgetClass.LoadSynchronous();
+		PlayerInfoButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnPlayerInfoClicked);
+	}
+	if (ShopButton)
+	{
+		ShopButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnShopClicked);
+	}
+	if (OptionButton)
+	{
+		OptionButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnOptionClicked);
+	}
+	if (QuitGameButton)
+	{
+		QuitGameButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnQuitGameClicked);
+	}
 
-		CachedShopMenuWidget = CreateWidget<UShopMenu>(GetWorld(), SoftShopMenuClass);
-		CachedShopMenuWidget->AddToViewport();
-		CachedShopMenuWidget->SetVisibility(ESlateVisibility::Hidden);
-	}*/
+	if (SingleGameModeButton)
+	{
+		SingleGameModeButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnSingleGameModeClicked);
+	}
+	if (CoopGameModeButton)
+	{
+		CoopGameModeButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnCoopGameModeClicked);
+	}
+	if (BattleGameModeButton)
+	{
+		BattleGameModeButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnBattleGameModeClicked);
+	}
 }
 
 void ULobbyMenu::OnPlayerInfoClicked()
@@ -68,47 +96,9 @@ void ULobbyMenu::OnPlayerInfoClicked()
 void ULobbyMenu::OnShopClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnShopClicked!"));
-	/*SetVisibility(ESlateVisibility::Hidden);*/
-	//CachedShopMenuWidget->SetVisibility(ESlateVisibility::Visible);
-
 	if (UUIManager* UIManager = ResolveUIManager())
 	{
-		UIManager->ShowShopMenu(); 
-	}
-}
-
-void ULobbyMenu::OnCreateRoomClicked()
-{
-	UE_LOG(LogTemp, Warning, TEXT("OnCreateRoomClicked!"));
-
-	if (CachedCreateRoomWidget && CachedCreateRoomWidget->IsValidLowLevel())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CachedCreateRoomWidget->IsValidLowLevel()!"));
-		CachedCreateRoomWidget->ResetRoomNameText();
-		CachedCreateRoomWidget->SetVisibility(ESlateVisibility::Visible);
-		return;
-	}
-
-	UClass* WidgetClass = CreateRoomWidgetClass.LoadSynchronous();
-
-	if (CreateRoomWidgetClass.IsValid() == false)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CreateRoomWidgetClass is not valid"));
-		return;
-	}
-
-	if (!WidgetClass)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to load QuitGameWidgetClass"));
-		return;
-	}
-
-	CachedCreateRoomWidget = CreateWidget<UCreateRoomWidget>(GetWorld(), WidgetClass);
-	if (CachedCreateRoomWidget)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OnCreateRoomClicked!"));
-		CachedCreateRoomWidget->ResetRoomNameText();
-		CachedCreateRoomWidget->AddToViewport();
+		UIManager->ShowShopMenu();
 	}
 }
 
@@ -144,14 +134,58 @@ void ULobbyMenu::OnQuitGameClicked()
 	}
 }
 
-void ULobbyMenu::OnCooperativeFilterClicked()
+void ULobbyMenu::OnSingleGameModeClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnCooperativeFilterClicked!"));
-	// Filter the list of Cooperative rooms
+	UE_LOG(LogTemp, Warning, TEXT("OnSingleGameModeClicked!"));
+
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	{
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			Subsystem->SetCurrentGameMode(EGameModeType::Single);
+
+			if (UUIManager* UIManager = ResolveUIManager())
+			{
+				UIManager->ShowMapSelectionWidget(Subsystem->GetCurrentGameMode());
+			}
+		}
+	}
 }
 
-void ULobbyMenu::OnBattleFilterClicked()
+void ULobbyMenu::OnCoopGameModeClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnBattleFilterClicked!"));
-	// Filter the list of Battle rooms
+	UE_LOG(LogTemp, Warning, TEXT("OnCoopGameModeClicked!"));
+
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	{
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			Subsystem->SetCurrentGameMode(EGameModeType::Cooperative);
+
+			const FString HostAddress = TEXT("127.0.0.1:7777");
+			Subsystem->ConnectToServerByAddress(HostAddress);
+
+			/*const FString RoomMapName = TEXT("RoomMenu");
+			Subsystem->ChangeLevelByMapName(RoomMapName);*/
+		}
+	}
+}
+
+void ULobbyMenu::OnBattleGameModeClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnBattleGameModeClicked!"));
+
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	{
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			Subsystem->SetCurrentGameMode(EGameModeType::Battle);
+
+			const FString HostAddress = TEXT("127.0.0.1:7777");
+			Subsystem->ConnectToServerByAddress(HostAddress);
+
+			/*const FString RoomMapName = TEXT("RoomMenu");
+			Subsystem->ChangeLevelByMapName(RoomMapName);*/
+		}
+	}
 }
