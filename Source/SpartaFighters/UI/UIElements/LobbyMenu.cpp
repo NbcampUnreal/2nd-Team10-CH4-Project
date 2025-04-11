@@ -165,8 +165,8 @@ void ULobbyMenu::OnCoopGameModeClicked()
 			const FString HostAddress = TEXT("127.0.0.1:7777");
 			Subsystem->ConnectToServerByAddress(HostAddress);
 
-			/*const FString RoomMapName = TEXT("RoomMenu");
-			Subsystem->ChangeLevelByMapName(RoomMapName);*/
+			const FString RoomMapName = TEXT("RoomMenu");
+			Subsystem->ChangeLevelByMapName(RoomMapName);
 		}
 	}
 }
@@ -184,8 +184,8 @@ void ULobbyMenu::OnBattleGameModeClicked()
 			const FString HostAddress = TEXT("127.0.0.1:7777");
 			Subsystem->ConnectToServerByAddress(HostAddress);
 
-			/*const FString RoomMapName = TEXT("RoomMenu");
-			Subsystem->ChangeLevelByMapName(RoomMapName);*/
+			const FString RoomMapName = TEXT("RoomMenu");
+			Subsystem->ChangeLevelByMapName(RoomMapName);
 		}
 	}
 }
