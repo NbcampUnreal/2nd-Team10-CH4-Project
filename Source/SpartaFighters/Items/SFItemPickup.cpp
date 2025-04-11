@@ -1,6 +1,3 @@
-
-
-
 #include "Items/SFItemPickup.h"
 #include "Components/SphereComponent.h"
 #include "Items/ConsumableItems/SFConsumableBase.h"

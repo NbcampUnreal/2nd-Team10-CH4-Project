@@ -19,16 +19,30 @@ void UShopMenu::NativeConstruct()
     {
         CosmeticItemButton->OnClicked.AddDynamic(this, &UShopMenu::OnCosmeticItemClicked);
     }
-    if (ExitButton)
-    {
-        ExitButton->OnClicked.AddDynamic(this, &UShopMenu::OnExitClicked);
-    }
 
     if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
     {
         FInputModeUIOnly InputModeData;
         PlayerController->SetInputMode(InputModeData);
         PlayerController->bShowMouseCursor = true;
+    }
+}
+
+void UShopMenu::NativeDestruct()
+{
+    Super::NativeDestruct();
+
+    if (CommonItemButton)
+    {
+        CommonItemButton->OnClicked.RemoveDynamic(this, &UShopMenu::OnCommonItemClicked);
+    }
+    if (ExclusiveItemButton)
+    {
+        ExclusiveItemButton->OnClicked.RemoveDynamic(this, &UShopMenu::OnExclusiveItemClicked);
+    }
+    if (CosmeticItemButton)
+    {
+        CosmeticItemButton->OnClicked.RemoveDynamic(this, &UShopMenu::OnCosmeticItemClicked);
     }
 }
 
@@ -63,7 +77,6 @@ void UShopMenu::OnExitClicked()
 {
     if (UUIManager* UIManager = ResolveUIManager())
     {
-        UIManager->BackToLobbyMenu();
-        UE_LOG(LogTemp, Warning, TEXT("OnExitClicked!"));
+        UIManager->ShowLobbyMenu();
     }
 }

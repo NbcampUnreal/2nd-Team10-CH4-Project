@@ -14,6 +14,7 @@ public class SpartaFighters : ModuleRules
             "CoreUObject",
             "Engine",
             "InputCore",
+            "NetCore",
             "EnhancedInput",
             "UMG",
             "HTTP",
@@ -21,7 +22,8 @@ public class SpartaFighters : ModuleRules
             "Json",
             "AIModule",
             "GamePlayTasks",
-            "NavigationSystem"
+            "NavigationSystem",
+            "Niagara"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[]

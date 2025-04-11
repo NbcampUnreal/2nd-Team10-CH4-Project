@@ -1,70 +1,61 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
-#include "DataTypes/RoomInfo.h"
-#include "DataTypes/PlayerInfo.h"
+#include "UI/BaseUserWidget.h"
 #include "RoomWidget.generated.h"
 
-class UTextBlock;
-class URoomChatWidget;
-class UUniformGridPanel;
 class UButton;
-class UPlayerSimpleInfoWidget;
-class UMapSelectionWidget;
 class UPlayerSlotWidget;
+class UUniformGridPanel;
 
 UCLASS()
-class SPARTAFIGHTERS_API URoomWidget : public UUserWidget
+class SPARTAFIGHTERS_API URoomWidget : public UBaseUserWidget
 {
 	GENERATED_BODY()
 	
-public:
-	void SetupRoom(const FRoomInfo& RoomInfo);
-
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 private:
 	UPROPERTY(meta = (BindWidget))
-	TSoftObjectPtr<UPlayerSimpleInfoWidget> PlayerSimpleInfoWidgetClass;
+	UButton* ShopButton;
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* RoomNameText;
+	UButton* PlayerInfoButton;
 	UPROPERTY(meta = (BindWidget))
-	TSoftObjectPtr<URoomChatWidget> RoomChatWidgetClass;
+	UButton* OptionButton;
 	UPROPERTY(meta = (BindWidget))
 	UButton* LobbyButton;
+
 	UPROPERTY(meta = (BindWidget))
-	UButton* ReadyOrStartButton;
+	UButton* SelectMapButton;
+	UPROPERTY(meta = (BindWidget))
+	UButton* ReadyButton;
 
 	UPROPERTY(meta = (BindWidget))
 	UUniformGridPanel* PlayerGridPanel;
+
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UPlayerSlotWidget> PlayerSlotWidgetClass;
-	TArray<UPlayerSlotWidget*> PlayerSlots;
 
-	UPROPERTY()
-	FRoomInfo CurrentRoomInfo;
+	FTimerHandle UpdatePlayerSlotTimerHandle;
 
-	UPROPERTY()
-	TArray<FPlayerInfo> PlayerList;
-
-	const int32 MaxPlayers = 4;
-	const int32 NumColumns = 2;
-
+	UFUNCTION()
+	void OnShopButtonClicked();
+	UFUNCTION()
+	void OnPlayerInfoButtonClicked();
+	UFUNCTION()
+	void OnOptionButtonClicked();
 	UFUNCTION()
 	void OnLobbyButtonClicked();
 	UFUNCTION()
-	void OnReadyOrStartButtonClicked();
+	void OnSelectMapButtonClicked();
+	UFUNCTION()
+	void OnReadyButtonClicked();
 
 public:
-	UPROPERTY(meta = (BindWidget))
-	UMapSelectionWidget* MapSelectionWidgetClass;
+	void UpdatePlayerSlots();
 
-	UFUNCTION()
-	void SetPlayerList(const TArray<FPlayerInfo>& NewPlayerList);
-	UFUNCTION()
-	void UpdatePlayerList();
+	void UpdateUIState();
 
-	FRoomInfo GetCurrentRoomInfo() const { return CurrentRoomInfo; }
 };

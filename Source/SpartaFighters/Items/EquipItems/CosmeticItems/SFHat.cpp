@@ -9,7 +9,7 @@ USFHat::USFHat()
 	ItemType = EItemType::Cosmetic;
 	ItemName = "Hat";
 	ItemDescription = FText::FromString(TEXT("Well designed hat."));
-	HatMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/PlatformFighterKit/Assets/Mesh/Hats/SM_Tophat_01"))); // 에셋 레퍼런스 설정 (경로는 실제 에셋 경로로 변경)
+	HatMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/PlatformFighterKit/Assets/Mesh/Hats/SM_Tophat_01")));
 }
 
 

@@ -7,13 +7,12 @@ USFItemBase::USFItemBase():
 	ItemIcon(nullptr),
 	ItemName(NAME_None),
 	ItemDescription(FText::GetEmpty()),
-	ItemType(EItemType::Common),
-	ItemQuantity(0)
+	ItemType(EItemType::Common)
 {
 }
 
 //Modify Item Data
-void USFItemBase::SetItemData(const FName& Name, const FSoftObjectPath& IconPath, FText Description,EItemType Type)
+void USFItemBase::SetItemData(const FName& Name, TSoftObjectPtr<UTexture2D> IconPath, FText Description,EItemType Type)
 {
 	ItemName = Name;
 	ItemIcon = IconPath;

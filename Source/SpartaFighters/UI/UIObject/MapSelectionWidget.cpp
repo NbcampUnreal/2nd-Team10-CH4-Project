@@ -1,18 +1,32 @@
 #include "MapSelectionWidget.h"
+
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Components/Button.h"
+
 #include "UI/UIElements/RoomWidget.h"
+#include "Framework/SFRoomPlayerController.h"
 #include "DataTable/MapInfoRow.h"
+#include "Kismet/GameplayStatics.h"
 
 void UMapSelectionWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	if (StartButton)
+	{
+		StartButton->OnClicked.AddDynamic(this, &UMapSelectionWidget::OnStartButtonClicked);
+	}
 }
 
-void UMapSelectionWidget::SetRoomSettings(const FRoomSettings& InRoomSettings)
+void UMapSelectionWidget::NativeDestruct()
 {
-	CurrentGameMode = InRoomSettings.GameMode;
-	UpdateAvailableMaps();
+	Super::NativeDestruct();
+
+	if (StartButton)
+	{
+		StartButton->OnClicked.RemoveDynamic(this, &UMapSelectionWidget::OnStartButtonClicked);
+	}
 }
 
 void UMapSelectionWidget::UpdateAvailableMaps()
@@ -66,4 +80,16 @@ void UMapSelectionWidget::SetGameMode(EGameModeType InGameMode)
 {
 	CurrentGameMode = InGameMode;
 	UpdateAvailableMaps();
+	UpdateSelectionUI();
+}
+
+void UMapSelectionWidget::OnStartButtonClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnStartButtonClicked"));
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (ASFRoomPlayerController* SFPC = Cast<ASFRoomPlayerController>(PC))
+	{
+		const FString SelectedMapName = GetCurrentSelectedMap().MapName;
+		SFPC->Server_RequestLevelChangeByMapName(SelectedMapName);
+	}
 }

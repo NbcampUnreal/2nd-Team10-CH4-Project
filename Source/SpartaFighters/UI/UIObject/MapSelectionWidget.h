@@ -17,25 +17,28 @@ class SPARTAFIGHTERS_API UMapSelectionWidget : public USelectionWidget
 	
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
-private:
-    UPROPERTY()
-    URoomWidget* RoomWidget;
-    UPROPERTY(EditDefaultsOnly, Category = "Map")
-    UDataTable* MapDataTable;
+public:
+    UPROPERTY(meta = (BindWidget))
+    UButton* StartButton;
     UPROPERTY(meta = (BindWidget))
     UImage* MapThumbnail;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Map")
+    UDataTable* MapDataTable;
     TArray<FMapInfoRow*> AvailableMaps;
+
     int32 CurrentIndex = 0;
 
     void UpdateSelectionUI();
 
-public:
-    void SetRoomSettings(const FRoomSettings& InRoomSettings);
     void UpdateAvailableMaps();
     FMapInfo GetCurrentSelectedMap() const;
     void SetGameMode(EGameModeType InGameMode);
+
+    UFUNCTION()
+    void OnStartButtonClicked();
 
 private:
     EGameModeType CurrentGameMode;

@@ -1,6 +1,3 @@
-
-
-
 #include "Items/ConsumableItems/SFHealthPotion.h"
 #include "Character/SFCharacter.h"
 

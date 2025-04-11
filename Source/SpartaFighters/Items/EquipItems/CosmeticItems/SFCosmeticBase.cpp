@@ -1,11 +1,9 @@
-
-
-
 #include "Items/EquipItems/CosmeticItems/SFCosmeticBase.h"
 
 USFCosmeticBase::USFCosmeticBase()
 {
 	ItemType = EItemType::Cosmetic;
+	EquipSlot = SFEquipSlot::CosmeticSlot;
 }
 
 void USFCosmeticBase::ApplyCosmetic_Implementation(AActor* Owner)

@@ -14,11 +14,21 @@ void UAccountRegisterWidget::NativeConstruct()
 
     if (RegisterConfirmButton)
     {
-        RegisterConfirmButton->OnClicked.AddDynamic(this, &UAccountRegisterWidget::OnRegisterConfirmClicked);
+        RegisterConfirmButton->OnClicked.AddUniqueDynamic(this, &UAccountRegisterWidget::OnRegisterConfirmClicked);
     }
     if (RegisterInstructionText)
     {
         RegisterInstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Sparta Fighters!"));
+    }
+}
+
+void UAccountRegisterWidget::NativeDestruct()
+{
+    Super::NativeDestruct();
+
+    if (RegisterConfirmButton)
+    {
+        RegisterConfirmButton->OnClicked.RemoveDynamic(this, &UAccountRegisterWidget::OnRegisterConfirmClicked);
     }
 }
 

@@ -14,6 +14,7 @@ class SPARTAFIGHTERS_API UAccountRegisterWidget : public USelectPopUpBase
 	
 protected:
     virtual void NativeConstruct() override;
+    virtual void NativeDestruct() override;
 
 private:
     UPROPERTY(meta = (BindWidget))

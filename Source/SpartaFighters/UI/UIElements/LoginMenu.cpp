@@ -1,8 +1,13 @@
 ﻿#include "LoginMenu.h"
-#include "Framework/SFPlayerController.h"
+#include "Framework/SFGameInstance.h"
+#include "Framework/SFGameInstanceSubsystem.h"
+#include "Framework/SFLobbyPlayerController.h"
+#include "Framework/SFPlayerState.h"
+
 #include "Components/EditableTextBox.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+
 #include "UI/PopUp/AccountRegisterWidget.h"
 #include "UI/PopUp/QuitGameWidget.h"
 #include "UI/UIManager/UIManager.h"
@@ -19,27 +24,27 @@ void ULoginMenu::NativeConstruct()
 
 	if (LoginButton)
 	{
-		LoginButton->OnClicked.AddDynamic(this, &ULoginMenu::OnLoginClicked);
+		LoginButton->OnClicked.AddUniqueDynamic(this, &ULoginMenu::OnLoginClicked);
 	}
 	if (RegisterButton)
 	{
-		RegisterButton->OnClicked.AddDynamic(this, &ULoginMenu::OnRegisterClicked);
+		RegisterButton->OnClicked.AddUniqueDynamic(this, &ULoginMenu::OnRegisterClicked);
 	}
 	if (OptionButton)
 	{
-		OptionButton->OnClicked.AddDynamic(this, &ULoginMenu::OnOptionClicked);
+		OptionButton->OnClicked.AddUniqueDynamic(this, &ULoginMenu::OnOptionClicked);
 	}
 	if (QuitGameButton)
 	{
-		QuitGameButton->OnClicked.AddDynamic(this, &ULoginMenu::OnQuitGameClicked);
+		QuitGameButton->OnClicked.AddUniqueDynamic(this, &ULoginMenu::OnQuitGameClicked);
 	}
 	if (IDTextBox)
 	{
-		IDTextBox->OnTextCommitted.AddDynamic(this, &ULoginMenu::OnTextCommitted);
+		IDTextBox->OnTextCommitted.AddUniqueDynamic(this, &ULoginMenu::OnTextCommitted);
 	}
 	if (PasswordTextBox)
 	{
-		PasswordTextBox->OnTextCommitted.AddDynamic(this, &ULoginMenu::OnTextCommitted);
+		PasswordTextBox->OnTextCommitted.AddUniqueDynamic(this, &ULoginMenu::OnTextCommitted);
 	}
 	if (InstructionText)
 	{
@@ -51,6 +56,40 @@ void ULoginMenu::NativeConstruct()
 		FInputModeUIOnly InputModeData;
 		PlayerController->SetInputMode(InputModeData);
 		PlayerController->bShowMouseCursor = true;
+	}
+}
+
+void ULoginMenu::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	if (LoginButton)
+	{
+		LoginButton->OnClicked.RemoveDynamic(this, &ULoginMenu::OnLoginClicked);
+	}
+	if (RegisterButton)
+	{
+		RegisterButton->OnClicked.RemoveDynamic(this, &ULoginMenu::OnRegisterClicked);
+	}
+	if (OptionButton)
+	{
+		OptionButton->OnClicked.RemoveDynamic(this, &ULoginMenu::OnOptionClicked);
+	}
+	if (QuitGameButton)
+	{
+		QuitGameButton->OnClicked.RemoveDynamic(this, &ULoginMenu::OnQuitGameClicked);
+	}
+	if (IDTextBox)
+	{
+		IDTextBox->OnTextCommitted.RemoveDynamic(this, &ULoginMenu::OnTextCommitted);
+	}
+	if (PasswordTextBox)
+	{
+		PasswordTextBox->OnTextCommitted.RemoveDynamic(this, &ULoginMenu::OnTextCommitted);
+	}
+	if (InstructionText)
+	{
+		InstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Sparta Fighters!"));
 	}
 }
 
@@ -219,25 +258,32 @@ void ULoginMenu::ResetInstructionText()
 
 void ULoginMenu::EnterLobby()
 {
-	UE_LOG(LogTemp, Log, TEXT("Entering Lobby..."));
-
-	RemoveFromParent();
-
-	/*LobbyMenu = CreateWidget<ULobbyMenu>(GetWorld(), LobbyMenuClass);
-	if (LobbyMenu)
+	
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
 	{
-		LobbyMenu->AddToViewport();
-	}*/
-
-	if (UUIManager* UIManager = ResolveUIManager())
-	{
-		UIManager->ShowLobbyMenu();
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			const FString LobbyMapName = TEXT("LobbyMenu");
+			Subsystem->ChangeLevelByMapName(LobbyMapName);
+		}
 	}
 }
 
 void ULoginMenu::OnLogInSucces()
 {
 	UE_LOG(LogTemp, Log, TEXT("Login Successful"));
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		ASFPlayerState* SFPlayerState = PlayerController->GetPlayerState<ASFPlayerState>();
+		if (SFPlayerState)
+		{
+			FString ID = IDTextBox->GetText().ToString();
+			UE_LOG(LogTemp, Warning, TEXT("[SFPlayerState->PlayerUniqueID : %s]"), *SFPlayerState->GetUniqueID());
+		}
+	}
+
 	if (InstructionText)
 	{
 		InstructionText->SetText(LOCTEXT("LoginSuccess", "Login Success! Start the game."));

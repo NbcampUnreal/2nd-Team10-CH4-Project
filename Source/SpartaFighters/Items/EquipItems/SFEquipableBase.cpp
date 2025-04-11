@@ -1,12 +1,9 @@
-
-
-
 #include "Items/EquipItems/SFEquipableBase.h"
 
 USFEquipableBase::USFEquipableBase()
 {
 	ItemType = EItemType::Common;
-	EquipSlot = SFEquipSlot::Head;
+	EquipSlot = SFEquipSlot::CommonSlot;
 }
 
 void USFEquipableBase::OnEquipped_Implementation(AActor* Owner)
