@@ -39,7 +39,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, Category = "Item")
-	void SetItemData(const FName& Name, const FSoftObjectPath& IconPath, FText Description, EItemType Type);
+	void SetItemData(const FName& Name, TSoftObjectPtr<UTexture2D> IconPath, FText Description, EItemType Type);
 
 	//implement on blueprint
 	UFUNCTION(BlueprintImplementableEvent)

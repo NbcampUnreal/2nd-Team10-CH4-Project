@@ -1,6 +1,3 @@
-
-
-
 #include "Items/EquipItems/SFEquipableBase.h"
 
 USFEquipableBase::USFEquipableBase()
