@@ -31,5 +31,13 @@ public:
 	UFUNCTION()
 	void OnRep_PlayerUniqueID();
 
+public:
+	void AddDeathCount();
+	int32 GetDeathCount() const { return DeathCount; }
+
+protected:
+	UPROPERTY(Replicated)
+	int32 DeathCount = 0;
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

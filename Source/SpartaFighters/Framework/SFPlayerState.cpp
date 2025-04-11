@@ -41,6 +41,15 @@ void ASFPlayerState::OnRep_PlayerUniqueID()
 	}
 }
 
+void ASFPlayerState::AddDeathCount()
+{
+	if (HasAuthority())
+	{
+		++DeathCount;
+		UE_LOG(LogTemp, Log, TEXT("%s died. DeathCount = %d"), *GetPlayerName(), DeathCount);
+	}
+}
+
 void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -48,4 +57,5 @@ void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASFPlayerState, SelectedCharacterName);
 	DOREPLIFETIME(ASFPlayerState, CharacterTexturePath);
 	DOREPLIFETIME(ASFPlayerState, EquippedItems);
+	DOREPLIFETIME(ASFPlayerState, DeathCount);
 }
