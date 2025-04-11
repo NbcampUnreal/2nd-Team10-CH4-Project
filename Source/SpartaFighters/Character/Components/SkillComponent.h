@@ -55,6 +55,17 @@ public:
 
 	void HandleSkillAttack(ECharacterState CurrentState);
 
+	// Handle Skill Attack
+	void HandleInputRoll();
+
+	UFUNCTION(Server, Reliable)
+	void Server_HandleRoll();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_HandleRoll(ECharacterState State);
+
+	void HandleRoll(ECharacterState CurrentState);
+
 
 	// Handle Animation
 	void PlayAnimMontage(const FName& RowName);
@@ -62,7 +73,7 @@ public:
 
 
 	void PerformAttackTrace();
-
+	void ClearHitActors();
 
 private:
 	UPROPERTY()
@@ -76,4 +87,5 @@ private:
 
 	FSkillDataRow* CurrentSkillData;
 
+	TSet<AActor*> AlreadyHitActors;
 };
