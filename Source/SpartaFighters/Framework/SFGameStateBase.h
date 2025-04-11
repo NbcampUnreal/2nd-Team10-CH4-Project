@@ -4,18 +4,25 @@
 #include "GameFramework/GameStateBase.h"
 #include "SFGameStateBase.generated.h"
 
+class ASFPlayerState;
 UCLASS()
 class SPARTAFIGHTERS_API ASFGameStateBase : public AGameStateBase
 {
 	GENERATED_BODY()
 
 public:
-	// 선택된 모드와 맵 정보
-	/*UPROPERTY(Replicated)
-	EGameModeType SelectedGameMode;
+    ASFGameStateBase();
 
-	UPROPERTY(Replicated)
-	int32 SelectedMapID;*/
+    void SetWinner(ASFPlayerState* InWinner);
 
-	// virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+    ASFPlayerState* GetWinner() const { return WinnerPlayerState; }
+
+protected:
+    UPROPERTY(ReplicatedUsing = OnRep_WinnerPlayerState)
+    ASFPlayerState* WinnerPlayerState;
+
+    UFUNCTION()
+    void OnRep_WinnerPlayerState();
+
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
