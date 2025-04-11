@@ -45,6 +45,18 @@ void ASFBattleGameMode::Multicast_StartBattle_Implementation()
 
 void ASFBattleGameMode::HandlePlayerDeath(AController* DeadController)
 {
+    ensureAlways(false);
+    // TODO : Update Logic in ASFCharacter::OnDeath/Die/
+    //if (HasAuthority())
+    //{
+    //    AController* OwnerController = GetController();
+    //    if (ASFBattleGameMode* GM = GetWorld()->GetAuthGameMode<ASFBattleGameMode>())
+    //    {
+    //        GM->HandlePlayerDeath(OwnerController);
+    //    }
+
+    //    Destroy(); // 죽은 캐릭터 제거
+    //}
     if (!DeadController)
         return;
 
@@ -55,6 +67,21 @@ void ASFBattleGameMode::HandlePlayerDeath(AController* DeadController)
     }
 
     RestartPlayer(DeadController);
+}
+
+AActor* ASFBattleGameMode::ChoosePlayerStart_Implementation(AController* Player)
+{
+    AActor* DefaultStart = Super::ChoosePlayerStart_Implementation(Player);
+
+    if (DefaultStart)
+    {
+        FVector NewLocation = DefaultStart->GetActorLocation();
+        NewLocation.Z += 1000.0f; 
+
+        DefaultStart->SetActorLocation(NewLocation);
+    }
+
+    return DefaultStart;
 }
 
 void ASFBattleGameMode::EndBattle()

@@ -26,6 +26,7 @@ protected:
     void EndBattle();
     
     void HandlePlayerDeath(AController* DeadController);
+    virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
     ASFPlayerState* CalculateWinner();
     void ReturnToLobby();
 
