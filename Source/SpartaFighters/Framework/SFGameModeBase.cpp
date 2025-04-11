@@ -1,11 +1,10 @@
 #include "Framework/SFGameModeBase.h"
 #include "Character/SFCharacter.h"
-#include "Framework/SFPlayerController.h"
+#include "Framework/SFLobbyPlayerController.h"
 #include "Framework/SFGameStateBase.h"
 
 ASFGameModeBase::ASFGameModeBase()
 {
-	DefaultPawnClass = ASFCharacter::StaticClass();
-	PlayerControllerClass = ASFPlayerController::StaticClass();
+	PlayerControllerClass = ASFLobbyPlayerController::StaticClass();
 	GameStateClass = ASFGameStateBase::StaticClass();
 }

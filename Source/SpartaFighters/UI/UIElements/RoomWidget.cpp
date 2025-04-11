@@ -1,165 +1,160 @@
 #include "RoomWidget.h"
 #include "LobbyMenu.h"
+#include "Framework/SFGameInstance.h"
+#include "Framework/SFGameInstanceSubsystem.h"
+#include "Framework/SFLobbyPlayerController.h"
+#include "Framework/SFGameStateBase.h"
+#include "Framework/SFPlayerState.h"
 
-#include "Components/TextBlock.h"
-#include "Components/ScrollBox.h"
-#include "Components/EditableTextBox.h"
 #include "Components/Button.h"
-#include "Components/UniformGridPanel.h"
-#include "Components/UniformGridSlot.h"
-
-#include "UI/UIObject/RoomChatWidget.h"
-#include "UI/UIObject/MapSelectionWidget.h"
 #include "UI/UIObject/PlayerSlotWidget.h"
+#include "UI/UIManager/UIManager.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-
-#include "DataTypes/PlayerInfo.h"
-#include "DataTypes/GameModeType.h"
 
 void URoomWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	if (ShopButton)
+	{
+		ShopButton->OnClicked.AddDynamic(this, &URoomWidget::OnShopButtonClicked);
+	}
+	if (PlayerInfoButton)
+	{
+		PlayerInfoButton->OnClicked.AddDynamic(this, &URoomWidget::OnPlayerInfoButtonClicked);
+	}
+	if (OptionButton)
+	{
+		OptionButton->OnClicked.AddDynamic(this, &URoomWidget::OnOptionButtonClicked);
+	}
 	if (LobbyButton)
 	{
 		LobbyButton->OnClicked.AddDynamic(this, &URoomWidget::OnLobbyButtonClicked);
 	}
-	if (ReadyOrStartButton)
+	if (SelectMapButton)
 	{
-		ReadyOrStartButton->OnClicked.AddDynamic(this, &URoomWidget::OnReadyOrStartButtonClicked);
+		SelectMapButton->OnClicked.AddDynamic(this, &URoomWidget::OnSelectMapButtonClicked);
+	}
+	
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle, 
+		this,
+		&URoomWidget::UpdatePlayerSlots, 
+		0.2f, 
+		false);
+}
+
+void URoomWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	if (ShopButton)
+	{
+		ShopButton->OnClicked.RemoveDynamic(this, &URoomWidget::OnShopButtonClicked);
+	}
+	if (PlayerInfoButton)
+	{
+		PlayerInfoButton->OnClicked.RemoveDynamic(this, &URoomWidget::OnPlayerInfoButtonClicked);
+	}
+	if (OptionButton)
+	{
+		OptionButton->OnClicked.RemoveDynamic(this, &URoomWidget::OnOptionButtonClicked);
+	}
+	if (LobbyButton)
+	{
+		LobbyButton->OnClicked.RemoveDynamic(this, &URoomWidget::OnLobbyButtonClicked);
+	}
+	if (SelectMapButton)
+	{
+		SelectMapButton->OnClicked.RemoveDynamic(this, &URoomWidget::OnSelectMapButtonClicked);
 	}
 }
 
-void URoomWidget::SetupRoom(const FRoomInfo& RoomInfo)
+void URoomWidget::OnShopButtonClicked()
 {
-	CurrentRoomInfo = RoomInfo;
-
-	// Display room information in formatted text
-	if (RoomNameText)
+	UE_LOG(LogTemp, Warning, TEXT("OnShopClicked!"));
+	if (UUIManager* UIManager = ResolveUIManager())
 	{
-		FString GameModeString;
-		switch (RoomInfo.GameMode)
-		{
-		case EGameModeType::Cooperative:
-			GameModeString = TEXT("Cooperative");
-			break;
-		case EGameModeType::Battle:
-			GameModeString = TEXT("Battle");
-			break;
-		case EGameModeType::Single:
-			GameModeString = TEXT("Single");
-			break;
-		default:
-			GameModeString = TEXT("Unknown");
-			break;
-		}
-
-		FString DisplayText = FString::Printf(TEXT("%d   |   %s   |   %s  "),
-			RoomInfo.RoomID,
-			*RoomInfo.RoomName,
-			*GameModeString
-		);
-
-		RoomNameText->SetText(FText::FromString(DisplayText));
+		UIManager->ShowShopMenu();
 	}
-
-	if (MapSelectionWidgetClass)
-	{
-		MapSelectionWidgetClass->SetGameMode(RoomInfo.GameMode);
-	}
-
-	UpdatePlayerList();
 }
 
-void URoomWidget::SetPlayerList(const TArray<FPlayerInfo>& NewPlayerList)
+void URoomWidget::OnPlayerInfoButtonClicked()
 {
-	PlayerList = NewPlayerList;
-	UpdatePlayerList();
+	UE_LOG(LogTemp, Log, TEXT("OnPlayerInfoButtonClicked"));
 }
 
-void URoomWidget::UpdatePlayerList()
+void URoomWidget::OnOptionButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PlayerList.Num() = %d"), PlayerList.Num());
-	for (const auto& Player : PlayerList)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerName = %s, IsReady = %d"), *Player.PlayerID, Player.bIsReady);
-	}
-
-	bool bIsSingleMode = (CurrentRoomInfo.GameMode == EGameModeType::Single);
-
-	int32 RequiredSlots = bIsSingleMode ? 1 : MaxPlayers;
-
-	while (PlayerSlots.Num() < RequiredSlots)
-	{
-		if (PlayerSlotWidgetClass)
-		{
-			UPlayerSlotWidget* NewSlot = CreateWidget<UPlayerSlotWidget>(GetWorld(), PlayerSlotWidgetClass);
-			if (NewSlot)
-			{
-				PlayerSlots.Add(NewSlot);
-				int32 Index = PlayerSlots.Num() - 1;
-				PlayerGridPanel->AddChildToUniformGrid(NewSlot, Index / NumColumns, Index % NumColumns);
-			}
-		}
-	}
-
-	// Setup Slots
-	for (int32 i = 0; i < RequiredSlots; ++i)
-	{
-		if (i < PlayerList.Num())
-		{
-			const FPlayerInfo& PlayerInfo = PlayerList[i];
-			UPlayerSlotWidget* CurrentPlayerSlot = PlayerSlots[i];
-			if (CurrentPlayerSlot)
-			{
-				CurrentPlayerSlot->SetupPlayerSlot(PlayerInfo.PlayerID, PlayerInfo.CharacterTexture, PlayerInfo.bIsReady);
-				CurrentPlayerSlot->SetVisibility(ESlateVisibility::Visible);
-			}
-		}
-		else
-		{
-			UPlayerSlotWidget* EmptyPlayerSlot = PlayerSlots[i];
-			if (EmptyPlayerSlot)
-			{
-				EmptyPlayerSlot->SetEmpty();
-				EmptyPlayerSlot->SetVisibility(ESlateVisibility::Visible);
-			}
-		}
-	}
+	UE_LOG(LogTemp, Log, TEXT("OnOptionButtonClicked"));
 }
 
 void URoomWidget::OnLobbyButtonClicked()
 {
-	UE_LOG(LogTemp, Log, TEXT("Leaving Room: %s"), *CurrentRoomInfo.RoomName);
-	APlayerController* PlayerController = GetOwningPlayer();
-	if (PlayerController)
+	UE_LOG(LogTemp, Log, TEXT("OnLobbyButtonClicked"));
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
 	{
-		TArray<UUserWidget*> FoundWidgets;
-		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, ULobbyMenu::StaticClass(), false);
-
-		for (UUserWidget* Widget : FoundWidgets)
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
 		{
-			if (ULobbyMenu* LobbyMenu = Cast<ULobbyMenu>(Widget))
+			const FString LobbyMapName = TEXT("LobbyMenu");
+			Subsystem->ChangeLevelByMapName(LobbyMapName);
+		}
+	}
+}
+
+void URoomWidget::OnSelectMapButtonClicked()
+{
+	UE_LOG(LogTemp, Log, TEXT("OnSelectMapButtonClicked"));
+
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	{
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			if (UUIManager* UIManager = Subsystem->GetUIManager())
 			{
-				LobbyMenu->SetVisibility(ESlateVisibility::Visible);
-				break;
+				UIManager->ShowMapSelectionWidget(Subsystem->GetCurrentGameMode());
 			}
 		}
 	}
-
-	RemoveFromParent();
 }
 
-void URoomWidget::OnReadyOrStartButtonClicked()
+void URoomWidget::UpdatePlayerSlots()
 {
-	// Create a NewPlayerList for test
-	TArray<FPlayerInfo> NewPlayerList;
+	UE_LOG(LogTemp, Warning, TEXT("UpdatePlayerSlots Called"));
 
-	FPlayerInfo Player;
-	Player.PlayerID = TEXT("TestPlayer");
-	Player.bIsReady = true;
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	AGameStateBase* GameState = World->GetGameState();
+	if (!GameState)
+	{
+		return;
+	}
 
-	NewPlayerList.Add(Player);
-	// 
-	SetPlayerList(NewPlayerList);
+	const TArray<APlayerState*>& PlayerStates = GameState->PlayerArray;
+	TArray<UPlayerSlotWidget*> Slots = { ClientSlot1, ClientSlot2, ClientSlot3, ClientSlot4 };
+
+	for (int32 i = 0; i < PlayerStates.Num(); ++i)
+	{
+		if (!Slots.IsValidIndex(i)) continue;
+
+		if (PlayerStates.IsValidIndex(i))
+		{
+			ASFPlayerState* SFPlayerState = Cast<ASFPlayerState>(PlayerStates[i]);
+			if (SFPlayerState)
+			{
+				const FString& PlayerID = SFPlayerState->PlayerUniqueID;
+				const FString& CharacterTexturePath = SFPlayerState->CharacterTexturePath;
+
+				Slots[i]->SetupPlayerSlot(PlayerID, CharacterTexturePath, /* bIsReady */ false);
+			}
+		}
+		else
+		{
+			Slots[i]->SetEmpty();
+		}
+	}
 }

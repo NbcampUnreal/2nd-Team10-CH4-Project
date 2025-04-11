@@ -1,70 +1,55 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
-#include "DataTypes/RoomInfo.h"
-#include "DataTypes/PlayerInfo.h"
+#include "UI/BaseUserWidget.h"
 #include "RoomWidget.generated.h"
 
-class UTextBlock;
-class URoomChatWidget;
-class UUniformGridPanel;
 class UButton;
-class UPlayerSimpleInfoWidget;
-class UMapSelectionWidget;
 class UPlayerSlotWidget;
 
 UCLASS()
-class SPARTAFIGHTERS_API URoomWidget : public UUserWidget
+class SPARTAFIGHTERS_API URoomWidget : public UBaseUserWidget
 {
 	GENERATED_BODY()
 	
-public:
-	void SetupRoom(const FRoomInfo& RoomInfo);
-
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 private:
 	UPROPERTY(meta = (BindWidget))
-	TSoftObjectPtr<UPlayerSimpleInfoWidget> PlayerSimpleInfoWidgetClass;
+	UButton* ShopButton;
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* RoomNameText;
+	UButton* PlayerInfoButton;
 	UPROPERTY(meta = (BindWidget))
-	TSoftObjectPtr<URoomChatWidget> RoomChatWidgetClass;
+	UButton* OptionButton;
 	UPROPERTY(meta = (BindWidget))
 	UButton* LobbyButton;
-	UPROPERTY(meta = (BindWidget))
-	UButton* ReadyOrStartButton;
 
 	UPROPERTY(meta = (BindWidget))
-	UUniformGridPanel* PlayerGridPanel;
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UPlayerSlotWidget> PlayerSlotWidgetClass;
-	TArray<UPlayerSlotWidget*> PlayerSlots;
+	UButton* SelectMapButton;
 
-	UPROPERTY()
-	FRoomInfo CurrentRoomInfo;
+	UPROPERTY(meta = (BindWidget))
+	UPlayerSlotWidget* ClientSlot1;
+	UPROPERTY(meta = (BindWidget))
+	UPlayerSlotWidget* ClientSlot2;
+	UPROPERTY(meta = (BindWidget))
+	UPlayerSlotWidget* ClientSlot3;
+	UPROPERTY(meta = (BindWidget))
+	UPlayerSlotWidget* ClientSlot4;
 
-	UPROPERTY()
-	TArray<FPlayerInfo> PlayerList;
-
-	const int32 MaxPlayers = 4;
-	const int32 NumColumns = 2;
-
+	UFUNCTION()
+	void OnShopButtonClicked();
+	UFUNCTION()
+	void OnPlayerInfoButtonClicked();
+	UFUNCTION()
+	void OnOptionButtonClicked();
 	UFUNCTION()
 	void OnLobbyButtonClicked();
 	UFUNCTION()
-	void OnReadyOrStartButtonClicked();
+	void OnSelectMapButtonClicked();
 
 public:
-	UPROPERTY(meta = (BindWidget))
-	UMapSelectionWidget* MapSelectionWidgetClass;
+	void UpdatePlayerSlots();
 
-	UFUNCTION()
-	void SetPlayerList(const TArray<FPlayerInfo>& NewPlayerList);
-	UFUNCTION()
-	void UpdatePlayerList();
-
-	FRoomInfo GetCurrentRoomInfo() const { return CurrentRoomInfo; }
 };

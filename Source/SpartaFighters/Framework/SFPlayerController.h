@@ -41,8 +41,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* CrouchAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* InteractionAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* SettingAction;
+
 private:
 	void AddMappingContext();
-	void InitUI();
+	// Move to SFLobbyPlayerController.cpp
+	//void InitUI();
 
 };
