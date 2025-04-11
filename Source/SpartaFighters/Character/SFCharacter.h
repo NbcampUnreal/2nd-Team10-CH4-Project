@@ -73,7 +73,7 @@ protected:
 	void StopJump();
 
 	void SpecialMovePressed(const FInputActionValue& Value);
-	void SpecialMoveReleased(const FInputActionValue& Value);
+	void SpecialMoveReleased();
 
 	void CrouchPressed();
 	void CrouchReleased();
@@ -104,7 +104,6 @@ protected:
 //
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat")
 	UStatusContainerComponent* StatusContainerComponent;
-
 
 	// TO DO : Low Jump Function
 	UPROPERTY(EditDefaultsOnly, Category = "Jump")

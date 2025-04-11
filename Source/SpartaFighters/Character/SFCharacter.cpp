@@ -44,7 +44,6 @@ ASFCharacter::ASFCharacter()
 	StatusContainerComponent = CreateDefaultSubobject<UStatusContainerComponent>(TEXT("StatusContainerComponent"));
 	StatusContainerComponent->InitializeMovementProperties(this);
 
-
 }
 
 UStatusContainerComponent* ASFCharacter::GetStatusContainerComponent() const
@@ -98,8 +97,8 @@ void ASFCharacter::StopJump()
 
 void ASFCharacter::SpecialMovePressed(const FInputActionValue& Value)
 {
-	bIsSpecialMove = true;
-
+	if (bIsSpecialMove) return;
+	
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && SkillDataTable)
 	{
@@ -113,9 +112,11 @@ void ASFCharacter::SpecialMovePressed(const FInputActionValue& Value)
 			AnimInstance->Montage_Play(SkillData->SkillMontage);
 		}
 	}
+
+	bIsSpecialMove = true;
 }
 
-void ASFCharacter::SpecialMoveReleased(const FInputActionValue& Value)
+void ASFCharacter::SpecialMoveReleased()
 {
 	bIsSpecialMove = false;
 }
@@ -239,7 +240,7 @@ void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 			EnhancedInput->BindAction(SFPlayerController->JumpAction, ETriggerEvent::Completed, this, &ASFCharacter::StopJump);
 
 			EnhancedInput->BindAction(SFPlayerController->RollAction, ETriggerEvent::Started, this, &ASFCharacter::SpecialMovePressed);
-			EnhancedInput->BindAction(SFPlayerController->RollAction, ETriggerEvent::Completed, this, &ASFCharacter::SpecialMoveReleased);
+			//EnhancedInput->BindAction(SFPlayerController->RollAction, ETriggerEvent::Completed, this, &ASFCharacter::SpecialMoveReleased);
 
 			EnhancedInput->BindAction(SFPlayerController->CrouchAction, ETriggerEvent::Started, this, &ASFCharacter::CrouchPressed);
 			EnhancedInput->BindAction(SFPlayerController->CrouchAction, ETriggerEvent::Completed, this, &ASFCharacter::CrouchReleased);

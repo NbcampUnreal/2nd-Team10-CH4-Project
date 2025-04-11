@@ -6,10 +6,5 @@ void UTeleportEffect::ApplyEffect(AActor* Target, float FinalPower)
 	if (Target)
 	{
 		ASFMageCharacter* MageCharacter = Cast<ASFMageCharacter>(Target);
-		if (MageCharacter)
-		{
-			// TODO : Implement healing logic
-			ensureAlways(false);
-		}
 	}
 }
