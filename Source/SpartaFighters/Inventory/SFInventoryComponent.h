@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,8 +6,6 @@
 #include "Items/EquipItems/SFEquipableBase.h"
 #include "Net/UnrealNetwork.h"
 #include "SFInventoryComponent.generated.h"
-
-
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -53,7 +49,7 @@ public:
 	void Server_UnequipItem(SFEquipSlot EquipSlot);
 	//Client
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Equipment")
-	USFItemBase* GetEquippedItem(SFEquipSlot EquipSlot) const;
+	const USFEquipableBase* GetEquippedItem(SFEquipSlot EquipSlot) const;
 	//Client
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Equipment")
 	bool IsItemEquipped(FName ItemName) const;
@@ -61,9 +57,12 @@ public:
 	//Multiplay related props
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	TArray<USFItemBase*> Inventory;
-	//TODO:get rid of TMAP(unable to replicate)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment", meta = (AllowPrivateAccess = "true"))
-	TMap<SFEquipSlot, USFItemBase*> EquippedItems;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Equipment")
+	USFEquipableBase* EquippedCommon;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Equipment")
+	USFEquipableBase* EquippedExclusive;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Equipment")
+	USFEquipableBase* EquippedCosmetic;
 
 	//Tell client when inventory is updated
 	UPROPERTY(ReplicatedUsing = OnRep_InventoryUpdated)
@@ -80,7 +79,7 @@ public:
 	//Update data locally in server
 	void Internal_UpdateData();
 
-
-	
-
+private:
+	USFEquipableBase** GetEquippedItemPtrBySlot(SFEquipSlot EquipSlot);
+	const USFEquipableBase* GetEquippedItemBySlotInternal(SFEquipSlot EquipSlot)const;
 };

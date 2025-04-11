@@ -9,7 +9,7 @@ USFHat::USFHat()
 	ItemType = EItemType::Cosmetic;
 	ItemName = "Hat";
 	ItemDescription = FText::FromString(TEXT("Well designed hat."));
-	HatMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/PlatformFighterKit/Assets/Mesh/Hats/SM_Tophat_01"))); 
+	HatMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/PlatformFighterKit/Assets/Mesh/Hats/SM_Tophat_01")));
 }
 
 

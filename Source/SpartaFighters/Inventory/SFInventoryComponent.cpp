@@ -1,4 +1,3 @@
-
 #include "Inventory/SFInventoryComponent.h"
 #include "Character/SFCharacter.h"
 #include "Items/EquipItems/SFEquipableBase.h"
@@ -140,18 +139,23 @@ void USFInventoryComponent::Server_EquipItem_Implementation(FName ItemNameToEqui
 			USFEquipableBase* EquipItemToEquip = Cast<USFEquipableBase>(ItemToEquip);
 			if (EquipItemToEquip->EquipSlot == EquipSlot)
 			{
-				if (EquippedItems.Contains(EquipSlot))
+				USFEquipableBase** EquippedSlot = GetEquippedItemPtrBySlot(EquipSlot);
+				if (EquippedSlot)
 				{
-					Server_UnequipItem(EquipSlot);
-				}
+					//Unequip if slot already has item
+					if (*EquippedSlot)
+					{
+						Server_UnequipItem_Implementation(EquipSlot);
+					}
 
-				if (Inventory.RemoveSingleSwap(ItemToEquip))
-				{
-					EquippedItems.Add(EquipSlot, EquipItemToEquip);
-					EquipItemToEquip->OnEquipped(GetOwner());
-					Internal_UpdateData();
-					bInventoryUpdated = !bInventoryUpdated;
-					bEquippedItemsUpdated = !bEquippedItemsUpdated;
+					if (Inventory.RemoveSingleSwap(ItemToEquip))
+					{
+						*EquippedSlot = EquipItemToEquip;
+						EquipItemToEquip->OnEquipped(GetOwner());
+						Internal_UpdateData();
+						bInventoryUpdated = !bInventoryUpdated;
+						bEquippedItemsUpdated = !bEquippedItemsUpdated;
+					}
 				}
 			}
 			else
@@ -170,70 +174,57 @@ void USFInventoryComponent::Server_UnequipItem_Implementation(SFEquipSlot EquipS
 {
 	if (GetOwnerRole() == ROLE_Authority) 
 	{
-		if (EquippedItems.Contains(EquipSlot))
+		USFEquipableBase** EquippedSlot = GetEquippedItemPtrBySlot(EquipSlot);
+		if (EquippedSlot && *EquippedSlot)
 		{
-			USFItemBase* ItemToUnequip = EquippedItems[EquipSlot];
-			EquippedItems.Remove(EquipSlot);
-			if (ItemToUnequip)
-			{
-				// Server_AddItemByClass 
-				TSubclassOf<USFItemBase> ItemClass = ItemToUnequip->GetClass();
-				if (ItemClass)
-				{
-					FName DefaultItemName = ItemClass.GetDefaultObject()->ItemName;
-					USFItemBase* ExistingItem = FindItemByName(DefaultItemName);
-					if (!ExistingItem)
-					{
-						USFItemBase* NewItem = NewObject<USFItemBase>(this, ItemClass);
-						if (NewItem)
-						{
-							Inventory.Add(NewItem);
-							//Internal_UpdateData();
-							bInventoryUpdated = !bInventoryUpdated;
-						}
-					}
-					else
-					{
-						bInventoryUpdated = !bInventoryUpdated; //already existing
-					}
-				}
+			USFEquipableBase* ItemToUnequip = *EquippedSlot;
+			*EquippedSlot = nullptr;
 
-				if (USFEquipableBase* EquipItemToUnequip = Cast<USFEquipableBase>(ItemToUnequip))
-				{
-					EquipItemToUnequip->OnUnequipped(GetOwner());
-				}
-				Internal_UpdateData();
-				bEquippedItemsUpdated = !bEquippedItemsUpdated;
-			}
-			else
+			// Server_AddItemByClass 
+			TSubclassOf<USFItemBase> ItemClass = ItemToUnequip->GetClass();
+			if (ItemClass)
 			{
-				Internal_UpdateData();
-				bEquippedItemsUpdated = !bEquippedItemsUpdated; //empty slot
+				FName DefaultItemName = ItemClass.GetDefaultObject()->ItemName;
+				USFItemBase* ExistingItem = FindItemByName(DefaultItemName);
+				if (!ExistingItem)
+				{
+					USFItemBase* NewItem = NewObject<USFItemBase>(this, ItemClass);
+					if (NewItem)
+					{
+						Inventory.Add(NewItem);
+						//Internal_UpdateData();
+						bInventoryUpdated = !bInventoryUpdated;
+					}
+				}
+				else
+				{
+					bInventoryUpdated = !bInventoryUpdated; //already existing
+				}
 			}
+			ItemToUnequip->OnUnequipped(GetOwner());
+			Internal_UpdateData();
+			bEquippedItemsUpdated = !bEquippedItemsUpdated;
+		}
+		else
+		{
+			Internal_UpdateData();
+			bEquippedItemsUpdated = !bEquippedItemsUpdated; //empty slot
 		}
 	}
 }
 
-USFItemBase* USFInventoryComponent::GetEquippedItem(SFEquipSlot EquipSlot) const
+
+const USFEquipableBase* USFInventoryComponent::GetEquippedItem(SFEquipSlot EquipSlot) const
 {
-	if (EquippedItems.Contains(EquipSlot))
-	{
-		return EquippedItems[EquipSlot];
-	}
-	return nullptr;
+	return GetEquippedItemBySlotInternal(EquipSlot);
 }
 
-//To do 
-// get rid of auto
+//Find out whether item is equipped
 bool USFInventoryComponent::IsItemEquipped(FName ItemName) const
 {
-	for (const auto& Pair : EquippedItems)
-	{
-		if (Pair.Value && Pair.Value->ItemName == ItemName)
-		{
-			return true;
-		}
-	}
+	if (EquippedCommon && EquippedCommon->ItemName == ItemName) return true;
+	if (EquippedExclusive && EquippedExclusive->ItemName == ItemName) return true;
+	if (EquippedCosmetic && EquippedCosmetic->ItemName == ItemName) return true;
 	return false;
 }
 
@@ -245,16 +236,44 @@ void USFInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(USFInventoryComponent, Inventory);
 	DOREPLIFETIME(USFInventoryComponent, bInventoryUpdated);
 	DOREPLIFETIME(USFInventoryComponent, bEquippedItemsUpdated);
+	DOREPLIFETIME(USFInventoryComponent, EquippedCommon);
+	DOREPLIFETIME(USFInventoryComponent, EquippedExclusive);
+	DOREPLIFETIME(USFInventoryComponent, EquippedCosmetic);
 
 }
 
 //Inv UI Update
 void USFInventoryComponent::OnRep_InventoryUpdated()
 {
-	
+	//OnInventoryUpdated.Broadcast();
 }
+
 //Eq UI Update
 void USFInventoryComponent::OnRep_EquippedItemsUpdated()
 {
-	
+	//OnEquippedItemsUpdated.Broadcast();
+}
+
+//Return equipped item pointer
+USFEquipableBase** USFInventoryComponent::GetEquippedItemPtrBySlot(SFEquipSlot EquipSlot)
+{
+	switch (EquipSlot)
+	{
+	case SFEquipSlot::CommonSlot: return &EquippedCommon;
+	case SFEquipSlot::ExclusiveSlot: return &EquippedExclusive;
+	case SFEquipSlot::CosmeticSlot: return &EquippedCosmetic;
+	default: return nullptr;
+	}
+}
+
+//Return equipped item
+const USFEquipableBase* USFInventoryComponent::GetEquippedItemBySlotInternal(SFEquipSlot EquipSlot) const
+{
+	switch (EquipSlot)
+	{
+	case SFEquipSlot::CommonSlot: return EquippedCommon;
+	case SFEquipSlot::ExclusiveSlot: return EquippedExclusive;
+	case SFEquipSlot::CosmeticSlot: return EquippedCosmetic;
+	default: return nullptr;
+	}
 }

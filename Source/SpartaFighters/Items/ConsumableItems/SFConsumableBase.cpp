@@ -1,6 +1,3 @@
-
-
-
 #include "Items/ConsumableItems/SFConsumableBase.h"
 
 USFConsumableBase::USFConsumableBase()

@@ -1,4 +1,3 @@
-
 #include "Items/SFTestHatEquip.h"
 
 
