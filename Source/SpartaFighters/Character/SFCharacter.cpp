@@ -123,20 +123,7 @@ void ASFCharacter::RollPressed()
 {
 	// TO DO : Move To SKill Component
 	if (StateComponent->IsInAction()) return;
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && SkillDataTable)
-	{
-		static const FString ContextString(TEXT("SkillDataLookup"));
-
-		FName TargetRowName = FName(TEXT("SpecialMoveSkill"));
-		FSkillDataRow* SkillData = SkillDataTable->FindRow<FSkillDataRow>(TargetRowName, ContextString);
-
-		if (SkillData && SkillData->SkillMontage)
-		{
-			AnimInstance->Montage_Play(SkillData->SkillMontage);
-		}
-	}
+	SkillComponent->HandleInputRoll();
 }
 
 void ASFCharacter::RollReleased()
