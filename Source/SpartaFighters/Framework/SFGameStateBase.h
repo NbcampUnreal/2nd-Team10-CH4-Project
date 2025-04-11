@@ -25,4 +25,5 @@ protected:
     void OnRep_WinnerPlayerState();
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+    bool AreAllPlayersReady() const;
 };

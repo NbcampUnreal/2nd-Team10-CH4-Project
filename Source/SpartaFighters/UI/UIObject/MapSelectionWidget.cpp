@@ -5,10 +5,9 @@
 #include "Components/Button.h"
 
 #include "UI/UIElements/RoomWidget.h"
-
-#include "Framework/SFGameInstance.h"
-#include "Framework/SFGameInstanceSubsystem.h"
+#include "Framework/SFRoomPlayerController.h"
 #include "DataTable/MapInfoRow.h"
+#include "Kismet/GameplayStatics.h"
 
 void UMapSelectionWidget::NativeConstruct()
 {
@@ -87,12 +86,10 @@ void UMapSelectionWidget::SetGameMode(EGameModeType InGameMode)
 void UMapSelectionWidget::OnStartButtonClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnStartButtonClicked"));
-	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (ASFRoomPlayerController* SFPC = Cast<ASFRoomPlayerController>(PC))
 	{
-		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
-		{
-			const FString RoomMapName = GetCurrentSelectedMap().MapName;
-			Subsystem->ChangeLevelByMapName(RoomMapName);
-		}
+		const FString SelectedMapName = GetCurrentSelectedMap().MapName;
+		SFPC->Server_RequestLevelChangeByMapName(SelectedMapName);
 	}
 }

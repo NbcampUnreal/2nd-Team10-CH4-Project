@@ -12,7 +12,10 @@ void USFGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	UIManager = NewObject<UUIManager>(GetGameInstance());
+	if(!IsRunningDedicatedServer())
+	{
+		UIManager = NewObject<UUIManager>(GetGameInstance());
+	}
 
 	USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance());
 	if (GameInstance)
@@ -114,5 +117,9 @@ void USFGameInstanceSubsystem::ConnectToServerByAddress(const FString& ServerAdd
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("Client traveling to server: %s"), *ServerAddress);
-	PC->ClientTravel(ServerAddress, ETravelType::TRAVEL_Absolute);
+	FString ServerURL = ServerAddress;
+		///	When loading a save game, the URL should be different.
+	FURL DedicatedServerURL(nullptr, *ServerURL, TRAVEL_Absolute);
+	FString ErrorMessage;
+	GEngine->Browse(GEngine->GetWorldContextFromWorldChecked(GetWorld()), DedicatedServerURL, ErrorMessage);
 }

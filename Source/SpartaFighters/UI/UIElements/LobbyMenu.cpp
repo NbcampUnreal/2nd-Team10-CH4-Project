@@ -18,32 +18,32 @@ void ULobbyMenu::NativeConstruct()
 
 	if (PlayerInfoButton)
 	{
-		PlayerInfoButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnPlayerInfoClicked);
+		PlayerInfoButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnPlayerInfoClicked);
 	}
 	if (ShopButton)
 	{
-		ShopButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnShopClicked);
+		ShopButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnShopClicked);
 	}
 	if (OptionButton)
 	{
-		OptionButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnOptionClicked);
+		OptionButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnOptionClicked);
 	}
 	if (QuitGameButton)
 	{
-		QuitGameButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnQuitGameClicked);
+		QuitGameButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnQuitGameClicked);
 	}
 
 	if (SingleGameModeButton)
 	{
-		SingleGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnSingleGameModeClicked);
+		SingleGameModeButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnSingleGameModeClicked);
 	}
 	if (CoopGameModeButton)
 	{
-		CoopGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnCoopGameModeClicked);
+		CoopGameModeButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnCoopGameModeClicked);
 	}
 	if (BattleGameModeButton)
 	{
-		BattleGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnBattleGameModeClicked);
+		BattleGameModeButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnBattleGameModeClicked);
 	}
 
 	if (QuitGameWidgetClass.IsNull())
@@ -162,11 +162,11 @@ void ULobbyMenu::OnCoopGameModeClicked()
 		{
 			Subsystem->SetCurrentGameMode(EGameModeType::Cooperative);
 
-			const FString HostAddress = TEXT("127.0.0.1:7777");
+			const FString HostAddress = TEXT("127.0.0.1:17777");
 			Subsystem->ConnectToServerByAddress(HostAddress);
 
-			const FString RoomMapName = TEXT("RoomMenu");
-			Subsystem->ChangeLevelByMapName(RoomMapName);
+			/*const FString RoomMapName = TEXT("RoomMenu");
+			Subsystem->ChangeLevelByMapName(RoomMapName);*/
 		}
 	}
 }
@@ -181,11 +181,11 @@ void ULobbyMenu::OnBattleGameModeClicked()
 		{
 			Subsystem->SetCurrentGameMode(EGameModeType::Battle);
 
-			const FString HostAddress = TEXT("127.0.0.1:7777");
+			const FString HostAddress = TEXT("127.0.0.1:17777");
 			Subsystem->ConnectToServerByAddress(HostAddress);
 
-			const FString RoomMapName = TEXT("RoomMenu");
-			Subsystem->ChangeLevelByMapName(RoomMapName);
+			/*const FString RoomMapName = TEXT("RoomMenu");
+			Subsystem->ChangeLevelByMapName(RoomMapName);*/
 		}
 	}
 }

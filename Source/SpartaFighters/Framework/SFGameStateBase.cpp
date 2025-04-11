@@ -4,7 +4,6 @@
 
 ASFGameStateBase::ASFGameStateBase()
 {
-    // 기본 생성자
 }
 
 void ASFGameStateBase::SetWinner(ASFPlayerState* InWinner)
@@ -13,7 +12,6 @@ void ASFGameStateBase::SetWinner(ASFPlayerState* InWinner)
     {
         WinnerPlayerState = InWinner;
 
-        // 로그 찍기
         if (InWinner)
         {
             UE_LOG(LogTemp, Log, TEXT("Winner is: %s"), *InWinner->GetPlayerName());
@@ -40,3 +38,17 @@ void ASFGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
     DOREPLIFETIME(ASFGameStateBase, WinnerPlayerState);
 }
 
+bool ASFGameStateBase::AreAllPlayersReady() const
+{
+    for (APlayerState* PS : PlayerArray)
+    {
+        ASFPlayerState* SFPS = Cast<ASFPlayerState>(PS);
+        if (!SFPS) continue;
+
+        if (!SFPS->bIsAI && !SFPS->bIsReady)
+        {
+            return false;
+        }
+    }
+    return true;
+}

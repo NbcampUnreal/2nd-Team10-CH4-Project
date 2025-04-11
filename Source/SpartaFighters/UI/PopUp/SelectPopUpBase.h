@@ -12,6 +12,7 @@ class SPARTAFIGHTERS_API USelectPopUpBase : public UBaseUserWidget
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* ExitButton;

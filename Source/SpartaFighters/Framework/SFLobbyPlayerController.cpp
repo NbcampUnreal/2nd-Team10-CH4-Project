@@ -1,6 +1,5 @@
 #include "Framework/SFLobbyPlayerController.h"
 #include "Framework/SFGameInstanceSubsystem.h"
-#include "Framework/SFCheatManager.h"
 
 #include "UI/UIManager/UIManager.h"
 
@@ -8,7 +7,6 @@
 
 ASFLobbyPlayerController::ASFLobbyPlayerController()
 {
-	CheatClass = USFCheatManager::StaticClass();
 }
 
 void ASFLobbyPlayerController::BeginPlay()
