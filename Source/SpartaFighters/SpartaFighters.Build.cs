@@ -22,7 +22,8 @@ public class SpartaFighters : ModuleRules
             "Json",
             "AIModule",
             "GamePlayTasks",
-            "NavigationSystem"
+            "NavigationSystem",
+            "Niagara"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[]

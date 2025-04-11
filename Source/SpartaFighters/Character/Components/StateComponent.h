@@ -32,7 +32,7 @@ public:
 	void SetState(ECharacterState NewState);
 
 	ECharacterState GetState() const { return CurrentState; }
-	bool CanMove() const { return !bIsInAction; };
+	bool CanMove() const { return !bIsInAction && CurrentState != ECharacterState::Crouching; };
 	bool CanJump() const { return !bIsInAction; };
 	bool CanCrouch() const { return !bIsInAction; };
 

@@ -21,7 +21,6 @@ void USkillComponent::HandleInputBasicAttack()
 {
 	if (!IsValid(OwnerCharacter) || !IsValid(SkillDataTable)) return;
 
-
 	if (OwnerCharacter->HasAuthority())
 	{
 		StateComponent->UpdateState(OwnerCharacter);
@@ -73,7 +72,82 @@ void USkillComponent::HandleBasicAttack(ECharacterState CurrentState)
 void USkillComponent::HandleInputSkillAttack()
 {
 	// TO DO : Handling
+	if (!IsValid(OwnerCharacter) || !IsValid(SkillDataTable)) return;
 
+	if (OwnerCharacter->HasAuthority())
+	{
+		StateComponent->UpdateState(OwnerCharacter);
+		Multicast_HandleSkillAttack(StateComponent->GetState());
+	}
+	else
+	{
+		Server_HandleSkillAttack();
+	}
+}
+
+void USkillComponent::Server_HandleSkillAttack_Implementation()
+{
+	if (StateComponent && OwnerCharacter)
+	{
+		StateComponent->UpdateState(OwnerCharacter);
+	}
+
+	Multicast_HandleSkillAttack(StateComponent->GetState());
+}
+
+void USkillComponent::Multicast_HandleSkillAttack_Implementation(ECharacterState State)
+{
+	HandleSkillAttack(State);
+}
+
+void USkillComponent::HandleSkillAttack(ECharacterState CurrentState)
+{
+	FName RowName = TEXT("IdleSkill");
+
+	switch (CurrentState)
+	{
+	case ECharacterState::Moving:
+		RowName = FName("MoveSkill");
+		break;
+	case ECharacterState::InAir:
+		RowName = FName("JumpSkill");
+		break;
+	case ECharacterState::Crouching:
+		RowName = FName("CrouchSkill");
+		break;
+	}
+
+	PlayAnimMontage(RowName);
+}
+
+void USkillComponent::HandleInputRoll()
+{
+	if (!IsValid(OwnerCharacter) || !IsValid(SkillDataTable)) return;
+
+	if (OwnerCharacter->HasAuthority())
+	{
+		Multicast_HandleRoll(StateComponent->GetState());
+	}
+	else
+	{
+		Server_HandleRoll();
+	}
+}
+
+void USkillComponent::Multicast_HandleRoll_Implementation(ECharacterState State)
+{
+	HandleRoll(State);
+}
+
+void USkillComponent::Server_HandleRoll_Implementation()
+{
+	Multicast_HandleRoll(StateComponent->GetState());
+}
+
+void USkillComponent::HandleRoll(ECharacterState CurrentState)
+{
+	FName RowName = TEXT("SpecialMoveSkill");
+	PlayAnimMontage(RowName);
 }
 
 void USkillComponent::PlayAnimMontage(const FName& RowName)
@@ -99,6 +173,8 @@ void USkillComponent::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	{
 		StateComponent->SetIsInAction(false);
 	}
+
+	ClearHitActors();
 }
 
 void USkillComponent::PerformAttackTrace()
@@ -110,45 +186,63 @@ void USkillComponent::PerformAttackTrace()
 	const float TraceLength = CurrentSkillData->TraceLength;
 	const float TraceRadius = CurrentSkillData->TraceRadius;
 
-	FVector StartLocation = SocketLocation - OwnerCharacter->GetActorForwardVector() * (TraceLength / 2.0f);
-	FVector EndLocation = SocketLocation + OwnerCharacter->GetActorForwardVector() * (TraceLength / 2.0f);
-
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
 
-	const bool bHit = OwnerCharacter->GetWorld()->SweepSingleByChannel(
-		HitResult,
-		StartLocation,
-		EndLocation,
+	TArray<FHitResult> HitResults;
+	bool bHit = OwnerCharacter->GetWorld()->SweepMultiByChannel(
+		HitResults,
+		SocketLocation,
+		SocketLocation,
 		FQuat::Identity,
 		ECC_Pawn,
-		FCollisionShape::MakeCapsule(TraceRadius, TraceRadius),
+		FCollisionShape::MakeCapsule(TraceRadius, TraceLength),
 		Params
 	);
 
-	if (OwnerCharacter->HasAuthority() && bHit && HitResult.GetActor())
+	if (OwnerCharacter->HasAuthority() && bHit)
 	{
-		UGameplayStatics::ApplyPointDamage(
-			HitResult.GetActor(),
-			CurrentSkillData->AttackPower,
-			EndLocation - StartLocation,
-			HitResult,
-			OwnerCharacter->GetController(),
-			OwnerCharacter,
-			UDamageType::StaticClass()
-		);
+		for (const FHitResult& Hit : HitResults)
+		{
+			AActor* HitActor = Hit.GetActor();
+			if (!HitActor) continue;
+
+			// 중복 피격 방지
+			if (AlreadyHitActors.Contains(HitActor)) continue;
+			AlreadyHitActors.Add(HitActor);
+
+			UGameplayStatics::ApplyPointDamage(
+				HitActor,
+				CurrentSkillData->AttackPower,
+				SocketLocation,
+				Hit,
+				OwnerCharacter->GetController(),
+				OwnerCharacter,
+				UDamageType::StaticClass()
+			);
+		}
 	}
 
 #if WITH_EDITOR
+	FVector Forward = OwnerCharacter->GetActorForwardVector();
+	FVector Start = SocketLocation - Forward * (TraceLength / 2);
+	FVector End = SocketLocation + Forward * (TraceLength / 2);
+	FQuat Rotation = FRotationMatrix::MakeFromZ(Forward).ToQuat();
+
 	DrawDebugCapsule(
 		OwnerCharacter->GetWorld(),
-		(StartLocation + EndLocation) / 2.0f,
-		TraceLength / 2.0f,
+		(Start + End) / 2,
+		TraceLength / 2,
 		TraceRadius,
-		FRotationMatrix::MakeFromZ(EndLocation - StartLocation).ToQuat(),
+		Rotation,
 		bHit ? FColor::Red : FColor::Green,
 		false, 1.0f
 	);
 #endif
+}
+
+void USkillComponent::ClearHitActors()
+{
+	AlreadyHitActors.Empty();
 }
