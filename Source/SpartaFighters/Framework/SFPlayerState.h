@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
-#include "DataTypes/PlayerInfo.h"
 #include "SFPlayerState.generated.h"
 
 class ASFGameStateBase;
@@ -14,16 +13,23 @@ class SPARTAFIGHTERS_API ASFPlayerState : public APlayerState
 public:
 	ASFPlayerState();
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
-	FPlayerInfo PlayerInfo;
+	UPROPERTY(Replicated= OnRep_PlayerUniqueUD)
+	FString PlayerUniqueID;
 
-	UFUNCTION(BlueprintCallable, Category = "Player")
-	FString GetPlayerInfoID() const { return PlayerInfo.PlayerID; }
+	UPROPERTY(Replicated)
+	FString SelectedCharacterName;
 
-	UFUNCTION(Server, Reliable)
-	void Server_SetPlayerInfoID(const FString& InPlayerID);
+	UPROPERTY(Replicated)
+	FString CharacterTexturePath;
 
-	const FPlayerInfo* GetMyPlayerInfo() const;
+	UPROPERTY(Replicated)
+	TArray<FString> EquippedItems;
+
+	UFUNCTION(Server, Unreliable)
+	void Server_SetPlayerID(const FString& InPlayerID);
+
+	UFUNCTION()
+	void OnRep_PlayerUniqueID();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

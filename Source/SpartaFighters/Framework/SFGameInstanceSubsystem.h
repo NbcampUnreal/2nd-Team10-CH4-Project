@@ -50,10 +50,14 @@ public:
 	void SetCurrentGameState(EGameState NewGameState);
 
 	EGameModeType GetCurrentGameMode() const { return CurrentGameMode; }
+	void SetCurrentGameMode(EGameModeType NewGameModeType);
 
 	void ChangeLevelByMapName(const FString& MapName);
 	void ChangeLevelByMapID(int32 MapID);
 
 	UUIManager* GetUIManager() const { return UIManager; }
 	
+	UFUNCTION(BlueprintCallable)
+	void ConnectToServerByAddress(const FString& ServerAddress);
+
 };

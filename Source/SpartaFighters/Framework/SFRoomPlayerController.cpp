@@ -1,5 +1,6 @@
 #include "Framework/SFRoomPlayerController.h"
 #include "Framework/SFGameInstanceSubsystem.h"
+#include "Framework/SFGameStateBase.h"
 #include "Framework/SFCheatManager.h"
 #include "UI/UIManager/UIManager.h"
 

@@ -2,15 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "DataTypes/RoomInfo.h"
+#include "DataTypes/GameModeType.h"
+#include "UI/UIObject/MapSelectionWidget.h"
 #include "UIManager.generated.h"
 
 class ULoginMenu;
 class ULobbyMenu;
 class UShopMenu;
-class ULoginMenu;
-class UUIManagerSettings;
 class UShopItemListMenu;
+class UUIManagerSettings;
 class URoomWidget;
 
 UCLASS()
@@ -19,12 +19,9 @@ class SPARTAFIGHTERS_API UUIManager : public UObject
 	GENERATED_BODY()
 
 public:
-    void Init(APlayerController* PlayerController);
-
-    UPROPERTY(VisibleAnywhere, Category = "UI")
-    UUserWidget* CurrentWidget;
-
     UUIManager();
+
+    void Init(APlayerController* PlayerController);
 
     /* Menu Change */
     void ShowLoginMenu();
@@ -34,16 +31,24 @@ public:
     void ShowShopMenu();
     void ShowShopItemListMenu();
     void SwitchToWidget(UUserWidget* NewWidget);
-    void BackToLobbyMenu();
-    void ShowCreatedRoomUI(const FRoomInfo& RoomInfo);
-
-    void OpenRoomWidget(const FRoomInfo& RoomInfo);
 
     /** Get Widget */
     ULobbyMenu* GetCachedLobbyMenu() const { return CachedLobbyMenu; }
     UShopMenu* GetCachedShopMenu() const { return CachedShopMenu; }
+    UUserWidget* GetCurrentWidget() const { return CurrentWidget; }
+
+    void ShowMapSelectionWidget(EGameModeType GameModeType);
+    void CloseMapSelectionWidget();
 
 private:
+    UPROPERTY()
+    UMapSelectionWidget* MapSelectionWidgetInstance;
+    UPROPERTY(EditDefaultsOnly)
+    TSubclassOf<UMapSelectionWidget> MapSelectionWidgetClass;
+
+    UPROPERTY()
+    UUserWidget* CurrentWidget;
+
     /* Widget Class */
     UPROPERTY(EditDefaultsOnly, Category = "UI")
     TSubclassOf<ULoginMenu> LoginWidgetClass;

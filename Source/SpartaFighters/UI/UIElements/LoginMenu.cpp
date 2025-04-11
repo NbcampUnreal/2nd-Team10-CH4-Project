@@ -224,6 +224,7 @@ void ULoginMenu::ResetInstructionText()
 
 void ULoginMenu::EnterLobby()
 {
+	
 	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
 	{
 		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
@@ -245,7 +246,8 @@ void ULoginMenu::OnLogInSucces()
 		if (SFPlayerState)
 		{
 			FString ID = IDTextBox->GetText().ToString();
-			SFPlayerState->Server_SetPlayerInfoID(ID);
+			SFPlayerState->Server_SetPlayerID(ID);
+			UE_LOG(LogTemp, Warning, TEXT("[SFPlayerState->PlayerUniqueID : %s]"), *SFPlayerState->PlayerUniqueID);
 		}
 	}
 

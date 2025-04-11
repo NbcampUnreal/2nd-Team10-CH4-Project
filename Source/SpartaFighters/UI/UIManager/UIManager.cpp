@@ -32,35 +32,27 @@ void UUIManager::Init(APlayerController* PlayerController)
 			ShopMenuClass = Settings->FromBPShopMenuClass;
 			ShopItemListMenuClass = Settings->FromBPShopItemListMenuClass;
 			RoomWidgetClass = Settings->FromBPRoomWidgetClass;
+			MapSelectionWidgetClass = Settings->FromBPMapSelectionWidgetClass;
 
-			if (LoginMenuClass)
+			if (!CachedLoginMenu && LoginMenuClass)
 			{
 				CachedLoginMenu = CreateWidget<ULoginMenu>(OwningPlayer, LoginMenuClass);
 			}
-
-			if (LobbyMenuClass)
+			if (!CachedLobbyMenu && LobbyMenuClass)
 			{
 				CachedLobbyMenu = CreateWidget<ULobbyMenu>(OwningPlayer, LobbyMenuClass);
-				CachedLobbyMenu->SetVisibility(ESlateVisibility::Hidden);
 			}
-
-			if (LobbyMenuClass)
+			if (!CachedRoomMenu && RoomWidgetClass)
 			{
 				CachedRoomMenu = CreateWidget<URoomWidget>(OwningPlayer, RoomWidgetClass);
-				CachedRoomMenu->SetVisibility(ESlateVisibility::Hidden);
 			}
-
-			if (ShopMenuClass)
+			if (!CachedShopMenu && ShopMenuClass)
 			{
 				CachedShopMenu = CreateWidget<UShopMenu>(OwningPlayer, ShopMenuClass);
-				CachedShopMenu->SetVisibility(ESlateVisibility::Hidden);
 			}
-
-			if (ShopItemListMenuClass)
+			if (!CachedShopItemListMenu && ShopItemListMenuClass)
 			{
 				CachedShopItemListMenu = CreateWidget<UShopItemListMenu>(OwningPlayer, ShopItemListMenuClass);
-				CachedShopItemListMenu->AddToViewport();
-				CachedShopItemListMenu->SetVisibility(ESlateVisibility::Hidden);
 			}
 		}
 	}
@@ -98,15 +90,28 @@ void UUIManager::ShowShopItemListMenu()
 
 void UUIManager::SwitchToWidget(UUserWidget* NewWidget)
 {
-	if (!NewWidget || IsRunningDedicatedServer()) return;
-
+	if (!NewWidget || IsRunningDedicatedServer())
+	{
+		return;
+	}
+	
 	if (CurrentWidget && CurrentWidget != NewWidget)
 	{
-		CurrentWidget->RemoveFromViewport();
+		if (CurrentWidget->IsInViewport())
+		{
+			CurrentWidget->RemoveFromParent();
+		}
 	}
 
-	NewWidget->AddToViewport();
-	NewWidget->SetVisibility(ESlateVisibility::Visible);
+	if (!NewWidget->IsInViewport())
+	{
+		NewWidget->AddToViewport();
+	}
+	else
+	{
+		NewWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+
 	CurrentWidget = NewWidget;
 
 	if (OwningPlayer)
@@ -119,72 +124,26 @@ void UUIManager::SwitchToWidget(UUserWidget* NewWidget)
 }
 
 
-void UUIManager::BackToLobbyMenu()
+void UUIManager::ShowMapSelectionWidget(EGameModeType GameModeType)
 {
-	CachedShopMenu->SetVisibility(ESlateVisibility::Hidden);
-	CachedShopItemListMenu->SetVisibility(ESlateVisibility::Hidden);
-	CachedLobbyMenu->SetVisibility(ESlateVisibility::Visible);
+	if (!MapSelectionWidgetInstance && MapSelectionWidgetClass)
+	{
+		MapSelectionWidgetInstance = CreateWidget<UMapSelectionWidget>(GetWorld(), MapSelectionWidgetClass);
+		MapSelectionWidgetInstance->AddToViewport();
+	}
+
+	if (MapSelectionWidgetInstance)
+	{
+		MapSelectionWidgetInstance->SetGameMode(GameModeType);
+		MapSelectionWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
-void UUIManager::ShowCreatedRoomUI(const FRoomInfo& RoomInfo)
+void UUIManager::CloseMapSelectionWidget()
 {
-	/*URoomWidget* RoomWidgetInstance = CreateWidget<URoomWidget>(GetWorld(), RoomWidgetClass);
-	if (RoomWidgetInstance)
+	if (MapSelectionWidgetInstance)
 	{
-		RoomWidgetInstance->SetupRoom(RoomInfo);
-
-		TArray<FPlayerInfo> NewPlayerList;
-		FPlayerInfo Player;
-		Player.PlayerID = RoomInfo.OwnerPlayerID;
-		Player.bIsReady = false;
-		NewPlayerList.Add(Player);
-		RoomWidgetInstance->SetPlayerList(NewPlayerList);
-
-		if (RoomWidgetInstance->MapSelectionWidgetClass)
-		{
-			RoomWidgetInstance->MapSelectionWidgetClass->SetGameMode(RoomInfo.GameMode);
-		}
-
-		RoomWidgetInstance->AddToViewport();
-
-		TArray<UUserWidget*> FoundWidgets;
-		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, ULobbyMenu::StaticClass(), false);
-		for (UUserWidget* Widget : FoundWidgets)
-		{
-			if (ULobbyMenu* LobbyMenu = Cast<ULobbyMenu>(Widget))
-			{
-				LobbyMenu->SetVisibility(ESlateVisibility::Hidden);
-				break;
-			}
-		}
-	}*/
-}
-
-void UUIManager::OpenRoomWidget(const FRoomInfo& RoomInfo)
-{
-	/*UE_LOG(LogTemp, Warning, TEXT("OpenRoomWidget Called!RoomID: % d"), RoomInfo.RoomID);
-
-	URoomWidget* RoomWidgetInstance = CreateWidget<URoomWidget>(GetWorld(), RoomWidgetClass);
-	if (RoomWidgetInstance)
-	{
-		RoomWidgetInstance->SetPlayerList(RoomInfo.PlayerList.Items);
-		RoomWidgetInstance->SetupRoom(RoomInfo);
-		if (RoomWidgetInstance->MapSelectionWidgetClass)
-		{
-			RoomWidgetInstance->MapSelectionWidgetClass->SetIsEnabled(false);
-		}
-
-		RoomWidgetInstance->AddToViewport();
-
-		TArray<UUserWidget*> FoundWidgets;
-		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, ULobbyMenu::StaticClass(), false);
-		for (UUserWidget* Widget : FoundWidgets)
-		{
-			if (ULobbyMenu* LobbyMenu = Cast<ULobbyMenu>(Widget))
-			{
-				LobbyMenu->SetVisibility(ESlateVisibility::Hidden);
-				break;
-			}
-		}
-	}*/
+		MapSelectionWidgetInstance->RemoveFromParent();
+		MapSelectionWidgetInstance = nullptr;
+	}
 }

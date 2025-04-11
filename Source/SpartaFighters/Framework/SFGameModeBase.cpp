@@ -8,12 +8,3 @@ ASFGameModeBase::ASFGameModeBase()
 	PlayerControllerClass = ASFLobbyPlayerController::StaticClass();
 	GameStateClass = ASFGameStateBase::StaticClass();
 }
-
-void ASFGameModeBase::UpdateRoomInfo()
-{
-	UE_LOG(LogTemp, Warning, TEXT("UpdateRoomInfo Called!!"));
-	if (ASFGameStateBase* SFGameState = GetGameState<ASFGameStateBase>())
-	{
-		SFGameState->Multicast_UpdateRoomInfo();
-	}
-}

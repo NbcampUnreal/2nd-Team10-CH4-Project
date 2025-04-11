@@ -12,4 +12,7 @@ class SPARTAFIGHTERS_API USFCheatManager : public UCheatManager
 public:
 	UFUNCTION(exec)
 	void Cheat_ChangeMap(const FString& MapName);
+
+	UFUNCTION(exec)
+	void PrintServerInfo();
 };

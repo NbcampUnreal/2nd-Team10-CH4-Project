@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UI/BaseUserWidget.h"
+#include "UI/PopUp/SelectPopUpBase.h"
 #include "ShopMenu.generated.h"
 
 class UTextBlock;
@@ -10,12 +10,14 @@ class ULobbyMenu;
 class UShopItemListMenu;
 
 UCLASS()
-class SPARTAFIGHTERS_API UShopMenu : public UBaseUserWidget
+class SPARTAFIGHTERS_API UShopMenu : public USelectPopUpBase
 {
 	GENERATED_BODY()
 
 protected:
 	virtual void NativeConstruct() override;
+
+	virtual void NativeDestruct() override;
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -25,8 +27,6 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* CosmeticItemButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* ExitButton;
-	UPROPERTY(meta = (BindWidget))
 	UTextBlock* CurrentGoldTextBlock;
 
 	UFUNCTION()
@@ -35,7 +35,7 @@ private:
 	void OnExclusiveItemClicked();
 	UFUNCTION()
 	void OnCosmeticItemClicked();
-	UFUNCTION()
-	void OnExitClicked();
+
+	void OnExitClicked() override;
 
 };

@@ -1,18 +1,33 @@
 #include "MapSelectionWidget.h"
+
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Components/Button.h"
+
 #include "UI/UIElements/RoomWidget.h"
+
+#include "Framework/SFGameInstance.h"
+#include "Framework/SFGameInstanceSubsystem.h"
 #include "DataTable/MapInfoRow.h"
 
 void UMapSelectionWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	if (StartButton)
+	{
+		StartButton->OnClicked.AddDynamic(this, &UMapSelectionWidget::OnStartButtonClicked);
+	}
 }
 
-void UMapSelectionWidget::SetRoomSettings(const FRoomSettings& InRoomSettings)
+void UMapSelectionWidget::NativeDestruct()
 {
-	CurrentGameMode = InRoomSettings.GameMode;
-	UpdateAvailableMaps();
+	Super::NativeDestruct();
+
+	if (StartButton)
+	{
+		StartButton->OnClicked.RemoveDynamic(this, &UMapSelectionWidget::OnStartButtonClicked);
+	}
 }
 
 void UMapSelectionWidget::UpdateAvailableMaps()
@@ -66,4 +81,18 @@ void UMapSelectionWidget::SetGameMode(EGameModeType InGameMode)
 {
 	CurrentGameMode = InGameMode;
 	UpdateAvailableMaps();
+	UpdateSelectionUI();
+}
+
+void UMapSelectionWidget::OnStartButtonClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnStartButtonClicked"));
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	{
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			const FString RoomMapName = GetCurrentSelectedMap().MapName;
+			Subsystem->ChangeLevelByMapName(RoomMapName);
+		}
+	}
 }

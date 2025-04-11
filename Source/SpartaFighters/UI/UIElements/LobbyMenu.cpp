@@ -16,10 +16,6 @@ void ULobbyMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (PlayButton)
-	{
-		PlayButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnPlayButtonClicked);
-	}
 	if (PlayerInfoButton)
 	{
 		PlayerInfoButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnPlayerInfoClicked);
@@ -37,23 +33,57 @@ void ULobbyMenu::NativeConstruct()
 		QuitGameButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnQuitGameClicked);
 	}
 
+	if (SingleGameModeButton)
+	{
+		SingleGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnSingleGameModeClicked);
+	}
+	if (CoopGameModeButton)
+	{
+		CoopGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnCoopGameModeClicked);
+	}
+	if (BattleGameModeButton)
+	{
+		BattleGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnBattleGameModeClicked);
+	}
+
 	if (QuitGameWidgetClass.IsNull())
 	{
 		UE_LOG(LogTemp, Error, TEXT("QuitGameWidgetClass is NULL in NativeConstruct"));
 	}
 }
 
-void ULobbyMenu::OnPlayButtonClicked()
+void ULobbyMenu::NativeDestruct()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnPlayButtonClicked!"));
-	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
-	{
-		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
-		{
-			const FString RoomMapName = TEXT("RoomMenu");
+	Super::NativeDestruct();
 
-			Subsystem->ChangeLevelByMapName(RoomMapName);
-		}
+	if (PlayerInfoButton)
+	{
+		PlayerInfoButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnPlayerInfoClicked);
+	}
+	if (ShopButton)
+	{
+		ShopButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnShopClicked);
+	}
+	if (OptionButton)
+	{
+		OptionButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnOptionClicked);
+	}
+	if (QuitGameButton)
+	{
+		QuitGameButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnQuitGameClicked);
+	}
+
+	if (SingleGameModeButton)
+	{
+		SingleGameModeButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnSingleGameModeClicked);
+	}
+	if (CoopGameModeButton)
+	{
+		CoopGameModeButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnCoopGameModeClicked);
+	}
+	if (BattleGameModeButton)
+	{
+		BattleGameModeButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnBattleGameModeClicked);
 	}
 }
 
@@ -68,7 +98,7 @@ void ULobbyMenu::OnShopClicked()
 	UE_LOG(LogTemp, Warning, TEXT("OnShopClicked!"));
 	if (UUIManager* UIManager = ResolveUIManager())
 	{
-		UIManager->ShowShopMenu(); 
+		UIManager->ShowShopMenu();
 	}
 }
 
@@ -101,5 +131,61 @@ void ULobbyMenu::OnQuitGameClicked()
 	{
 		QuitGameWidgetInstance->AddToViewport();
 		UE_LOG(LogTemp, Log, TEXT("Quit Game Widget Added to Viewport"));
+	}
+}
+
+void ULobbyMenu::OnSingleGameModeClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnSingleGameModeClicked!"));
+
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	{
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			Subsystem->SetCurrentGameMode(EGameModeType::Single);
+
+			if (UUIManager* UIManager = ResolveUIManager())
+			{
+				UIManager->ShowMapSelectionWidget(Subsystem->GetCurrentGameMode());
+			}
+		}
+	}
+}
+
+void ULobbyMenu::OnCoopGameModeClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnCoopGameModeClicked!"));
+
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	{
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			Subsystem->SetCurrentGameMode(EGameModeType::Cooperative);
+
+			const FString HostAddress = TEXT("127.0.0.1:7777");
+			Subsystem->ConnectToServerByAddress(HostAddress);
+
+			/*const FString RoomMapName = TEXT("RoomMenu");
+			Subsystem->ChangeLevelByMapName(RoomMapName);*/
+		}
+	}
+}
+
+void ULobbyMenu::OnBattleGameModeClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnBattleGameModeClicked!"));
+
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	{
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			Subsystem->SetCurrentGameMode(EGameModeType::Battle);
+
+			const FString HostAddress = TEXT("127.0.0.1:7777");
+			Subsystem->ConnectToServerByAddress(HostAddress);
+
+			/*const FString RoomMapName = TEXT("RoomMenu");
+			Subsystem->ChangeLevelByMapName(RoomMapName);*/
+		}
 	}
 }

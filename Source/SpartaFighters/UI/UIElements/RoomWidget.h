@@ -2,8 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "UI/BaseUserWidget.h"
-#include "DataTypes/RoomInfo.h"
-#include "DataTypes/PlayerInfo.h"
 #include "RoomWidget.generated.h"
 
 class UButton;
@@ -16,6 +14,7 @@ class SPARTAFIGHTERS_API URoomWidget : public UBaseUserWidget
 	
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -26,14 +25,9 @@ private:
 	UButton* OptionButton;
 	UPROPERTY(meta = (BindWidget))
 	UButton* LobbyButton;
+
 	UPROPERTY(meta = (BindWidget))
-	UButton* StartButton;
-	UPROPERTY(meta = (BindWidget))
-	UButton* SingleGameModeButton;
-	UPROPERTY(meta = (BindWidget))
-	UButton* CoopGameModeButton;
-	UPROPERTY(meta = (BindWidget))
-	UButton* BattleGameModeButton;
+	UButton* SelectMapButton;
 
 	UPROPERTY(meta = (BindWidget))
 	UPlayerSlotWidget* ClientSlot1;
@@ -50,9 +44,12 @@ private:
 	void OnPlayerInfoButtonClicked();
 	UFUNCTION()
 	void OnOptionButtonClicked();
-
 	UFUNCTION()
 	void OnLobbyButtonClicked();
 	UFUNCTION()
-	void OnStartButtonClicked();
+	void OnSelectMapButtonClicked();
+
+public:
+	void UpdatePlayerSlots();
+
 };

@@ -10,3 +10,4 @@ class SPARTAFIGHTERS_API ARoomGameMode : public AGameModeBase
 	GENERATED_BODY()
 	
 };
+

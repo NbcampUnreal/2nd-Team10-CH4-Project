@@ -18,9 +18,9 @@ class SPARTAFIGHTERS_API ULobbyMenu : public UBaseUserWidget
 protected:
 		virtual void NativeConstruct() override;
 
+		virtual void NativeDestruct() override;
+
 private:
-	UPROPERTY(meta = (BindWidget))
-	UButton* PlayButton;
 	UPROPERTY(meta = (BindWidget))
 	UButton* PlayerInfoButton;
 	UPROPERTY(meta = (BindWidget))
@@ -30,14 +30,20 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* QuitGameButton;
 	
-	//// Chat Section
-	//UPROPERTY(meta = (BindWidget))
-	//UGlobalChatWidget* GlobalChatWidgetClass;
-	//// User List Section
-	//UPROPERTY(meta = (BindWidget))
-	//UVerticalBox* UserListBox;
+	UPROPERTY(meta = (BindWidget))
+	UButton* SingleGameModeButton;
+	UPROPERTY(meta = (BindWidget))
+	UButton* CoopGameModeButton;
+	UPROPERTY(meta = (BindWidget))
+	UButton* BattleGameModeButton;
+
 	UFUNCTION()
-	void OnPlayButtonClicked();
+	void OnSingleGameModeClicked();
+	UFUNCTION()
+	void OnCoopGameModeClicked();
+	UFUNCTION()
+	void OnBattleGameModeClicked();
+
 	UFUNCTION()
 	void OnPlayerInfoClicked();
 	UFUNCTION()

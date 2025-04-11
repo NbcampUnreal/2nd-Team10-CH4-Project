@@ -12,5 +12,4 @@ class SPARTAFIGHTERS_API ASFGameModeBase : public AGameModeBase
 	
 public:
 	ASFGameModeBase();
-	void UpdateRoomInfo();
 };
