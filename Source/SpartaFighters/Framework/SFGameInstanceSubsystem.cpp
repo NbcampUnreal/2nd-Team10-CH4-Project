@@ -85,8 +85,13 @@ void USFGameInstanceSubsystem::ChangeLevelByMapID(int32 MapID)
 
 			if (IsRunningDedicatedServer())
 			{
-				UE_LOG(LogTemp, Log, TEXT("Changing Level to: %s (Server)"), *LevelToLoad);
-				UGameplayStatics::OpenLevel(World, FName(*LevelToLoad), true);
+				/*UE_LOG(LogTemp, Log, TEXT("Changing Level to: %s (Server)"), *LevelToLoad);
+				UGameplayStatics::OpenLevel(World, FName(*LevelToLoad), true);*/
+
+				FName LevelName = FPackageName::GetShortFName(FName(*LevelToLoad));
+
+				World->GetAuthGameMode()->bUseSeamlessTravel = true;
+				World->ServerTravel(LevelName.ToString(), true);
 			}
 			else
 			{

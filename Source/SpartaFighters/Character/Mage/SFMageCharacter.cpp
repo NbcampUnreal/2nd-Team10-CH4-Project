@@ -50,7 +50,7 @@ void ASFMageCharacter::DelayTeleport()
 {
     ExecuteTelepoprt();
     ShowTeleportCircleEffect();
-    SpecialMoveReleased();
+    //SpecialMoveReleased();
 }
 
 void ASFMageCharacter::ShowTeleportCircleEffect()
