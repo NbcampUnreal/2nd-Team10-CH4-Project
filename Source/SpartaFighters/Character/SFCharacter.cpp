@@ -3,9 +3,11 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 
 #include "Framework/SFPlayerController.h"
+#include "Framework/SFBattleGameMode.h"
 #include "Components/StatusContainerComponent.h"
 #include "Components/StateComponent.h"
 #include "Components/SkillComponent.h"
@@ -309,3 +311,25 @@ void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 //	AttackHandlers.Add(AttackHandler);
 //}
 
+void ASFCharacter::Die()
+{
+	if (!bIsDead)
+	{
+		bIsDead = true;
+
+		if (AController* ControllerInstance = GetController())
+		{
+			if (ASFBattleGameMode* GM = GetWorld()->GetAuthGameMode<ASFBattleGameMode>())
+			{
+				GM->RequestRespawn(ControllerInstance);
+			}
+		}
+
+		Destroy();
+	}
+}
+
+void ASFCharacter::DieImmediately()
+{
+	Die(); // 내부적으로 같은 처리
+}

@@ -40,5 +40,5 @@ void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASFPlayerState, bIsReady);
 	DOREPLIFETIME(ASFPlayerState, bIsRoomOwner);
 	DOREPLIFETIME(ASFPlayerState, bIsAI);
-	DOREPLIFETIME(ASFPlayerState, CharacterRowName);
+	DOREPLIFETIME(ASFPlayerState, SelectedCharacterRow);
 }
