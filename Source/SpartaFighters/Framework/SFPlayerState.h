@@ -15,15 +15,19 @@ public:
 
 	UPROPERTY(ReplicatedUsing = OnRep_bIsReady)
 	bool bIsReady = false;
-
 	UPROPERTY(ReplicatedUsing = OnRep_bIsRoomOwner)
 	bool bIsRoomOwner = false;
-
 	UPROPERTY(Replicated)
 	bool bIsAI = false;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_SelectedCharacterRow)
 	FName SelectedCharacterRow;
+	// UPROPERTY(Replicated)
+	// FName PublicGearRow;
+	// UPROPERTY(Replicated)
+	// FName UniqueGearRow;
+	// UPROPERTY(Replicated)
+	// FName CosmeticItemRow;
 
 	UPROPERTY(Replicated)
 	FString CustomPlayerID;
@@ -31,11 +35,14 @@ public:
 	FString GetUniqueID() const;
 
 public:
-	void SetSelectedCharacterRow(FName NewRow) { SelectedCharacterRow = NewRow; }
-	FName GetSelectedCharacterRow() const { return SelectedCharacterRow; }
+	void SetSelectedCharacterRow(FName NewRow);
+	FName GetSelectedCharacterRow() const;
 
 	void AddDeathCount();
 	int32 GetDeathCount() const { return DeathCount; }
+
+	UFUNCTION(BlueprintCallable)
+	FString PrintSelectedCharacterRow();
 
 protected:
 	UPROPERTY(Replicated)
@@ -46,6 +53,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_bIsRoomOwner();
+
+	UFUNCTION()
+	void OnRep_SelectedCharacterRow();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

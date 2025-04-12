@@ -21,3 +21,25 @@ void USFGameInstance::LoadMapData()
         }
     }
 }
+
+//void USFGameInstance::LoadCharacterData()
+//{
+//    if (!CharacterDataTable)
+//    {
+//        UE_LOG(LogTemp, Warning, TEXT("CharacterDataTable is not assigned in USFGameInstance."));
+//        return;
+//    }
+//
+//    static const FString ContextString(TEXT("Character Lookup"));
+//    TArray<FCharacterDataRow*> AllCharacters;
+//    CharacterDataTable->GetAllRows(ContextString, AllCharacters);
+//
+//    for (FCharacterDataRow* CharacterInfoRow : AllCharacters)
+//    {
+//        if (CharacterInfoRow)
+//        {
+//            const int32 ID = GetTypeHash(CharacterInfoRow->CharacterName.ToString());
+//            UE_LOG(LogTemp, Log, TEXT("Loaded Character: %s (Hash: %d)"), *CharacterInfoRow->CharacterName.ToString(), ID);
+//        }
+//    }
+//}

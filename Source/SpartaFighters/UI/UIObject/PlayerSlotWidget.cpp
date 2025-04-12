@@ -56,10 +56,9 @@ void UPlayerSlotWidget::SetEmpty()
 
 void UPlayerSlotWidget::UpdateRoomOwner(const FString& OwnerPlayerID)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UpdateRoomOwner Called!"));
 	if (OwnerPlayerID.IsEmpty())
 	{
-	UE_LOG(LogTemp, Warning, TEXT("OwnerPlayerID.IsEmpty!"));
+		UE_LOG(LogTemp, Warning, TEXT("OwnerPlayerID.IsEmpty!"));
 		return;
 	}
 

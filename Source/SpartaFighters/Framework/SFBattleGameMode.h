@@ -16,10 +16,12 @@ public:
 	ASFBattleGameMode();
 
 	virtual void BeginPlay() override;
-    virtual void PostLogin(APlayerController* NewPlayer) override;
-    virtual APawn* SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot) override;
+    void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
+    void PollCharacterSpawnRequests();
 
     void RequestRespawn(AController* DeadController);
+    void HandleCharacterSpawnRequest(APlayerController* PC);
 
 protected:
     // Spawn Selected Character
@@ -58,5 +60,9 @@ protected:
     FTimerHandle BattleStartTimerHandle;
     FTimerHandle BattleTimerHandle;
     FTimerHandle ReturnLobbyTimerHandle;
+
+    // SFBattleGameMode.h
+    FTimerHandle SpawnPollingTimerHandle;
+    TMap<APlayerController*, bool> bWaitingForSpawn;
 
 };

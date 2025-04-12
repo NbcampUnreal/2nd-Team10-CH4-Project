@@ -4,6 +4,7 @@
 #include "UObject/NoExportTypes.h"
 #include "DataTypes/GameModeType.h"
 #include "UI/UIObject/MapSelectionWidget.h"
+#include "UI/UIObject/SelectCharacterWidget.h"
 #include "UIManager.generated.h"
 
 class ULoginMenu;
@@ -38,13 +39,18 @@ public:
     UUserWidget* GetCurrentWidget() const { return CurrentWidget; }
 
     void ShowMapSelectionWidget(EGameModeType GameModeType);
-    void CloseMapSelectionWidget();
+    void ShowSelectCharacterWidget();
 
 private:
     UPROPERTY()
     UMapSelectionWidget* MapSelectionWidgetInstance;
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<UMapSelectionWidget> MapSelectionWidgetClass;
+
+    UPROPERTY()
+    USelectCharacterWidget* SelectCharacterWidgetInstance;
+    UPROPERTY(EditDefaultsOnly)
+    TSubclassOf<USelectCharacterWidget> SelectCharacterWidgetClass;
 
     UPROPERTY()
     UUserWidget* CurrentWidget;

@@ -8,6 +8,7 @@
 #include "UI/UIElements/ShopItemListMenu.h"
 #include "UI/UIElements/RoomWidget.h"
 #include "UI/UIObject/MapSelectionWidget.h"
+#include "UI/UIObject/SelectCharacterWidget.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
@@ -33,6 +34,7 @@ void UUIManager::Init(APlayerController* PlayerController)
 			ShopItemListMenuClass = Settings->FromBPShopItemListMenuClass;
 			RoomWidgetClass = Settings->FromBPRoomWidgetClass;
 			MapSelectionWidgetClass = Settings->FromBPMapSelectionWidgetClass;
+			SelectCharacterWidgetClass = Settings->FromBPSelectCharacterWidgetClass;
 
 			if (!CachedLoginMenu && LoginMenuClass)
 			{
@@ -123,7 +125,6 @@ void UUIManager::SwitchToWidget(UUserWidget* NewWidget)
 	}
 }
 
-
 void UUIManager::ShowMapSelectionWidget(EGameModeType GameModeType)
 {
 	if (!MapSelectionWidgetInstance && MapSelectionWidgetClass)
@@ -139,11 +140,16 @@ void UUIManager::ShowMapSelectionWidget(EGameModeType GameModeType)
 	}
 }
 
-void UUIManager::CloseMapSelectionWidget()
+void UUIManager::ShowSelectCharacterWidget()
 {
-	if (MapSelectionWidgetInstance)
+	if (!SelectCharacterWidgetInstance && SelectCharacterWidgetClass)
 	{
-		MapSelectionWidgetInstance->RemoveFromParent();
-		MapSelectionWidgetInstance = nullptr;
+		SelectCharacterWidgetInstance = CreateWidget<USelectCharacterWidget>(GetWorld(), SelectCharacterWidgetClass);
+		SelectCharacterWidgetInstance->AddToViewport();
+	}
+
+	if (SelectCharacterWidgetInstance)
+	{
+		SelectCharacterWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 	}
 }

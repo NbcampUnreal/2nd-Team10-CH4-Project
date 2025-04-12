@@ -1,14 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-//#include "Blueprint/UserWidget.h"
 #include "UI/BaseUserWidget.h"
 #include "LobbyMenu.generated.h"
 
 class UTextBlock;
 class UButton;
 class UQuitGameWidget;
-// class UGlobalChatWidget;
 
 UCLASS()
 class SPARTAFIGHTERS_API ULobbyMenu : public UBaseUserWidget
@@ -63,4 +61,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UShopMenu* CachedShopMenuWidget;*/
 
+	
 };

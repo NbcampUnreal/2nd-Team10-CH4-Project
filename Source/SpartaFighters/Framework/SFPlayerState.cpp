@@ -19,9 +19,25 @@ void ASFPlayerState::OnRep_bIsRoomOwner()
 	// Host 아이콘 갱신 등 UI 처리
 }
 
+void ASFPlayerState::OnRep_SelectedCharacterRow()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_SelectedCharacterRow called after travel: %s"), *SelectedCharacterRow.ToString());
+}
+
 FString ASFPlayerState::GetUniqueID() const
 {
 	return CustomPlayerID;
+}
+
+void ASFPlayerState::SetSelectedCharacterRow(FName NewRow)
+{
+	SelectedCharacterRow = NewRow;
+	UE_LOG(LogTemp, Warning, TEXT("Server: SetSelectedCharacterRow to %s"), *NewRow.ToString());
+}
+
+FName ASFPlayerState::GetSelectedCharacterRow() const
+{
+	return SelectedCharacterRow;
 }
 
 void ASFPlayerState::AddDeathCount()
@@ -31,6 +47,12 @@ void ASFPlayerState::AddDeathCount()
 		++DeathCount;
 		UE_LOG(LogTemp, Log, TEXT("%s died. DeathCount = %d"), *GetPlayerName(), DeathCount);
 	}
+}
+
+FString ASFPlayerState::PrintSelectedCharacterRow()
+{
+	FString SelectedChar = GetSelectedCharacterRow().ToString();
+	return SelectedChar;
 }
 
 void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

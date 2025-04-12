@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "DataTable/MapInfoRow.h"
+#include "DataTable/CharacterDataRow.h"
 #include "SFGameInstance.generated.h"
 
 class UUIManagerSettings;
@@ -20,9 +21,14 @@ public:
 	UUIManagerSettings* GetUISettings() const { return UISettings; }
 	
 	FMapInfoRow CurrentMapInfoRow;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	UDataTable* MapDataTable;
-
 	void LoadMapData();
+
+	/*FCharacterDataRow CurrentCharacterInfoRow;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	UDataTable* CharacterDataTable;
+
+	void LoadCharacterData();*/
 };
