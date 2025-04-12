@@ -5,6 +5,7 @@
 #include "Framework/SFPlayerState.h"
 #include "SFBattleGameMode.generated.h"
 
+class ASFCharacterSpawner;
 UCLASS()
 class SPARTAFIGHTERS_API ASFBattleGameMode : public ASFGameModeBase
 {
@@ -14,7 +15,14 @@ public:
 	ASFBattleGameMode();
 
 	virtual void BeginPlay() override;
+    virtual void PostLogin(APlayerController* NewPlayer) override;
 
+    UFUNCTION()
+    void RequestRespawn(AController* DeadController);
+
+private:
+    UPROPERTY()
+    TArray<ASFCharacterSpawner*> SpawnPoints;
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Battle")
     float BattleStartDelay = 3.0f;
