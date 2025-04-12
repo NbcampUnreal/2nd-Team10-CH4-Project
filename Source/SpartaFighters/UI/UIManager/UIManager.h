@@ -12,6 +12,8 @@ class UShopMenu;
 class UShopItemListMenu;
 class UUIManagerSettings;
 class URoomWidget;
+class UCombatHUD;
+class UCombatResultHUD;
 
 UCLASS()
 class SPARTAFIGHTERS_API UUIManager : public UObject
@@ -40,6 +42,11 @@ public:
     void ShowMapSelectionWidget(EGameModeType GameModeType);
     void CloseMapSelectionWidget();
 
+    void ShowCombatResultHUD();
+    void CloseCombatHUD();
+    void CloseCombatResultHUD();
+    void ShowCombatHUD();
+
 private:
     UPROPERTY()
     UMapSelectionWidget* MapSelectionWidgetInstance;
@@ -62,6 +69,10 @@ private:
     TSubclassOf<ULoginMenu> LoginMenuClass;
     UPROPERTY(EditDefaultsOnly, Category = "UI")
     TSubclassOf<UShopItemListMenu> ShopItemListMenuClass;
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UCombatHUD> CombatHUDClass;
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UCombatResultHUD> CombatResultHUDClass;
     
     /* Chacing Widget */
     UPROPERTY()
@@ -74,6 +85,10 @@ private:
     UShopMenu* CachedShopMenu;
     UPROPERTY()
     UShopItemListMenu* CachedShopItemListMenu;
+    UPROPERTY()
+    UCombatHUD* CachedCombatHUD;
+    UPROPERTY()
+    UCombatResultHUD* CachedCombatResultHUD;
 
     /* Controller save */
     UPROPERTY()
