@@ -50,26 +50,79 @@ void ASFBattleGameMode::PostLogin(APlayerController* NewPlayer)
 	}
 	else
 	{
-		RestartPlayer(NewPlayer);
+		RequestRespawn(NewPlayer);
 	}
+
+	if (ASFPlayerState* PS = NewPlayer->GetPlayerState<ASFPlayerState>())
+	{
+		if (PS->GetSelectedCharacterRow().IsNone())
+		{
+			PS->SetSelectedCharacterRow("DefaultFighter"); 
+		}
+	}
+}
+
+APawn* ASFBattleGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
+{
+	ASFPlayerState* PS = NewPlayer->GetPlayerState<ASFPlayerState>();
+	if (!PS || !CharacterDataTable)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid PlayerState or CharacterDataTable"));
+		return Super::SpawnDefaultPawnFor(NewPlayer, StartSpot);
+	}
+
+	const FString Context = TEXT("Character Context");
+	FCharacterDataRow* Row = CharacterDataTable->FindRow<FCharacterDataRow>(PS->GetSelectedCharacterRow(), Context);
+	if (!Row || !Row->CharacterClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Character not found in DataTable or invalid class"));
+		return Super::SpawnDefaultPawnFor(NewPlayer, StartSpot);
+	}
+
+	// 지정된 캐릭터 생성
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = NewPlayer;
+	SpawnParams.Instigator = GetInstigator();
+	FTransform SpawnTransform = StartSpot ? StartSpot->GetActorTransform() : FTransform::Identity;
+
+	APawn* SpawnedPawn = GetWorld()->SpawnActor<APawn>(Row->CharacterClass, SpawnTransform, SpawnParams);
+	if (!SpawnedPawn)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to spawn pawn for Player %s"), *NewPlayer->GetName());
+	}
+	return SpawnedPawn;
 }
 
 void ASFBattleGameMode::RequestRespawn(AController* DeadController)
 {
-	TArray <ASFCharacterSpawner*> Respawns = SpawnPoints.FilterByPredicate([](ASFCharacterSpawner* Spawner)
+	if (!DeadController) return;
+
+	AActor* RespawnPoint = GetAvailableSpawnPoint(true);
+	FTransform RespawnTransform = RespawnPoint ? RespawnPoint->GetActorTransform() : FTransform::Identity;
+
+	APawn* NewPawn = SpawnDefaultPawnFor(DeadController, RespawnPoint);
+	if (NewPawn)
+	{
+		DeadController->UnPossess();
+		DeadController->Possess(NewPawn);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Respawn failed for controller %s"), *DeadController->GetName());
+	}
+}
+
+AActor* ASFBattleGameMode::GetAvailableSpawnPoint(bool bForRespawn) const
+{
+	TArray<ASFCharacterSpawner*> Filtered = SpawnPoints.FilterByPredicate(
+		[bForRespawn](ASFCharacterSpawner* Spawner)
 		{
-			return Spawner && Spawner->bIsRespawnPoint;
+			return Spawner && Spawner->bIsRespawnPoint == bForRespawn;
 		});
 
-	if (Respawns.Num() == 0)
-	{
-		return;
-	}
+	if (Filtered.Num() == 0) return nullptr;
 
-	const int32 RandIndex = FMath::RandRange(0, Respawns.Num() - 1);
-	ASFCharacterSpawner* RespawnPoint = Respawns[RandIndex];
-
-	RestartPlayerAtTransform(DeadController, FTransform(RespawnPoint->GetSpawnLocation()));
+	return Filtered[FMath::RandRange(0, Filtered.Num() - 1)];
 }
 
 void ASFBattleGameMode::StartBattle()
@@ -107,7 +160,9 @@ void ASFBattleGameMode::HandlePlayerDeath(AController* DeadController)
 	//    Destroy(); // 죽은 캐릭터 제거
 	//}
 	if (!DeadController)
+	{
 		return;
+	}
 
 	ASFPlayerState* DeadPS = DeadController->GetPlayerState<ASFPlayerState>();
 	if (DeadPS)
@@ -115,22 +170,7 @@ void ASFBattleGameMode::HandlePlayerDeath(AController* DeadController)
 		DeadPS->AddDeathCount();
 	}
 
-	RestartPlayer(DeadController);
-}
-
-AActor* ASFBattleGameMode::ChoosePlayerStart_Implementation(AController* Player)
-{
-	AActor* DefaultStart = Super::ChoosePlayerStart_Implementation(Player);
-
-	if (DefaultStart)
-	{
-		FVector NewLocation = DefaultStart->GetActorLocation();
-		NewLocation.Z += 1000.0f;
-
-		DefaultStart->SetActorLocation(NewLocation);
-	}
-
-	return DefaultStart;
+	RequestRespawn(DeadController);
 }
 
 void ASFBattleGameMode::EndBattle()
