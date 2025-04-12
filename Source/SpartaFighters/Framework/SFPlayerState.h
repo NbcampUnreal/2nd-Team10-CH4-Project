@@ -23,7 +23,7 @@ public:
 	bool bIsAI = false;
 
 	UPROPERTY(Replicated)
-	FName CharacterRowName;
+	FName SelectedCharacterRow;
 
 	UPROPERTY(Replicated)
 	FString CustomPlayerID;
@@ -31,6 +31,9 @@ public:
 	FString GetUniqueID() const;
 
 public:
+	void SetSelectedCharacterRow(FName NewRow) { SelectedCharacterRow = NewRow; }
+	FName GetSelectedCharacterRow() const { return SelectedCharacterRow; }
+
 	void AddDeathCount();
 	int32 GetDeathCount() const { return DeathCount; }
 
