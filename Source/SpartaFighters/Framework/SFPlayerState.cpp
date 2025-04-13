@@ -24,6 +24,17 @@ void ASFPlayerState::OnRep_SelectedCharacterRow()
 	UE_LOG(LogTemp, Warning, TEXT("OnRep_SelectedCharacterRow called after travel: %s"), *SelectedCharacterRow.ToString());
 }
 
+void ASFPlayerState::CopyProperties(APlayerState* PlayerState)
+{
+	Super::CopyProperties(PlayerState);
+
+	if (ASFPlayerState* OldState = Cast<ASFPlayerState>(PlayerState))
+	{
+		SelectedCharacterRow = OldState->SelectedCharacterRow;
+	}
+}
+
+
 FString ASFPlayerState::GetUniqueID() const
 {
 	return CustomPlayerID;

@@ -57,5 +57,7 @@ protected:
 	UFUNCTION()
 	void OnRep_SelectedCharacterRow();
 
+	void CopyProperties(APlayerState* PlayerState) override;
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
