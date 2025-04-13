@@ -4,9 +4,10 @@
 #include "UI/UIElements/LoginMenu.h"
 #include "UI/UIElements/LobbyMenu.h"
 #include "UI/UIElements/ShopMenu.h"
-#include "UI/UIElements/LoginMenu.h"
 #include "UI/UIElements/ShopItemListMenu.h"
 #include "UI/UIElements/RoomWidget.h"
+#include "UI/UIElements/CombatHUD.h"
+#include "UI/UIElements/CombatResultHUD.h"
 #include "UI/UIObject/MapSelectionWidget.h"
 #include "UI/UIObject/SelectCharacterWidget.h"
 
@@ -34,6 +35,8 @@ void UUIManager::Init(APlayerController* PlayerController)
 			ShopItemListMenuClass = Settings->FromBPShopItemListMenuClass;
 			RoomWidgetClass = Settings->FromBPRoomWidgetClass;
 			MapSelectionWidgetClass = Settings->FromBPMapSelectionWidgetClass;
+			CombatHUDClass = Settings->FromBPCombatHUDClass;
+			CombatResultHUDClass = Settings->FromBPCombatResultHUDClass;
 			SelectCharacterWidgetClass = Settings->FromBPSelectCharacterWidgetClass;
 
 			if (!CachedLoginMenu && LoginMenuClass)
@@ -55,6 +58,16 @@ void UUIManager::Init(APlayerController* PlayerController)
 			if (!CachedShopItemListMenu && ShopItemListMenuClass)
 			{
 				CachedShopItemListMenu = CreateWidget<UShopItemListMenu>(OwningPlayer, ShopItemListMenuClass);
+			}
+			if (!CachedCombatHUD && CombatHUDClass)
+			{
+				CachedCombatHUD = CreateWidget<UCombatHUD>(OwningPlayer, CombatHUDClass);
+				CachedCombatHUD->AddToViewport();
+			}
+			if (!CachedCombatResultHUD && CombatResultHUDClass)
+			{
+				CachedCombatResultHUD = CreateWidget<UCombatResultHUD>(OwningPlayer, CombatResultHUDClass);
+				CachedCombatResultHUD->AddToViewport();
 			}
 		}
 	}
@@ -152,4 +165,29 @@ void UUIManager::ShowSelectCharacterWidget()
 	{
 		SelectCharacterWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 	}
+}
+}
+
+void UUIManager::ShowCombatHUD()
+{
+	ensureAlways(CachedCombatHUD);
+	CachedCombatHUD->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UUIManager::ShowCombatResultHUD()
+{
+	ensureAlways(CachedCombatResultHUD);
+	CachedCombatResultHUD->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UUIManager::CloseCombatHUD()
+{
+	ensureAlways(CachedCombatHUD);
+	CachedCombatHUD->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UUIManager::CloseCombatResultHUD()
+{
+	ensureAlways(CachedCombatResultHUD);
+	CachedCombatResultHUD->SetVisibility(ESlateVisibility::Hidden);
 }

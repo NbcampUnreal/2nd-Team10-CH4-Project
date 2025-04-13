@@ -11,6 +11,8 @@ class UShopMenu;
 class UShopItemListMenu;
 class UMapSelectionWidget;
 class USelectCharacterWidget;
+class UCombatHUD;
+class UCombatResultHUD;
 
 UCLASS(BlueprintType)
 class SPARTAFIGHTERS_API UUIManagerSettings : public UDataAsset
@@ -32,4 +34,8 @@ public:
 	TSubclassOf<UMapSelectionWidget> FromBPMapSelectionWidgetClass;
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<USelectCharacterWidget> FromBPSelectCharacterWidgetClass;
+	TSubclassOf<UCombatHUD> FromBPCombatHUDClass;
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UCombatResultHUD> FromBPCombatResultHUDClass;
+	
 };
