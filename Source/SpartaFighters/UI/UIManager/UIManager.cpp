@@ -166,7 +166,6 @@ void UUIManager::ShowSelectCharacterWidget()
 		SelectCharacterWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 	}
 }
-}
 
 void UUIManager::ShowCombatHUD()
 {

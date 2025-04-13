@@ -27,7 +27,7 @@ void ASFPlayerState::OnRep_SelectedCharacterRow()
 void ASFPlayerState::CopyProperties(APlayerState* PlayerState)
 {
 	Super::CopyProperties(PlayerState);
-
+	UE_LOG(LogTemp, Warning, TEXT("SelectedCharacterRow : %s"), *SelectedCharacterRow.ToString());
 	if (ASFPlayerState* OldState = Cast<ASFPlayerState>(PlayerState))
 	{
 		SelectedCharacterRow = OldState->SelectedCharacterRow;
