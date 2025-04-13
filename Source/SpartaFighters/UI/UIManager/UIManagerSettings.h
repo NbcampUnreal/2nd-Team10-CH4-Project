@@ -10,6 +10,7 @@ class URoomWidget;
 class UShopMenu;
 class UShopItemListMenu;
 class UMapSelectionWidget;
+class USelectCharacterWidget;
 class UCombatHUD;
 class UCombatResultHUD;
 
@@ -32,6 +33,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UMapSelectionWidget> FromBPMapSelectionWidgetClass;
 	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<USelectCharacterWidget> FromBPSelectCharacterWidgetClass;
 	TSubclassOf<UCombatHUD> FromBPCombatHUDClass;
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UCombatResultHUD> FromBPCombatResultHUDClass;

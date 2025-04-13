@@ -52,4 +52,7 @@ private:
 	// Move to SFLobbyPlayerController.cpp
 	//void InitUI();
 
+public:
+	UFUNCTION(Server, Reliable)
+	void Server_RequestSpawnCharacter();
 };

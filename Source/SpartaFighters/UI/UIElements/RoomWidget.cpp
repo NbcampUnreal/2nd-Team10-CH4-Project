@@ -97,6 +97,17 @@ void URoomWidget::OnShopButtonClicked()
 void URoomWidget::OnPlayerInfoButtonClicked()
 {
 	UE_LOG(LogTemp, Log, TEXT("OnPlayerInfoButtonClicked"));
+
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	{
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			if (UUIManager* UIManager = Subsystem->GetUIManager())
+			{
+				UIManager->ShowSelectCharacterWidget();
+			}
+		}
+	}
 }
 
 void URoomWidget::OnOptionButtonClicked()
