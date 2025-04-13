@@ -319,6 +319,7 @@ void ASFCharacter::Die()
 
 		if (AController* ControllerInstance = GetController())
 		{
+			ControllerInstance->UnPossess();
 			if (ASFBattleGameMode* GM = GetWorld()->GetAuthGameMode<ASFBattleGameMode>())
 			{
 				GM->RequestRespawn(ControllerInstance);
