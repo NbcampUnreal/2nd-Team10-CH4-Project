@@ -11,4 +11,7 @@ class SPARTAFIGHTERS_API ASFCooperativeGameMode : public ASFGameModeBase
 	
 public:
 	ASFCooperativeGameMode();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Data")
+	UDataTable* CharacterDataTable;
 };
