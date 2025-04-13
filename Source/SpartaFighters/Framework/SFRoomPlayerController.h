@@ -18,4 +18,6 @@ public:
 	void Server_SetReady(bool bReady);
 	UFUNCTION(Server, Reliable)
 	void Server_RequestLevelChangeByMapName(const FString& MapName);
+	UFUNCTION(Server, Reliable)
+	void Server_SelectCharacter(FName CharacterRow/*, FName CommonItem, FName ExclusiveItem, FName CosmeticItem*/);
 };

@@ -121,4 +121,14 @@ public:
 
 private:
 	bool bIsItemEquipped;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void Die();
+
+	UFUNCTION(BlueprintCallable)
+	void DieImmediately();
+
+protected:
+	bool bIsDead = false;
 };

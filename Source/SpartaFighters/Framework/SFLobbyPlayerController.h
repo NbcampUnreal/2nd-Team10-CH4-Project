@@ -8,11 +8,14 @@ UCLASS()
 class SPARTAFIGHTERS_API ASFLobbyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
 public:
-    ASFLobbyPlayerController();
+	ASFLobbyPlayerController();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SelectCharacter(FName CharacterRow, FName CommonItem, FName ExclusiveItem, FName CosmeticItem);
 
 protected:
-    virtual void BeginPlay() override;
+	virtual void BeginPlay() override;
 
 };

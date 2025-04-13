@@ -19,9 +19,36 @@ void ASFPlayerState::OnRep_bIsRoomOwner()
 	// Host 아이콘 갱신 등 UI 처리
 }
 
+void ASFPlayerState::OnRep_SelectedCharacterRow()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_SelectedCharacterRow called after travel: %s"), *SelectedCharacterRow.ToString());
+}
+
+void ASFPlayerState::CopyProperties(APlayerState* PlayerState)
+{
+	Super::CopyProperties(PlayerState);
+	UE_LOG(LogTemp, Warning, TEXT("SelectedCharacterRow : %s"), *SelectedCharacterRow.ToString());
+	if (ASFPlayerState* OldState = Cast<ASFPlayerState>(PlayerState))
+	{
+		SelectedCharacterRow = OldState->SelectedCharacterRow;
+	}
+}
+
+
 FString ASFPlayerState::GetUniqueID() const
 {
 	return CustomPlayerID;
+}
+
+void ASFPlayerState::SetSelectedCharacterRow(FName NewRow)
+{
+	SelectedCharacterRow = NewRow;
+	UE_LOG(LogTemp, Warning, TEXT("Server: SetSelectedCharacterRow to %s"), *NewRow.ToString());
+}
+
+FName ASFPlayerState::GetSelectedCharacterRow() const
+{
+	return SelectedCharacterRow;
 }
 
 void ASFPlayerState::AddDeathCount()
@@ -33,6 +60,12 @@ void ASFPlayerState::AddDeathCount()
 	}
 }
 
+FString ASFPlayerState::PrintSelectedCharacterRow()
+{
+	FString SelectedChar = GetSelectedCharacterRow().ToString();
+	return SelectedChar;
+}
+
 void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -40,5 +73,5 @@ void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASFPlayerState, bIsReady);
 	DOREPLIFETIME(ASFPlayerState, bIsRoomOwner);
 	DOREPLIFETIME(ASFPlayerState, bIsAI);
-	DOREPLIFETIME(ASFPlayerState, CharacterRowName);
+	DOREPLIFETIME(ASFPlayerState, SelectedCharacterRow);
 }

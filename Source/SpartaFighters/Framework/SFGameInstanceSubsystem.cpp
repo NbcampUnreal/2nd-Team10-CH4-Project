@@ -12,7 +12,7 @@ void USFGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	if(!IsRunningDedicatedServer())
+	if (!IsRunningDedicatedServer())
 	{
 		UIManager = NewObject<UUIManager>(GetGameInstance());
 	}
@@ -85,8 +85,34 @@ void USFGameInstanceSubsystem::ChangeLevelByMapID(int32 MapID)
 
 			if (IsRunningDedicatedServer())
 			{
-				UE_LOG(LogTemp, Log, TEXT("Changing Level to: %s (Server)"), *LevelToLoad);
-				UGameplayStatics::OpenLevel(World, FName(*LevelToLoad), true);
+				for (FConstPlayerControllerIterator It = World->GetPlayerControllerIterator(); It; ++It)
+				{
+					if (APlayerController* PlayerControllerInstance = It->Get())
+					{
+						if (ASFPlayerState* PS = PlayerControllerInstance->GetPlayerState<ASFPlayerState>())
+						{
+							UE_LOG(LogTemp, Warning, TEXT("[Before SeamlessTravel] PC: %s, Row: %s, PS : %s"),
+								*PlayerControllerInstance->GetName(),
+								*PS->GetSelectedCharacterRow().ToString(),
+								*PS->GetActorNameOrLabel());
+						}
+						else
+						{
+							UE_LOG(LogTemp, Error, TEXT("PlayerController %s has no ASFPlayerState"), *PlayerControllerInstance->GetName());
+						}
+					}
+				}
+
+				/*UE_LOG(LogTemp, Log, TEXT("Changing Level to: %s (Server)"), *LevelToLoad);
+				UGameplayStatics::OpenLevel(World, FName(*LevelToLoad), true);*/
+
+				FName LevelName = FPackageName::GetShortFName(FName(*LevelToLoad));
+
+				World->GetAuthGameMode()->bUseSeamlessTravel = true;
+				World->ServerTravel(LevelName.ToString(), true);
+
+				/*FString URL = FString::Printf(TEXT("%s?listen"), *LevelToLoad);
+				GetWorld()->ServerTravel(URL);*/
 			}
 			else
 			{
@@ -118,7 +144,7 @@ void USFGameInstanceSubsystem::ConnectToServerByAddress(const FString& ServerAdd
 
 	UE_LOG(LogTemp, Log, TEXT("Client traveling to server: %s"), *ServerAddress);
 	FString ServerURL = ServerAddress;
-		///	When loading a save game, the URL should be different.
+	///	When loading a save game, the URL should be different.
 	FURL DedicatedServerURL(nullptr, *ServerURL, TRAVEL_Absolute);
 	FString ErrorMessage;
 	GEngine->Browse(GEngine->GetWorldContextFromWorldChecked(GetWorld()), DedicatedServerURL, ErrorMessage);

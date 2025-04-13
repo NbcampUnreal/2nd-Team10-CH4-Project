@@ -4,8 +4,6 @@
 #include "ShopMenu.h"
 #include "Components/Button.h"
 
-#include "UI/UIObject/PlayerSimpleInfoWidget.h"
-//#include "UI/UIObject/GlobalChatWidget.h"
 #include "UI/PopUp/QuitGameWidget.h"
 #include "UI/UIManager/UIManager.h"
 
@@ -189,3 +187,4 @@ void ULobbyMenu::OnBattleGameModeClicked()
 		}
 	}
 }
+

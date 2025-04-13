@@ -15,7 +15,7 @@ void UMapSelectionWidget::NativeConstruct()
 
 	if (StartButton)
 	{
-		StartButton->OnClicked.AddDynamic(this, &UMapSelectionWidget::OnStartButtonClicked);
+		StartButton->OnClicked.AddUniqueDynamic(this, &UMapSelectionWidget::OnStartButtonClicked);
 	}
 }
 
