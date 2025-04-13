@@ -25,7 +25,7 @@ ASFItemPickup::ASFItemPickup()
 void ASFItemPickup::BeginPlay()
 {
 	Super::BeginPlay();
-	if (ItemClass && HasAuthority())
+	if (ItemClass)
 	{
 		PickupItemInstance = NewObject<USFConsumableBase>(GetWorld(), ItemClass);
 		if (PickupItemInstance)
@@ -46,16 +46,21 @@ void ASFItemPickup::BeginPlay()
 void ASFItemPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ASFCharacter* PlayerCharacter = Cast<ASFCharacter>(OtherActor);
-	if (PlayerCharacter && PlayerCharacter->IsLocallyControlled())
+	if (PlayerCharacter && PlayerCharacter->IsLocallyControlled() && HasAuthority())
 	{
 		//Server request
 		Server_UsePickup(PlayerCharacter);
+	}
+	else if (PlayerCharacter && PlayerCharacter->IsLocallyControlled() && !HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Item used by client"));
+		Destroy();
 	}
 }
 
 void ASFItemPickup::Server_UsePickup_Implementation(ASFCharacter* PlayerCharacter)
 {
-	if (PlayerCharacter && PickupItemInstance)
+	if (PlayerCharacter && PickupItemInstance && HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s picked up and used by server: collide with %s "), *PickupItemInstance->ItemName.ToString(), *PlayerCharacter->GetName());
 
