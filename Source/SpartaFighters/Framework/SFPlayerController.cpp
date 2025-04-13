@@ -25,6 +25,7 @@ void ASFPlayerController::BeginPlay()
 	if (IsLocalController())
 	{
 		AddMappingContext();
+		SetInputMode(FInputModeGameOnly());
 	}
 }
 
@@ -51,5 +52,18 @@ void ASFPlayerController::Server_RequestSpawnCharacter_Implementation()
 	if (GM)
 	{
 		GM->HandleCharacterSpawnRequest(this);
+	}
+}
+
+void ASFPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	UE_LOG(LogTemp, Warning, TEXT("ASFPlayerController::OnPossess => %s"), *InPawn->GetName());
+
+	if (IsLocalController())
+	{
+		AddMappingContext();
+		SetInputMode(FInputModeGameOnly());
 	}
 }

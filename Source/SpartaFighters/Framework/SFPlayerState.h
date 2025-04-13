@@ -35,6 +35,8 @@ public:
 	FString GetUniqueID() const;
 
 public:
+	UFUNCTION(BlueprintCallable)
+	void BP_SetSelectedCharacterRow(FName NewRow);
 	void SetSelectedCharacterRow(FName NewRow);
 	FName GetSelectedCharacterRow() const;
 

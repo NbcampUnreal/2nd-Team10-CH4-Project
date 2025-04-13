@@ -28,16 +28,21 @@ void ASFPlayerState::CopyProperties(APlayerState* PlayerState)
 {
 	Super::CopyProperties(PlayerState);
 	UE_LOG(LogTemp, Warning, TEXT("SelectedCharacterRow : %s"), *SelectedCharacterRow.ToString());
-	if (ASFPlayerState* OldState = Cast<ASFPlayerState>(PlayerState))
+	if (ASFPlayerState* NewState = Cast<ASFPlayerState>(PlayerState))
 	{
-		SelectedCharacterRow = OldState->SelectedCharacterRow;
+		NewState->SelectedCharacterRow = this->SelectedCharacterRow;
 	}
 }
-
 
 FString ASFPlayerState::GetUniqueID() const
 {
 	return CustomPlayerID;
+}
+
+void ASFPlayerState::BP_SetSelectedCharacterRow(FName NewRow)
+{
+	SelectedCharacterRow = NewRow;
+	UE_LOG(LogTemp, Warning, TEXT("Server: SetSelectedCharacterRow to %s"), *NewRow.ToString());
 }
 
 void ASFPlayerState::SetSelectedCharacterRow(FName NewRow)
