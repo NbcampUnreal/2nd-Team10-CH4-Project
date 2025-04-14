@@ -1,4 +1,4 @@
-#include "SFPlayerController.h"
+﻿#include "SFPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "Framework/SFGameInstanceSubsystem.h"
 #include "Framework/SFBattleGameMode.h"
@@ -26,6 +26,15 @@ void ASFPlayerController::BeginPlay()
 	{
 		AddMappingContext();
 		SetInputMode(FInputModeGameOnly());
+
+		if (USFGameInstanceSubsystem* Subsystem = GetGameInstance()->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			if (UUIManager* UIManager = Subsystem->GetUIManager())
+			{
+				UIManager->SetPlayerController(this);
+				UIManager->ShowCombatHUD();
+			}
+		}
 	}
 }
 
@@ -52,6 +61,25 @@ void ASFPlayerController::Server_RequestSpawnCharacter_Implementation()
 	if (GM)
 	{
 		GM->HandleCharacterSpawnRequest(this);
+	}
+}
+
+void ASFPlayerController::Client_StartHUDUpdate_Implementation()
+{
+	if (USFGameInstanceSubsystem* Subsystem = GetGameInstance()->GetSubsystem<USFGameInstanceSubsystem>())
+	{
+		/*if (UUIManager* UIManager = Subsystem->GetUIManager())
+		{
+			UIManager->StartHUDUpdate(); 
+		}*/
+
+		UUIManager* UIManager = Subsystem->GetUIManager();
+		if (UIManager != nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("please"));
+			UIManager->SetPlayerController(this);
+			UIManager->StartHUDUpdate();
+		}
 	}
 }
 
