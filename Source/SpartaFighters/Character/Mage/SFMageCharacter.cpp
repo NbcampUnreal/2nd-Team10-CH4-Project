@@ -35,7 +35,7 @@ void ASFMageCharacter::CastingFireBall()
 
 void ASFMageCharacter::TeleportForward()
 {
-    ShowTeleportDustEffect();
+    ShowTeleportCircleEffect();
 
     GetWorldTimerManager().SetTimer(
         PrepareTeleportTimer,
@@ -88,6 +88,6 @@ void ASFMageCharacter::ExecuteTelepoprt()
     FVector CurrentLocation = GetActorLocation();
     FVector TeleportLocation = CurrentLocation + Forward * TeleportDistance;
 
-    SetActorLocation(TeleportLocation, true, nullptr);  // TODO : If you want not sweep.. true->false change.
+    SetActorLocation(TeleportLocation, false, nullptr);  // TODO : If you want not sweep.. true->false change.
 }
 
