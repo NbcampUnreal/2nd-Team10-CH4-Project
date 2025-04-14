@@ -33,6 +33,7 @@ public:
 	FString CustomPlayerID;
 
 	FString GetUniqueID() const;
+	void SetUniqueID(FString InUniqueID) { CustomPlayerID = InUniqueID; }
 
 public:
 	UFUNCTION(BlueprintCallable)
