@@ -25,4 +25,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Blackboard)
 	FBlackboardKeySelector TargetStateKey;
+
+	UPROPERTY(EditAnywhere, Category = Blackboard)
+	FBlackboardKeySelector AIStateKey;
 };

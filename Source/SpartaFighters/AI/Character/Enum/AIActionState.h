@@ -11,5 +11,5 @@ enum class EAIActionType : uint8
 	Guard       UMETA(DisplayName = "Guard"),
 	Evade       UMETA(DisplayName = "Evade"),
 	Retreat     UMETA(DisplayName = "Retreat"),
-	Chase		UMETA(DisplayName = "Retreat")
+	Chase		UMETA(DisplayName = "Chase")
 };

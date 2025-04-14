@@ -3,6 +3,8 @@
 
 #include "BTT_SelectRangeAction.h"
 #include "AI/Character/Enum/AIActionState.h"
+#include "AI/Character/Enum/AIState.h"
+#include "Character/Components/StateComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTT_SelectRangeAction::UBTT_SelectRangeAction()
