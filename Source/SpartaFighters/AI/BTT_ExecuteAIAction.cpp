@@ -60,31 +60,31 @@ EBTNodeResult::Type UBTT_ExecuteAIAction::ExecuteTask(UBehaviorTreeComponent& Ow
 
     EAIActionType AIActionType = static_cast<EAIActionType>(AIAction);
 
-    switch (AIActionType)
-    {
-    case EAIActionType::Attack:
-        SFCharacter->PerformAttack(0);
-        break;
+    //switch (AIActionType)
+    //{
+    //case EAIActionType::Attack:
+    //    SFCharacter->PerformAttack(0);
+    //    break;
 
-    case EAIActionType::Guard:
-        SFCharacter->PerformAttack(0);
-        break;
+    //case EAIActionType::Guard:
+    //    SFCharacter->PerformAttack(0);
+    //    break;
 
-    case EAIActionType::Evade:
-        SFCharacter->PerformAttack(0);
-        break;
+    //case EAIActionType::Evade:
+    //    SFCharacter->PerformAttack(0);
+    //    break;
 
-    case EAIActionType::Retreat:
-        SFCharacter->PerformAttack(0);
-        break;
-        
-    case EAIActionType::Chase:
-        return EBTNodeResult::Failed;
+    //case EAIActionType::Retreat:
+    //    SFCharacter->PerformAttack(0);
+    //    break;
+    //    
+    //case EAIActionType::Chase:
+    //    return EBTNodeResult::Failed;
 
-    default:
-        UE_LOG(LogTemp, Warning, TEXT("Invalid AIAction Enum."));
-        return EBTNodeResult::Failed;
-    }
+    //default:
+    //    UE_LOG(LogTemp, Warning, TEXT("Invalid AIAction Enum."));
+    //    return EBTNodeResult::Failed;
+    //}
 
     return EBTNodeResult::Succeeded;
 

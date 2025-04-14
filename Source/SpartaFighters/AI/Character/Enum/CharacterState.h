@@ -5,7 +5,7 @@
 
 
 UENUM(BlueprintType)
-enum class ECharacterState : uint8
+enum class ECharacterState1 : uint8
 {
 	Idle			UMETA(DisplayName = "Idle"),
 	Walking			UMETA(DisplayName = "Walking"),
