@@ -24,6 +24,7 @@ public:
 	void ReturnToLobby();
 	void Client_TravelToLobby_Implementation(APlayerController* PC);
 	void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+	void RequestRespawn(AController* DeadController);
 
 	ASFPlayerState* CalculateWinner();
 
