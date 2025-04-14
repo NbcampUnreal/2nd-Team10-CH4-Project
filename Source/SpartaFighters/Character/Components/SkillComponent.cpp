@@ -102,6 +102,8 @@ void USkillComponent::Multicast_HandleSkillAttack_Implementation(ECharacterState
 
 void USkillComponent::HandleSkillAttack(ECharacterState CurrentState)
 {
+	if (!StateComponent || StateComponent->IsInAction()) return;
+
 	FName RowName = TEXT("IdleSkill");
 
 	switch (CurrentState)
@@ -120,33 +122,35 @@ void USkillComponent::HandleSkillAttack(ECharacterState CurrentState)
 	PlayAnimMontage(RowName);
 }
 
-void USkillComponent::HandleInputRoll()
+void USkillComponent::HandleInputDodge()
 {
 	if (!IsValid(OwnerCharacter) || !IsValid(SkillDataTable)) return;
 
 	if (OwnerCharacter->HasAuthority())
 	{
-		Multicast_HandleRoll(StateComponent->GetState());
+		Multicast_HandleDodge(StateComponent->GetState());
 	}
 	else
 	{
-		Server_HandleRoll();
+		Server_HandleDodge();
 	}
 }
 
-void USkillComponent::Multicast_HandleRoll_Implementation(ECharacterState State)
+void USkillComponent::Multicast_HandleDodge_Implementation(ECharacterState State)
 {
-	HandleRoll(State);
+	HandleDodge(State);
 }
 
-void USkillComponent::Server_HandleRoll_Implementation()
+void USkillComponent::Server_HandleDodge_Implementation()
 {
-	Multicast_HandleRoll(StateComponent->GetState());
+	Multicast_HandleDodge(StateComponent->GetState());
 }
 
-void USkillComponent::HandleRoll(ECharacterState CurrentState)
+void USkillComponent::HandleDodge(ECharacterState CurrentState)
 {
-	FName RowName = TEXT("SpecialMoveSkill");
+	FName RowName = TEXT("Dodge");
+	StateComponent->SetIsInAction(true);
+
 	PlayAnimMontage(RowName);
 }
 
