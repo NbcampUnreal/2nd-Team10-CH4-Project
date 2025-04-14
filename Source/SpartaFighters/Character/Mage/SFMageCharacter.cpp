@@ -35,7 +35,7 @@ void ASFMageCharacter::CastingFireBall()
 
 void ASFMageCharacter::TeleportForward()
 {
-    ShowTeleportCircleEffect();
+    ShowTeleportDustEffect();
 
     GetWorldTimerManager().SetTimer(
         PrepareTeleportTimer,
