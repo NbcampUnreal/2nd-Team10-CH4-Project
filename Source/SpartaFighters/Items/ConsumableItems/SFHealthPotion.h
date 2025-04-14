@@ -4,9 +4,6 @@
 #include "Items/ConsumableItems/SFConsumableBase.h"
 #include "SFHealthPotion.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SPARTAFIGHTERS_API USFHealthPotion : public USFConsumableBase
 {
@@ -19,7 +16,7 @@ public:
 	float RecoveryAmount;
 
 	
-	virtual void ApplyConsumableEffect_Implementation(ASFCharacter* InPlayerCharacter) override;
+	virtual void Server_ApplyConsumableEffect_Implementation(ASFCharacter* InPlayerCharacter) override;
 
 	
 };
