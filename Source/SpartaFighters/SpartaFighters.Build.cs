@@ -14,8 +14,16 @@ public class SpartaFighters : ModuleRules
             "CoreUObject",
             "Engine",
             "InputCore",
+            "NetCore",
             "EnhancedInput",
-            "UMG"
+            "UMG",
+            "HTTP",
+            "JsonUtilities",
+            "Json",
+            "AIModule",
+            "GamePlayTasks",
+            "NavigationSystem",
+            "Niagara"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[]
