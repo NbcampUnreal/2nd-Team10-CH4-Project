@@ -7,15 +7,15 @@ void USelectionWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    if (LeftArrowButton)
+   /* if (LeftArrowButton)
     {
-        LeftArrowButton->OnClicked.AddDynamic(this, &USelectionWidget::OnLeftArrowClicked);
+        LeftArrowButton->OnClicked.AddUniqueDynamic(this, &USelectionWidget::OnLeftArrowClicked);
     }
 
     if (RightArrowButton)
     {
-        RightArrowButton->OnClicked.AddDynamic(this, &USelectionWidget::OnRightArrowClicked);
-    }
+        RightArrowButton->OnClicked.AddUniqueDynamic(this, &USelectionWidget::OnRightArrowClicked);
+    }*/
 }
 
 void USelectionWidget::InitializeSelection(const TArray<FString>& InOptions, int32 DefaultIndex)
@@ -29,31 +29,31 @@ void USelectionWidget::InitializeSelection(const TArray<FString>& InOptions, int
     }
 }
 
-void USelectionWidget::OnLeftArrowClicked()
-{
-    if (Options.Num() == 0)
-    {
-        return;
-    }
-
-    CurrentIndex = (CurrentIndex - 1 + Options.Num()) % Options.Num();
-    SelectionText->SetText(FText::FromString(Options[CurrentIndex]));
-
-    OnSelectionChanged.Broadcast(CurrentIndex);
-}
-
-void USelectionWidget::OnRightArrowClicked()
-{
-    if (Options.Num() == 0)
-    {
-        return;
-    }
-    
-    CurrentIndex = (CurrentIndex + 1) % Options.Num();
-    SelectionText->SetText(FText::FromString(Options[CurrentIndex]));
-
-    OnSelectionChanged.Broadcast(CurrentIndex);
-}
+//void USelectionWidget::OnLeftArrowClicked()
+//{
+//    if (Options.Num() == 0)
+//    {
+//        return;
+//    }
+//
+//    CurrentIndex = (CurrentIndex - 1 + Options.Num()) % Options.Num();
+//    SelectionText->SetText(FText::FromString(Options[CurrentIndex]));
+//
+//    OnSelectionChanged.Broadcast(CurrentIndex);
+//}
+//
+//void USelectionWidget::OnRightArrowClicked()
+//{
+//    if (Options.Num() == 0)
+//    {
+//        return;
+//    }
+//    
+//    CurrentIndex = (CurrentIndex + 1) % Options.Num();
+//    SelectionText->SetText(FText::FromString(Options[CurrentIndex]));
+//
+//    OnSelectionChanged.Broadcast(CurrentIndex);
+//}
 
 void USelectionWidget::SetCurrentOption(FString NewCurrentOption)
 {

@@ -280,6 +280,7 @@ void ULoginMenu::OnLogInSucces()
 		if (SFPlayerState)
 		{
 			FString ID = IDTextBox->GetText().ToString();
+			SFPlayerState->SetUniqueID(ID);
 			UE_LOG(LogTemp, Warning, TEXT("[SFPlayerState->PlayerUniqueID : %s]"), *SFPlayerState->GetUniqueID());
 		}
 	}

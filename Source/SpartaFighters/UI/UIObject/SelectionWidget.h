@@ -30,11 +30,11 @@ protected:
     TArray<FString> Options;
     int32 CurrentIndex = 0;
 
-    UFUNCTION()
+   /* UFUNCTION()
     void OnLeftArrowClicked();
 
     UFUNCTION()
-    void OnRightArrowClicked();
+    void OnRightArrowClicked();*/
 
 public:
     UPROPERTY(BlueprintAssignable)
