@@ -6,6 +6,7 @@
 
 class UButton;
 class UPlayerSlotWidget;
+class UUniformGridPanel;
 
 UCLASS()
 class SPARTAFIGHTERS_API URoomWidget : public UBaseUserWidget
@@ -28,15 +29,16 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* SelectMapButton;
+	UPROPERTY(meta = (BindWidget))
+	UButton* ReadyButton;
 
 	UPROPERTY(meta = (BindWidget))
-	UPlayerSlotWidget* ClientSlot1;
-	UPROPERTY(meta = (BindWidget))
-	UPlayerSlotWidget* ClientSlot2;
-	UPROPERTY(meta = (BindWidget))
-	UPlayerSlotWidget* ClientSlot3;
-	UPROPERTY(meta = (BindWidget))
-	UPlayerSlotWidget* ClientSlot4;
+	UUniformGridPanel* PlayerGridPanel;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UPlayerSlotWidget> PlayerSlotWidgetClass;
+
+	FTimerHandle UpdatePlayerSlotTimerHandle;
 
 	UFUNCTION()
 	void OnShopButtonClicked();
@@ -48,8 +50,12 @@ private:
 	void OnLobbyButtonClicked();
 	UFUNCTION()
 	void OnSelectMapButtonClicked();
+	UFUNCTION()
+	void OnReadyButtonClicked();
 
 public:
 	void UpdatePlayerSlots();
+
+	void UpdateUIState();
 
 };

@@ -24,27 +24,27 @@ void ULoginMenu::NativeConstruct()
 
 	if (LoginButton)
 	{
-		LoginButton->OnClicked.AddDynamic(this, &ULoginMenu::OnLoginClicked);
+		LoginButton->OnClicked.AddUniqueDynamic(this, &ULoginMenu::OnLoginClicked);
 	}
 	if (RegisterButton)
 	{
-		RegisterButton->OnClicked.AddDynamic(this, &ULoginMenu::OnRegisterClicked);
+		RegisterButton->OnClicked.AddUniqueDynamic(this, &ULoginMenu::OnRegisterClicked);
 	}
 	if (OptionButton)
 	{
-		OptionButton->OnClicked.AddDynamic(this, &ULoginMenu::OnOptionClicked);
+		OptionButton->OnClicked.AddUniqueDynamic(this, &ULoginMenu::OnOptionClicked);
 	}
 	if (QuitGameButton)
 	{
-		QuitGameButton->OnClicked.AddDynamic(this, &ULoginMenu::OnQuitGameClicked);
+		QuitGameButton->OnClicked.AddUniqueDynamic(this, &ULoginMenu::OnQuitGameClicked);
 	}
 	if (IDTextBox)
 	{
-		IDTextBox->OnTextCommitted.AddDynamic(this, &ULoginMenu::OnTextCommitted);
+		IDTextBox->OnTextCommitted.AddUniqueDynamic(this, &ULoginMenu::OnTextCommitted);
 	}
 	if (PasswordTextBox)
 	{
-		PasswordTextBox->OnTextCommitted.AddDynamic(this, &ULoginMenu::OnTextCommitted);
+		PasswordTextBox->OnTextCommitted.AddUniqueDynamic(this, &ULoginMenu::OnTextCommitted);
 	}
 	if (InstructionText)
 	{
@@ -56,6 +56,40 @@ void ULoginMenu::NativeConstruct()
 		FInputModeUIOnly InputModeData;
 		PlayerController->SetInputMode(InputModeData);
 		PlayerController->bShowMouseCursor = true;
+	}
+}
+
+void ULoginMenu::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	if (LoginButton)
+	{
+		LoginButton->OnClicked.RemoveDynamic(this, &ULoginMenu::OnLoginClicked);
+	}
+	if (RegisterButton)
+	{
+		RegisterButton->OnClicked.RemoveDynamic(this, &ULoginMenu::OnRegisterClicked);
+	}
+	if (OptionButton)
+	{
+		OptionButton->OnClicked.RemoveDynamic(this, &ULoginMenu::OnOptionClicked);
+	}
+	if (QuitGameButton)
+	{
+		QuitGameButton->OnClicked.RemoveDynamic(this, &ULoginMenu::OnQuitGameClicked);
+	}
+	if (IDTextBox)
+	{
+		IDTextBox->OnTextCommitted.RemoveDynamic(this, &ULoginMenu::OnTextCommitted);
+	}
+	if (PasswordTextBox)
+	{
+		PasswordTextBox->OnTextCommitted.RemoveDynamic(this, &ULoginMenu::OnTextCommitted);
+	}
+	if (InstructionText)
+	{
+		InstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Sparta Fighters!"));
 	}
 }
 
@@ -246,8 +280,8 @@ void ULoginMenu::OnLogInSucces()
 		if (SFPlayerState)
 		{
 			FString ID = IDTextBox->GetText().ToString();
-			SFPlayerState->Server_SetPlayerID(ID);
-			UE_LOG(LogTemp, Warning, TEXT("[SFPlayerState->PlayerUniqueID : %s]"), *SFPlayerState->PlayerUniqueID);
+			SFPlayerState->SetUniqueID(ID);
+			UE_LOG(LogTemp, Warning, TEXT("[SFPlayerState->PlayerUniqueID : %s]"), *SFPlayerState->GetUniqueID());
 		}
 	}
 

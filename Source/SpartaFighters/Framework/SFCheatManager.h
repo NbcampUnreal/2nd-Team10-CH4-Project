@@ -15,4 +15,7 @@ public:
 
 	UFUNCTION(exec)
 	void PrintServerInfo();
+
+	UFUNCTION(exec)
+	void PrintFrameworkInfo();
 };

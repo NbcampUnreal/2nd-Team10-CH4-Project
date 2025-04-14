@@ -9,5 +9,7 @@ class SPARTAFIGHTERS_API ARoomGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+protected:
+	void PostLogin(APlayerController* NewPlayer) override;
 };
 

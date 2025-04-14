@@ -4,6 +4,7 @@
 #include "UObject/NoExportTypes.h"
 #include "DataTypes/GameModeType.h"
 #include "UI/UIObject/MapSelectionWidget.h"
+#include "UI/UIObject/SelectCharacterWidget.h"
 #include "UIManager.generated.h"
 
 class ULoginMenu;
@@ -12,6 +13,8 @@ class UShopMenu;
 class UShopItemListMenu;
 class UUIManagerSettings;
 class URoomWidget;
+class UCombatHUD;
+class UCombatResultHUD;
 
 UCLASS()
 class SPARTAFIGHTERS_API UUIManager : public UObject
@@ -38,13 +41,23 @@ public:
     UUserWidget* GetCurrentWidget() const { return CurrentWidget; }
 
     void ShowMapSelectionWidget(EGameModeType GameModeType);
-    void CloseMapSelectionWidget();
+    void ShowSelectCharacterWidget();
+
+    void ShowCombatResultHUD();
+    void CloseCombatHUD();
+    void CloseCombatResultHUD();
+    void ShowCombatHUD();
 
 private:
     UPROPERTY()
     UMapSelectionWidget* MapSelectionWidgetInstance;
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<UMapSelectionWidget> MapSelectionWidgetClass;
+
+    UPROPERTY()
+    USelectCharacterWidget* SelectCharacterWidgetInstance;
+    UPROPERTY(EditDefaultsOnly)
+    TSubclassOf<USelectCharacterWidget> SelectCharacterWidgetClass;
 
     UPROPERTY()
     UUserWidget* CurrentWidget;
@@ -62,6 +75,10 @@ private:
     TSubclassOf<ULoginMenu> LoginMenuClass;
     UPROPERTY(EditDefaultsOnly, Category = "UI")
     TSubclassOf<UShopItemListMenu> ShopItemListMenuClass;
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UCombatHUD> CombatHUDClass;
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UCombatResultHUD> CombatResultHUDClass;
     
     /* Chacing Widget */
     UPROPERTY()
@@ -74,6 +91,10 @@ private:
     UShopMenu* CachedShopMenu;
     UPROPERTY()
     UShopItemListMenu* CachedShopItemListMenu;
+    UPROPERTY()
+    UCombatHUD* CachedCombatHUD;
+    UPROPERTY()
+    UCombatResultHUD* CachedCombatResultHUD;
 
     /* Controller save */
     UPROPERTY()

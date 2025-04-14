@@ -47,9 +47,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* SettingAction;
 
-private:
+public:
 	void AddMappingContext();
 	// Move to SFLobbyPlayerController.cpp
 	//void InitUI();
 
+public:
+	UFUNCTION(Server, Reliable)
+	void Server_RequestSpawnCharacter();
+	void OnPossess(APawn* InPawn) override;
 };

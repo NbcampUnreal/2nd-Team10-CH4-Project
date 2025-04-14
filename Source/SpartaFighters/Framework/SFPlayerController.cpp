@@ -1,6 +1,8 @@
 #include "SFPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "Framework/SFGameInstanceSubsystem.h"
+#include "Framework/SFBattleGameMode.h"
+#include "Framework/SFPlayerState.h"
 #include "UI/UIManager/UIManager.h"
 
 ASFPlayerController::ASFPlayerController()
@@ -23,6 +25,7 @@ void ASFPlayerController::BeginPlay()
 	if (IsLocalController())
 	{
 		AddMappingContext();
+		SetInputMode(FInputModeGameOnly());
 	}
 }
 
@@ -43,3 +46,24 @@ void ASFPlayerController::AddMappingContext()
 	Subsystem->AddMappingContext(InputMappingContext, 0);
 }
 
+void ASFPlayerController::Server_RequestSpawnCharacter_Implementation()
+{
+	ASFBattleGameMode* GM = GetWorld()->GetAuthGameMode<ASFBattleGameMode>();
+	if (GM)
+	{
+		GM->HandleCharacterSpawnRequest(this);
+	}
+}
+
+void ASFPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	UE_LOG(LogTemp, Warning, TEXT("ASFPlayerController::OnPossess => %s"), *InPawn->GetName());
+
+	if (IsLocalController())
+	{
+		AddMappingContext();
+		SetInputMode(FInputModeGameOnly());
+	}
+}

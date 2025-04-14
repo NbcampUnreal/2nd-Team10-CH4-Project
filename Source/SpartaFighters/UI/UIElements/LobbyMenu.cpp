@@ -4,8 +4,6 @@
 #include "ShopMenu.h"
 #include "Components/Button.h"
 
-#include "UI/UIObject/PlayerSimpleInfoWidget.h"
-//#include "UI/UIObject/GlobalChatWidget.h"
 #include "UI/PopUp/QuitGameWidget.h"
 #include "UI/UIManager/UIManager.h"
 
@@ -16,34 +14,34 @@ void ULobbyMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (PlayerInfoButton)
+	/*if (PlayerInfoButton)
 	{
-		PlayerInfoButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnPlayerInfoClicked);
+		PlayerInfoButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnPlayerInfoClicked);
 	}
 	if (ShopButton)
 	{
-		ShopButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnShopClicked);
-	}
+		ShopButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnShopClicked);
+	}*/
 	if (OptionButton)
 	{
-		OptionButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnOptionClicked);
+		OptionButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnOptionClicked);
 	}
 	if (QuitGameButton)
 	{
-		QuitGameButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnQuitGameClicked);
+		QuitGameButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnQuitGameClicked);
 	}
 
-	if (SingleGameModeButton)
+	/*if (SingleGameModeButton)
 	{
-		SingleGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnSingleGameModeClicked);
-	}
+		SingleGameModeButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnSingleGameModeClicked);
+	}*/
 	if (CoopGameModeButton)
 	{
-		CoopGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnCoopGameModeClicked);
+		CoopGameModeButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnCoopGameModeClicked);
 	}
 	if (BattleGameModeButton)
 	{
-		BattleGameModeButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnBattleGameModeClicked);
+		BattleGameModeButton->OnClicked.AddUniqueDynamic(this, &ULobbyMenu::OnBattleGameModeClicked);
 	}
 
 	if (QuitGameWidgetClass.IsNull())
@@ -56,14 +54,14 @@ void ULobbyMenu::NativeDestruct()
 {
 	Super::NativeDestruct();
 
-	if (PlayerInfoButton)
+	/*if (PlayerInfoButton)
 	{
 		PlayerInfoButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnPlayerInfoClicked);
 	}
 	if (ShopButton)
 	{
 		ShopButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnShopClicked);
-	}
+	}*/
 	if (OptionButton)
 	{
 		OptionButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnOptionClicked);
@@ -73,10 +71,10 @@ void ULobbyMenu::NativeDestruct()
 		QuitGameButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnQuitGameClicked);
 	}
 
-	if (SingleGameModeButton)
+	/*if (SingleGameModeButton)
 	{
 		SingleGameModeButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnSingleGameModeClicked);
-	}
+	}*/
 	if (CoopGameModeButton)
 	{
 		CoopGameModeButton->OnClicked.RemoveDynamic(this, &ULobbyMenu::OnCoopGameModeClicked);
@@ -87,20 +85,20 @@ void ULobbyMenu::NativeDestruct()
 	}
 }
 
-void ULobbyMenu::OnPlayerInfoClicked()
-{
-	UE_LOG(LogTemp, Warning, TEXT("OnPlayerInfoClicked!"));
-	// Open Player Info UI
-}
-
-void ULobbyMenu::OnShopClicked()
-{
-	UE_LOG(LogTemp, Warning, TEXT("OnShopClicked!"));
-	if (UUIManager* UIManager = ResolveUIManager())
-	{
-		UIManager->ShowShopMenu();
-	}
-}
+//void ULobbyMenu::OnPlayerInfoClicked()
+//{
+//	UE_LOG(LogTemp, Warning, TEXT("OnPlayerInfoClicked!"));
+//	// Open Player Info UI
+//}
+//
+//void ULobbyMenu::OnShopClicked()
+//{
+//	UE_LOG(LogTemp, Warning, TEXT("OnShopClicked!"));
+//	if (UUIManager* UIManager = ResolveUIManager())
+//	{
+//		UIManager->ShowShopMenu();
+//	}
+//}
 
 void ULobbyMenu::OnOptionClicked()
 {
@@ -134,23 +132,23 @@ void ULobbyMenu::OnQuitGameClicked()
 	}
 }
 
-void ULobbyMenu::OnSingleGameModeClicked()
-{
-	UE_LOG(LogTemp, Warning, TEXT("OnSingleGameModeClicked!"));
-
-	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
-	{
-		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
-		{
-			Subsystem->SetCurrentGameMode(EGameModeType::Single);
-
-			if (UUIManager* UIManager = ResolveUIManager())
-			{
-				UIManager->ShowMapSelectionWidget(Subsystem->GetCurrentGameMode());
-			}
-		}
-	}
-}
+//void ULobbyMenu::OnSingleGameModeClicked()
+//{
+//	UE_LOG(LogTemp, Warning, TEXT("OnSingleGameModeClicked!"));
+//
+//	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+//	{
+//		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+//		{
+//			Subsystem->SetCurrentGameMode(EGameModeType::Single);
+//
+//			if (UUIManager* UIManager = ResolveUIManager())
+//			{
+//				UIManager->ShowMapSelectionWidget(Subsystem->GetCurrentGameMode());
+//			}
+//		}
+//	}
+//}
 
 void ULobbyMenu::OnCoopGameModeClicked()
 {
@@ -162,11 +160,11 @@ void ULobbyMenu::OnCoopGameModeClicked()
 		{
 			Subsystem->SetCurrentGameMode(EGameModeType::Cooperative);
 
-			const FString HostAddress = TEXT("127.0.0.1:7777");
+			const FString HostAddress = TEXT("127.0.0.1:17777");
 			Subsystem->ConnectToServerByAddress(HostAddress);
 
-			const FString RoomMapName = TEXT("RoomMenu");
-			Subsystem->ChangeLevelByMapName(RoomMapName);
+			/*const FString RoomMapName = TEXT("RoomMenu");
+			Subsystem->ChangeLevelByMapName(RoomMapName);*/
 		}
 	}
 }
@@ -181,11 +179,12 @@ void ULobbyMenu::OnBattleGameModeClicked()
 		{
 			Subsystem->SetCurrentGameMode(EGameModeType::Battle);
 
-			const FString HostAddress = TEXT("127.0.0.1:7777");
+			const FString HostAddress = TEXT("127.0.0.1:17777");
 			Subsystem->ConnectToServerByAddress(HostAddress);
 
-			const FString RoomMapName = TEXT("RoomMenu");
-			Subsystem->ChangeLevelByMapName(RoomMapName);
+			/*const FString RoomMapName = TEXT("RoomMenu");
+			Subsystem->ChangeLevelByMapName(RoomMapName);*/
 		}
 	}
 }
+

@@ -111,14 +111,24 @@ protected:
 public:
 	virtual void AttackTrace();	// For AnimNotify
 
-public:
-	void PerformAttack(int32 AttackIndex);
-	void AddAttackHandler(UObject* AttackHandler);
-
-protected:
-	UPROPERTY()
-	TArray<TObjectPtr<UObject>> AttackHandlers;
+//public:
+//	void PerformAttack(int32 AttackIndex);
+//	void AddAttackHandler(UObject* AttackHandler);
+//
+//protected:
+//	UPROPERTY()
+//	TArray<TObjectPtr<UObject>> AttackHandlers;
 
 private:
 	bool bIsItemEquipped;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void Die();
+
+	UFUNCTION(BlueprintCallable)
+	void DieImmediately();
+
+protected:
+	bool bIsDead = false;
 };

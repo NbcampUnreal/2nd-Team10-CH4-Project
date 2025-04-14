@@ -6,7 +6,16 @@ void USelectPopUpBase::NativeConstruct()
 	Super::NativeConstruct();
 	if (ExitButton)
 	{
-		ExitButton->OnClicked.AddDynamic(this, &USelectPopUpBase::OnExitClicked);
+		ExitButton->OnClicked.AddUniqueDynamic(this, &USelectPopUpBase::OnExitClicked);
+	}
+}
+
+void USelectPopUpBase::NativeDestruct()
+{
+	Super::NativeDestruct();
+	if (ExitButton)
+	{
+		ExitButton->OnClicked.RemoveDynamic(this, &USelectPopUpBase::OnExitClicked);
 	}
 }
 

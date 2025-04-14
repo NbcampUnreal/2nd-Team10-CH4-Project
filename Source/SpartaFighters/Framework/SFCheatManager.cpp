@@ -1,7 +1,13 @@
 #include "Framework/SFCheatManager.h"
 #include "Framework/SFGameInstance.h"
 #include "Framework/SFGameInstanceSubsystem.h"
+
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
+#include "GameFramework/Pawn.h"
+
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 
@@ -71,4 +77,45 @@ void USFCheatManager::PrintServerInfo()
     }
 
     UE_LOG(LogTemp, Log, TEXT("NetModeString : %s"), *NetModeString);
+}
+
+void USFCheatManager::PrintFrameworkInfo()
+{
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("World is null"));
+        return;
+    }
+
+    // GameMode
+    AGameModeBase* GameMode = World->GetAuthGameMode();
+
+    // GameState
+    AGameStateBase* GameState = World->GetGameState();
+
+    // PlayerController
+    APlayerController* PC = World->GetFirstPlayerController();
+
+    // PlayerState
+    APlayerState* PlayerState = PC ? PC->PlayerState : nullptr;
+
+    // Pawn
+    APawn* Pawn = PC ? PC->GetPawn() : nullptr;
+
+    auto LogAndScreen = [](const FString& Label, const UObject* Object)
+        {
+            FString Msg = FString::Printf(TEXT("%s: %s"), *Label, Object ? *Object->GetName() : TEXT("None"));
+            UE_LOG(LogTemp, Log, TEXT("%s"), *Msg);
+            if (GEngine)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, Msg);
+            }
+        };
+
+    LogAndScreen(TEXT("GameMode"), GameMode);
+    LogAndScreen(TEXT("GameState"), GameState);
+    LogAndScreen(TEXT("PlayerController"), PC);
+    LogAndScreen(TEXT("PlayerState"), PlayerState);
+    LogAndScreen(TEXT("Pawn"), Pawn);
 }

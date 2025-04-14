@@ -9,36 +9,51 @@ ASFPlayerState::ASFPlayerState()
 	bReplicates = true;
 }
 
-void ASFPlayerState::Server_SetPlayerID_Implementation(const FString& InPlayerID)
+void ASFPlayerState::OnRep_bIsReady()
 {
-	
-			UE_LOG(LogTemp, Warning, TEXT("[SFPlayerState->PlayerUniqueID : %s]"), *PlayerUniqueID);
-		
-	if (HasAuthority())
-	{
-		PlayerUniqueID = InPlayerID;
-		UE_LOG(LogTemp, Warning, TEXT("[SFPlayerState->PlayerUniqueID : %s]"), *PlayerUniqueID);
+	// 갱신 필요 시 클라이언트에서 RoomWidget 업데이트 가능
+}
 
+void ASFPlayerState::OnRep_bIsRoomOwner()
+{
+	// Host 아이콘 갱신 등 UI 처리
+}
+
+void ASFPlayerState::OnRep_SelectedCharacterRow()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_SelectedCharacterRow called after travel: %s"), *SelectedCharacterRow.ToString());
+}
+
+void ASFPlayerState::CopyProperties(APlayerState* PlayerState)
+{
+	Super::CopyProperties(PlayerState);
+	UE_LOG(LogTemp, Warning, TEXT("SelectedCharacterRow : %s"), *SelectedCharacterRow.ToString());
+	if (ASFPlayerState* NewState = Cast<ASFPlayerState>(PlayerState))
+	{
+		NewState->SelectedCharacterRow = this->SelectedCharacterRow;
 	}
 }
 
-void ASFPlayerState::OnRep_PlayerUniqueID()
+FString ASFPlayerState::GetUniqueID() const
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnRep_PlayerUniqueID Called"));
+	return CustomPlayerID;
+}
 
+void ASFPlayerState::BP_SetSelectedCharacterRow(FName NewRow)
+{
+	SelectedCharacterRow = NewRow;
+	UE_LOG(LogTemp, Warning, TEXT("Server: SetSelectedCharacterRow to %s"), *NewRow.ToString());
+}
 
-	UE_LOG(LogTemp, Warning, TEXT("OnRep_PlayerID triggered on client: %s"), *PlayerUniqueID);
+void ASFPlayerState::SetSelectedCharacterRow(FName NewRow)
+{
+	SelectedCharacterRow = NewRow;
+	UE_LOG(LogTemp, Warning, TEXT("Server: SetSelectedCharacterRow to %s"), *NewRow.ToString());
+}
 
-	if (const USFGameInstanceSubsystem* Subsystem = GetGameInstance()->GetSubsystem<USFGameInstanceSubsystem>())
-	{
-		if (UUIManager* UIManager = Subsystem->GetUIManager())
-		{
-			if (URoomWidget* RoomWidget = Cast<URoomWidget>(UIManager->GetCurrentWidget()))
-			{
-				RoomWidget->UpdatePlayerSlots();
-			}
-		}
-	}
+FName ASFPlayerState::GetSelectedCharacterRow() const
+{
+	return SelectedCharacterRow;
 }
 
 void ASFPlayerState::AddDeathCount()
@@ -50,12 +65,18 @@ void ASFPlayerState::AddDeathCount()
 	}
 }
 
+FString ASFPlayerState::PrintSelectedCharacterRow()
+{
+	FString SelectedChar = GetSelectedCharacterRow().ToString();
+	return SelectedChar;
+}
+
 void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ASFPlayerState, PlayerUniqueID);
-	DOREPLIFETIME(ASFPlayerState, SelectedCharacterName);
-	DOREPLIFETIME(ASFPlayerState, CharacterTexturePath);
-	DOREPLIFETIME(ASFPlayerState, EquippedItems);
-	DOREPLIFETIME(ASFPlayerState, DeathCount);
+
+	DOREPLIFETIME(ASFPlayerState, bIsReady);
+	DOREPLIFETIME(ASFPlayerState, bIsRoomOwner);
+	DOREPLIFETIME(ASFPlayerState, bIsAI);
+	DOREPLIFETIME(ASFPlayerState, SelectedCharacterRow);
 }

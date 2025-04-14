@@ -5,10 +5,9 @@
 #include "Components/Button.h"
 
 #include "UI/UIElements/RoomWidget.h"
-
-#include "Framework/SFGameInstance.h"
-#include "Framework/SFGameInstanceSubsystem.h"
+#include "Framework/SFRoomPlayerController.h"
 #include "DataTable/MapInfoRow.h"
+#include "Kismet/GameplayStatics.h"
 
 void UMapSelectionWidget::NativeConstruct()
 {
@@ -16,7 +15,15 @@ void UMapSelectionWidget::NativeConstruct()
 
 	if (StartButton)
 	{
-		StartButton->OnClicked.AddDynamic(this, &UMapSelectionWidget::OnStartButtonClicked);
+		StartButton->OnClicked.AddUniqueDynamic(this, &UMapSelectionWidget::OnStartButtonClicked);
+	}
+	if (LeftArrowButton)
+	{
+		LeftArrowButton->OnClicked.AddUniqueDynamic(this, &UMapSelectionWidget::OnLeftArrowClicked);
+	}
+	if (RightArrowButton)
+	{
+		RightArrowButton->OnClicked.AddUniqueDynamic(this, &UMapSelectionWidget::OnRightArrowClicked);
 	}
 }
 
@@ -27,6 +34,14 @@ void UMapSelectionWidget::NativeDestruct()
 	if (StartButton)
 	{
 		StartButton->OnClicked.RemoveDynamic(this, &UMapSelectionWidget::OnStartButtonClicked);
+	}
+	if (LeftArrowButton)
+	{
+		LeftArrowButton->OnClicked.RemoveDynamic(this, &UMapSelectionWidget::OnLeftArrowClicked);
+	}
+	if (RightArrowButton)
+	{
+		RightArrowButton->OnClicked.RemoveDynamic(this, &UMapSelectionWidget::OnRightArrowClicked);
 	}
 }
 
@@ -61,10 +76,12 @@ void UMapSelectionWidget::UpdateSelectionUI()
 {
 	if (AvailableMaps.IsValidIndex(CurrentIndex))
 	{
-		if (MapThumbnail)
+		UTexture2D* ThumbnailTex = AvailableMaps[CurrentIndex]->MapInfo.MapThumbnail.LoadSynchronous();
+		if (!ThumbnailTex)
 		{
-			MapThumbnail->SetBrushFromTexture(AvailableMaps[CurrentIndex]->MapInfo.MapThumbnail.LoadSynchronous());
+			UE_LOG(LogTemp, Error, TEXT("Failed to load texture for map: %s"), *AvailableMaps[CurrentIndex]->MapInfo.MapName);
 		}
+		MapThumbnail->SetBrushFromTexture(ThumbnailTex);
 		if (SelectionText)
 		{
 			SelectionText->SetText(FText::FromString(AvailableMaps[CurrentIndex]->MapInfo.MapName));
@@ -87,12 +104,38 @@ void UMapSelectionWidget::SetGameMode(EGameModeType InGameMode)
 void UMapSelectionWidget::OnStartButtonClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnStartButtonClicked"));
-	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (ASFRoomPlayerController* SFPC = Cast<ASFRoomPlayerController>(PC))
 	{
-		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
-		{
-			const FString RoomMapName = GetCurrentSelectedMap().MapName;
-			Subsystem->ChangeLevelByMapName(RoomMapName);
-		}
+		const FString SelectedMapName = GetCurrentSelectedMap().MapName;
+		SFPC->Server_RequestLevelChangeByMapName(SelectedMapName);
 	}
+}
+
+void UMapSelectionWidget::OnLeftArrowClicked()
+{
+	if (Options.Num() == 0)
+	{
+		return;
+	}
+
+	CurrentIndex = (CurrentIndex - 1 + Options.Num()) % Options.Num();
+	SelectionText->SetText(FText::FromString(Options[CurrentIndex]));
+
+	UpdateSelectionUI();
+
+}
+
+void UMapSelectionWidget::OnRightArrowClicked()
+{
+	if (Options.Num() == 0)
+	{
+		return;
+	}
+
+	CurrentIndex = (CurrentIndex + 1) % Options.Num();
+	SelectionText->SetText(FText::FromString(Options[CurrentIndex]));
+
+	UpdateSelectionUI();
+
 }

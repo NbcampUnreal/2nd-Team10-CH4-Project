@@ -1,6 +1,6 @@
 #include "Framework/SFLobbyPlayerController.h"
 #include "Framework/SFGameInstanceSubsystem.h"
-#include "Framework/SFCheatManager.h"
+#include "Framework/SFPlayerState.h"
 
 #include "UI/UIManager/UIManager.h"
 
@@ -8,7 +8,6 @@
 
 ASFLobbyPlayerController::ASFLobbyPlayerController()
 {
-	CheatClass = USFCheatManager::StaticClass();
 }
 
 void ASFLobbyPlayerController::BeginPlay()
@@ -24,5 +23,14 @@ void ASFLobbyPlayerController::BeginPlay()
 				UIManager->ShowLobbyMenu();
 			}
 		}
+	}
+}
+
+void ASFLobbyPlayerController::Server_SelectCharacter_Implementation(FName CharacterRow, FName CommonItem, FName ExclusiveItem, FName CosmeticItem)
+{
+	if (ASFPlayerState* PS = GetPlayerState<ASFPlayerState>())
+	{
+		PS->SetSelectedCharacterRow(CharacterRow);
+		//PS->SetEquippedGear(CommonItem, ExclusiveItem, CosmeticItem); 
 	}
 }
