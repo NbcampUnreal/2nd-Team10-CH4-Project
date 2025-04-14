@@ -26,7 +26,7 @@ class UInputMappingContext;
 class UInputAction;
 
 class UAnimMontage;
-
+class UNiagaraSystem;
 UCLASS()
 class SPARTAFIGHTERS_API ASFCharacter : public ACharacter//, public IStatusContainerInterface
 {
@@ -135,6 +135,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DieImmediately();
 
+	void RequestRespawn();
+
 protected:
 	bool bIsDead = false;
+
+	FTimerHandle RespawnTimer;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects");
+	UNiagaraSystem* DeathExplosionEffect;
+
+	UFUNCTION(NetMulticast,Unreliable)
+	void Multicast_PlayDeathEffect();
 };
