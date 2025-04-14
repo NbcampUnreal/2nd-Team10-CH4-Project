@@ -18,33 +18,33 @@ protected:
 		virtual void NativeDestruct() override;
 
 private:
-	UPROPERTY(meta = (BindWidget))
+	/*UPROPERTY(meta = (BindWidget))
 	UButton* PlayerInfoButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* ShopButton;
+	UButton* ShopButton;*/
 	UPROPERTY(meta = (BindWidget))
 	UButton* OptionButton;
 	UPROPERTY(meta = (BindWidget))
 	UButton* QuitGameButton;
 	
-	UPROPERTY(meta = (BindWidget))
-	UButton* SingleGameModeButton;
+	/*UPROPERTY(meta = (BindWidget))
+	UButton* SingleGameModeButton;*/
 	UPROPERTY(meta = (BindWidget))
 	UButton* CoopGameModeButton;
 	UPROPERTY(meta = (BindWidget))
 	UButton* BattleGameModeButton;
 
-	UFUNCTION()
-	void OnSingleGameModeClicked();
+	/*UFUNCTION()
+	void OnSingleGameModeClicked();*/
 	UFUNCTION()
 	void OnCoopGameModeClicked();
 	UFUNCTION()
 	void OnBattleGameModeClicked();
 
-	UFUNCTION()
+	/*UFUNCTION()
 	void OnPlayerInfoClicked();
 	UFUNCTION()
-	void OnShopClicked();
+	void OnShopClicked();*/
 	UFUNCTION()
 	void OnOptionClicked();
 	UFUNCTION()

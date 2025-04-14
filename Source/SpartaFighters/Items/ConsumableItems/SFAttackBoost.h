@@ -15,16 +15,18 @@ class SPARTAFIGHTERS_API USFAttackBoost : public USFConsumableBase
 public:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Boost")
 	float AttackBoostAmount;
-	UFUNCTION()
-	void RevertAttackBoost(ASFCharacter* InPlayerCharacter, float Amount);
-
-
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Boost")
 	float EffectDuration;
 
-	virtual void ApplyConsumableEffect_Implementation(ASFCharacter* InPlayerCharacter) override;
+	UFUNCTION()
+	void RevertAttackBoost(ASFCharacter* InPlayerCharacter, float Amount);
+
+	virtual void Server_ApplyConsumableEffect_Implementation(ASFCharacter* InPlayerCharacter) override;
 
 	USFAttackBoost();
+
+private:
+	FTimerHandle AttackBoostTimerHandle;
 	
 };

@@ -56,15 +56,15 @@ public:
 	void HandleSkillAttack(ECharacterState CurrentState);
 
 	// Handle Skill Attack
-	void HandleInputRoll();
+	void HandleInputDodge();
 
 	UFUNCTION(Server, Reliable)
-	void Server_HandleRoll();
+	void Server_HandleDodge();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_HandleRoll(ECharacterState State);
+	void Multicast_HandleDodge(ECharacterState State);
 
-	void HandleRoll(ECharacterState CurrentState);
+	void HandleDodge(ECharacterState CurrentState);
 
 
 	// Handle Animation

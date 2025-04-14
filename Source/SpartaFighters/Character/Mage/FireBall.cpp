@@ -44,6 +44,8 @@ AFireBall::AFireBall()
 void AFireBall::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetWorld()->GetTimerManager().SetTimer(DestroyLazyTimer, this, &AFireBall::DestroyFireBall, 2.f, false);
 	
 }
 

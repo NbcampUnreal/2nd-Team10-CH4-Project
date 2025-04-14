@@ -14,32 +14,36 @@ UCLASS()
 class SPARTAFIGHTERS_API UMapSelectionWidget : public USelectionWidget
 {
 	GENERATED_BODY()
-	
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
 public:
-    UPROPERTY(meta = (BindWidget))
-    UButton* StartButton;
-    UPROPERTY(meta = (BindWidget))
-    UImage* MapThumbnail;
+	UPROPERTY(meta = (BindWidget))
+	UButton* StartButton;
+	UPROPERTY(meta = (BindWidget))
+	UImage* MapThumbnail;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Map")
-    UDataTable* MapDataTable;
-    TArray<FMapInfoRow*> AvailableMaps;
+	UPROPERTY(EditDefaultsOnly, Category = "Map")
+	UDataTable* MapDataTable;
+	TArray<FMapInfoRow*> AvailableMaps;
 
-    int32 CurrentIndex = 0;
+	int32 CurrentIndex = 0;
 
-    void UpdateSelectionUI();
+	UFUNCTION()
+	void OnLeftArrowClicked();
+	UFUNCTION()
+	void OnRightArrowClicked();
 
-    void UpdateAvailableMaps();
-    FMapInfo GetCurrentSelectedMap() const;
-    void SetGameMode(EGameModeType InGameMode);
+	void UpdateSelectionUI();
+	void UpdateAvailableMaps();
+	FMapInfo GetCurrentSelectedMap() const;
+	void SetGameMode(EGameModeType InGameMode);
 
-    UFUNCTION()
-    void OnStartButtonClicked();
+	UFUNCTION()
+	void OnStartButtonClicked();
 
 private:
-    EGameModeType CurrentGameMode;
+	EGameModeType CurrentGameMode;
 };
