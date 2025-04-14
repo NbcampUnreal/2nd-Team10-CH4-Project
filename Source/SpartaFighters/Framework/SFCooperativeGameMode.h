@@ -19,6 +19,7 @@ public:
 	void PollCharacterSpawnRequests();
 	void HandleCharacterSpawnRequest(APlayerController* PC);
 	void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+	void RequestRespawn(AController* DeadController);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Data")
 	UDataTable* CharacterDataTable;
