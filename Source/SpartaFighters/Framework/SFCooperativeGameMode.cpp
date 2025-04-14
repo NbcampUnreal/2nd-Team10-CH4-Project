@@ -145,3 +145,19 @@ void ASFCooperativeGameMode::HandleCharacterSpawnRequest(APlayerController* PC)
 			(SFPlayerController->GetPawn() ? *SFPlayerController->GetPawn()->GetName() : TEXT("None")));
 	}
 }
+
+void ASFCooperativeGameMode::RequestRespawn(AController* DeadController)
+{
+	if (!DeadController)
+	{
+		return;
+	}
+
+	APlayerController* PC = Cast<APlayerController>(DeadController);
+	if (!PC)
+	{
+		return;
+	}
+
+	HandleCharacterSpawnRequest(PC);
+}

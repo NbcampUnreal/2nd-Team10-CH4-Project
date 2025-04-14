@@ -9,6 +9,8 @@
 
 #include "Framework/SFPlayerController.h"
 #include "Framework/SFBattleGameMode.h"
+#include "Framework/SFCooperativeGameMode.h"
+
 #include "Components/StatusContainerComponent.h"
 #include "Components/StatusComponent.h"
 #include "Components/StateComponent.h"
@@ -325,9 +327,13 @@ void ASFCharacter::Die()
 		if (AController* ControllerInstance = GetController())
 		{
 			ControllerInstance->UnPossess();
-			if (ASFBattleGameMode* GM = GetWorld()->GetAuthGameMode<ASFBattleGameMode>())
+			if (ASFBattleGameMode* BattleGM = GetWorld()->GetAuthGameMode<ASFBattleGameMode>())
 			{
-				GM->RequestRespawn(ControllerInstance);
+				BattleGM->RequestRespawn(ControllerInstance);
+			}
+			else if (ASFCooperativeGameMode* CoopGM = GetWorld()->GetAuthGameMode<ASFCooperativeGameMode>())
+			{
+				CoopGM->RequestRespawn(ControllerInstance);
 			}
 		}
 
