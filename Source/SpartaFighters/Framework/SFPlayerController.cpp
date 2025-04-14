@@ -11,7 +11,7 @@ ASFPlayerController::ASFPlayerController()
 
 	MoveAction = nullptr;
 	JumpAction = nullptr;
-	RollAction = nullptr;
+	DodgeAction = nullptr;
 	AttackAction = nullptr;
 	SkillAttackAction = nullptr;
 	GuardAction = nullptr;
