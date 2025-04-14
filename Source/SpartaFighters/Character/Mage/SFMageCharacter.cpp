@@ -50,7 +50,7 @@ void ASFMageCharacter::DelayTeleport()
 {
     ExecuteTelepoprt();
     ShowTeleportCircleEffect();
-    RollPressed();
+    //DodgePressed();
 }
 
 void ASFMageCharacter::ShowTeleportCircleEffect()
