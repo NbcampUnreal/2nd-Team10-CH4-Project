@@ -1,9 +1,12 @@
 
 #include "Framework/OptionManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/GameUserSettings.h"
 
 UOptionManager::UOptionManager()
 {
+	CurrentResolution = {1920,1080};
+	CurrentMode = EScreenMode::FullScreen;
 	ConstructorHelpers::FObjectFinder<USoundMix>
 		SoundMix(TEXT("/Script/Engine.SoundMix'/Game/PlatformFighterKit/Blueprints/Option/SoundOption/MainSoundMix.MainSoundMix'"));
 	ConstructorHelpers::FObjectFinder<USoundClass>
@@ -37,3 +40,33 @@ void UOptionManager::EFSoundValue(float Value)
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MainSoundMix);
 }
 
+void UOptionManager::ChangeScreen(EScreenMode Mode)
+{
+	if (CurrentMode != Mode)
+	{
+		CurrentMode = Mode;
+		switch (CurrentMode)
+		{
+		case EScreenMode::FullScreen:
+			GEngine->GetGameUserSettings()->SetFullscreenMode(EWindowMode::Fullscreen);
+			break;
+		case EScreenMode::WindowedFullScreen:
+			GEngine->GetGameUserSettings()->SetFullscreenMode(EWindowMode::WindowedFullscreen);
+			break;
+		case EScreenMode::Window:
+			GEngine->GetGameUserSettings()->SetFullscreenMode(EWindowMode::Windowed);
+			break;
+		default:
+			break;
+		}
+	}
+}
+void UOptionManager::ChangeResolution(FIntPoint Resolution)
+{
+	
+	if (CurrentResolution != Resolution)
+	{
+		CurrentResolution = Resolution;
+		GEngine->GetGameUserSettings()->SetScreenResolution(CurrentResolution);
+	}
+}
