@@ -6,10 +6,11 @@
 UENUM(BlueprintType)
 enum class EAIActionType : uint8
 {
-	None        UMETA(DisplayName = "None"),
-	Attack      UMETA(DisplayName = "Attack"),
-	Guard       UMETA(DisplayName = "Guard"),
-	Evade       UMETA(DisplayName = "Evade"),
-	Retreat     UMETA(DisplayName = "Retreat"),
-	Chase		UMETA(DisplayName = "Chase")
+	None			UMETA(DisplayName = "None"),
+	Attack			UMETA(DisplayName = "Attack"),
+	SpecialAttack	UMETA(DisplayName = "SpecialAttack"),
+	Guard			UMETA(DisplayName = "Guard"),
+	Evade			UMETA(DisplayName = "Evade"),
+	Retreat			UMETA(DisplayName = "Retreat"),
+	Chase			UMETA(DisplayName = "Chase")
 };

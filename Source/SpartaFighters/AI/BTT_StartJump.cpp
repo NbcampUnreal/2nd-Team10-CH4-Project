@@ -26,17 +26,14 @@ EBTNodeResult::Type UBTT_StartJump::ExecuteTask(UBehaviorTreeComponent& OwnerCom
         return EBTNodeResult::Failed;
     }
 
-    // 점프가 가능한지 확인 (선택적이지만 권장)
     if (Character->CanJump())
     {
-        Character->Jump(); // 점프 시작
-        // 점프 시작 명령을 성공적으로 내렸으므로 Succeeded 반환
-        // 점프가 완료될 때까지 기다리지 않음
+        Character->Jump();
         return EBTNodeResult::Succeeded;
     }
     else
     {
         UE_LOG(LogTemp, Log, TEXT("BTT_StartJump: Character cannot jump right now."));
-        return EBTNodeResult::Failed; // 점프할 수 없는 상태면 실패
+        return EBTNodeResult::Failed;
     }
 }

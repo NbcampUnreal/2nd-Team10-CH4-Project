@@ -26,6 +26,6 @@ EBTNodeResult::Type UBTT_StopJump::ExecuteTask(UBehaviorTreeComponent& OwnerComp
         return EBTNodeResult::Failed;
     }
 
-    Character->StopJumping(); // 점프 중지 (가변 점프 높이 등)
-    return EBTNodeResult::Succeeded; // 명령 전달 성공
+    Character->StopJumping();
+    return EBTNodeResult::Succeeded;
 }
