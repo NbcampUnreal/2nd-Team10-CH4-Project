@@ -20,6 +20,7 @@
 
 #include "Net/UnrealNetwork.h"
 #include "Character/Mage/FireBall.h"
+#include "NiagaraFunctionLibrary.h"
 
 ASFCharacter::ASFCharacter()
 {
@@ -320,32 +321,88 @@ void ASFCharacter::OnHPChanged(AActor* AffectedActor, float HP)
 
 void ASFCharacter::Die()
 {
-	if (!bIsDead)
+	if (!HasAuthority() || bIsDead)
 	{
-		bIsDead = true;
-
-		if (AController* ControllerInstance = GetController())
-		{
-			ControllerInstance->UnPossess();
-			if (ASFBattleGameMode* BattleGM = GetWorld()->GetAuthGameMode<ASFBattleGameMode>())
-			{
-				BattleGM->RequestRespawn(ControllerInstance);
-			}
-			else if (ASFCooperativeGameMode* CoopGM = GetWorld()->GetAuthGameMode<ASFCooperativeGameMode>())
-			{
-				CoopGM->RequestRespawn(ControllerInstance);
-			}
-		}
-
-		Destroy();
+		return;
 	}
+
+	bIsDead = true;
+
+	AController* ControllerInstance = GetController();
+
+	Multicast_PlayDeathEffect();
+
+	SetActorEnableCollision(false);
+	SetActorHiddenInGame(true);
+
+	if (ControllerInstance)
+	{
+		ControllerInstance->UnPossess();
+	}
+
+	GetWorldTimerManager().SetTimer(
+		RespawnTimer,
+		this,
+		&ASFCharacter::RequestRespawn,
+		2.0f,
+		false
+	);
 }
 
 void ASFCharacter::DieImmediately()
 {
-	Die(); // 내부적으로 같은 처리
+	Die();
 }
 
+void ASFCharacter::RequestRespawn()
+{
+	AController* ControllerInstance = GetController();
+
+	if (!ControllerInstance && IsValid(GetWorld()))
+	{
+		ControllerInstance = Cast<AController>(GetOwner());
+	}
+
+	if (ControllerInstance)
+	{
+		if (ASFBattleGameMode* BattleGM = GetWorld()->GetAuthGameMode<ASFBattleGameMode>())
+		{
+			BattleGM->RequestRespawn(ControllerInstance);
+		}
+		else if (ASFCooperativeGameMode* CoopGM = GetWorld()->GetAuthGameMode<ASFCooperativeGameMode>())
+		{
+			CoopGM->RequestRespawn(ControllerInstance);
+		}
+	}
+
+	Destroy();
+}
+
+void ASFCharacter::Multicast_PlayDeathEffect_Implementation()
+{
+	FVector SpawnLocation = GetActorLocation();
+	FRotator SpawnRotation = GetActorRotation();
+	UE_LOG(LogTemp, Warning, TEXT("MulticcastPlayDeathCalled"));
+	if (DeathExplosionEffect)
+	{
+	UE_LOG(LogTemp, Warning, TEXT("EffectPlayed"));
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			DeathExplosionEffect,
+			SpawnLocation,
+			SpawnRotation
+		);
+	}
+
+	/*if (DeathExplosionSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			DeathExplosionSound,
+			SpawnLocation
+		);
+	}*/
+}
 
 // TO DO : Seperate Components
 void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
