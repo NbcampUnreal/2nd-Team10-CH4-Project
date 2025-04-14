@@ -19,6 +19,12 @@ void ASFGameStateBase::SetWinner(ASFPlayerState* InWinner)
     }
 }
 
+float ASFGameStateBase::GetRemainingBattleTime() const
+{
+    float Elapsed = GetWorld()->GetTimeSeconds() - BattleStartTime;
+    return FMath::Max(0.f, BattleDuration - Elapsed);
+}
+
 void ASFGameStateBase::OnRep_WinnerPlayerState()
 {
     if (WinnerPlayerState)
@@ -36,6 +42,8 @@ void ASFGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(ASFGameStateBase, WinnerPlayerState);
+    DOREPLIFETIME(ASFGameStateBase, BattleStartTime);
+    DOREPLIFETIME(ASFGameStateBase, BattleDuration);
 }
 
 bool ASFGameStateBase::AreAllPlayersReady() const

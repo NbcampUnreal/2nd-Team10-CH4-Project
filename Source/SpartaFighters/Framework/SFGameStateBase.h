@@ -17,9 +17,19 @@ public:
 
     ASFPlayerState* GetWinner() const { return WinnerPlayerState; }
 
+    float GetRemainingBattleTime() const;
+    void SetBattleStartTime(float TimeInput) { BattleStartTime = TimeInput;  }
+    void SetBattleDuration(float DurationInput) { BattleDuration = DurationInput; }
+
 protected:
     UPROPERTY(ReplicatedUsing = OnRep_WinnerPlayerState)
     ASFPlayerState* WinnerPlayerState;
+
+    UPROPERTY(Replicated)
+    float BattleStartTime;
+
+    UPROPERTY(Replicated)
+    float BattleDuration;
 
     UFUNCTION()
     void OnRep_WinnerPlayerState();
