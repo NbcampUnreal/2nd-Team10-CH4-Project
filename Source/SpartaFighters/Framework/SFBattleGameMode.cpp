@@ -161,9 +161,16 @@ void ASFBattleGameMode::HandleCharacterSpawnRequest(APlayerController* PC)
 	if (NewPawn)
 	{
 		UE_LOG(LogTemp, Error, TEXT("NewPawn : %s"), *NewPawn->GetActorNameOrLabel());
+		UE_LOG(LogTemp, Warning, TEXT("Before Possess: PC->GetPawn(): %s"),
+			(SFPlayerController->GetPawn() ? *SFPlayerController->GetPawn()->GetName() : TEXT("None")));
+
 		SFPlayerController->Possess(NewPawn);
+		UE_LOG(LogTemp, Warning, TEXT("After Possess: PC->GetPawn(): %s"),
+			(SFPlayerController->GetPawn() ? *SFPlayerController->GetPawn()->GetName() : TEXT("None")));
 	}
 }
+
+
 
 AActor* ASFBattleGameMode::GetAvailableSpawnPoint(bool bForRespawn) const
 {
