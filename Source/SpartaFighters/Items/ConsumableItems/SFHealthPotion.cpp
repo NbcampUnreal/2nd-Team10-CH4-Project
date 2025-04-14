@@ -2,11 +2,11 @@
 #include "Character/SFCharacter.h"
 
 
-void USFHealthPotion::ApplyConsumableEffect_Implementation(ASFCharacter* InPlayerCharacter)
+void USFHealthPotion::Server_ApplyConsumableEffect_Implementation(ASFCharacter* InPlayerCharacter)
 {
-	Super::ApplyConsumableEffect_Implementation(InPlayerCharacter);
+	Super::Server_ApplyConsumableEffect_Implementation(InPlayerCharacter);
 
-	if (InPlayerCharacter)
+	if (InPlayerCharacter&&InPlayerCharacter->GetLocalRole() == ROLE_Authority)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s activated."), *ItemName.ToString(), RecoveryAmount);
 	}

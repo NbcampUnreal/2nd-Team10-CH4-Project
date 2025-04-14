@@ -11,11 +11,11 @@ USFAttackBoost::USFAttackBoost()
 	EffectDuration = 10.0f;
 }
 
-void USFAttackBoost::ApplyConsumableEffect_Implementation(ASFCharacter* InPlayerCharacter)
+void USFAttackBoost::Server_ApplyConsumableEffect_Implementation(ASFCharacter* InPlayerCharacter)
 {
-	Super::ApplyConsumableEffect_Implementation(InPlayerCharacter);
+	Super::Server_ApplyConsumableEffect_Implementation(InPlayerCharacter);
 
-	if (InPlayerCharacter)
+	if (InPlayerCharacter&&InPlayerCharacter->GetLocalRole() == ROLE_Authority)
 	{
 		//InPlayerCharacter->IncreaseAttackPower(AttackBoostAmount);
 		UE_LOG(LogTemp, Warning, TEXT("%s used! Attackpower increased by %f . (Duration %f)"), *ItemName.ToString(), AttackBoostAmount, EffectDuration);
@@ -32,7 +32,7 @@ void USFAttackBoost::ApplyConsumableEffect_Implementation(ASFCharacter* InPlayer
 
 void USFAttackBoost::RevertAttackBoost(ASFCharacter* InPlayerCharacter, float Amount)
 {
-	if (InPlayerCharacter)
+	if (InPlayerCharacter&& InPlayerCharacter->GetLocalRole() == ROLE_Authority)
 	{
 		//InPlayerCharacter->DecreaseAttackPower(Amount);
 		UE_LOG(LogTemp, Warning, TEXT("%s Effect End."), *ItemName.ToString());

@@ -2,6 +2,7 @@
 #include "Components/SphereComponent.h"
 #include "Items/ConsumableItems/SFConsumableBase.h"
 #include "Character/SFCharacter.h"
+#include "Net/UnrealNetwork.h"
 
 
 ASFItemPickup::ASFItemPickup()
@@ -9,6 +10,7 @@ ASFItemPickup::ASFItemPickup()
 	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
 	OverlapSphere->SetSphereRadius(100.0f);
 	RootComponent = OverlapSphere;
+	SetReplicates(true);//Replicate actore
 
 	PickupMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PickupMesh"));
 	PickupMesh->SetupAttachment(RootComponent);
@@ -25,7 +27,7 @@ void ASFItemPickup::BeginPlay()
 	Super::BeginPlay();
 	if (ItemClass)
 	{
-		PickupItemInstance = NewObject<USFConsumableBase>(GetTransientPackage(), ItemClass);
+		PickupItemInstance = NewObject<USFConsumableBase>(GetWorld(), ItemClass);
 		if (PickupItemInstance)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("%s successfully generated: %s (%s)"), *GetName(), *PickupItemInstance->ItemName.ToString(), *UEnum::GetValueAsString(PickupItemInstance->ItemType));
@@ -35,7 +37,7 @@ void ASFItemPickup::BeginPlay()
 			UE_LOG(LogTemp, Error, TEXT("%s failed generation: unable to generate pick up by ItemClass."), *GetName());
 		}
 	}
-	else
+	else if(!ItemClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s generated: ItemClass not defined."), *GetName());
 	}
@@ -44,26 +46,37 @@ void ASFItemPickup::BeginPlay()
 void ASFItemPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ASFCharacter* PlayerCharacter = Cast<ASFCharacter>(OtherActor);
-	if (PlayerCharacter && PlayerCharacter->IsLocallyControlled()) 
+	if (PlayerCharacter && PlayerCharacter->IsLocallyControlled() && HasAuthority())
 	{
-		if (PickupItemInstance)
+		//Server request
+		Server_UsePickup(PlayerCharacter);
+	}
+	else if (PlayerCharacter && PlayerCharacter->IsLocallyControlled() && !HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Item used by client"));
+		Destroy();
+	}
+}
+
+void ASFItemPickup::Server_UsePickup_Implementation(ASFCharacter* PlayerCharacter)
+{
+	if (PlayerCharacter && PickupItemInstance && HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s picked up and used by server: collide with %s "), *PickupItemInstance->ItemName.ToString(), *PlayerCharacter->GetName());
+
+		if (PickupItemInstance->IsA(USFConsumableBase::StaticClass()))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s picked up: collide with %s "), *PickupItemInstance->ItemName.ToString(), *PlayerCharacter->GetName());
-
-			if (PickupItemInstance->IsA(USFConsumableBase::StaticClass()))
-			{
-				USFConsumableBase* ConsumableItem = Cast<USFConsumableBase>(PickupItemInstance);
-				ConsumableItem->ApplyConsumableEffect(PlayerCharacter);
-				UE_LOG(LogTemp, Warning, TEXT("%s : %s"), *PlayerCharacter->GetName(), *ConsumableItem->ItemName.ToString());
-				Destroy();
-			}
-			else
-			{
-			}
-
-			//use if additional logic required
-			PickupItemInstance->OnItemAcquired();
+			USFConsumableBase* ConsumableItem = Cast<USFConsumableBase>(PickupItemInstance);
+			ConsumableItem->Server_ApplyConsumableEffect(PlayerCharacter); //Server RPC
+			UE_LOG(LogTemp, Warning, TEXT("%s used by %s"), *ConsumableItem->ItemName.ToString(), *PlayerCharacter->GetName());
+			Destroy();
 		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s is not a consumable item."), *PickupItemInstance->ItemName.ToString());
+		}
+
+		PickupItemInstance->OnItemAcquired(); 
 	}
 }
 
@@ -74,4 +87,13 @@ void ASFItemPickup::SetPickupMesh(UStaticMesh* NewMesh)
 	{
 		PickupMesh->SetStaticMesh(NewMesh);
 	}
+}
+
+void ASFItemPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASFItemPickup, PickupItemInstance);
+	DOREPLIFETIME(ASFItemPickup, OverlapSphere);
+	DOREPLIFETIME(ASFItemPickup, PickupMesh);
 }
