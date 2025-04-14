@@ -2,6 +2,7 @@
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
@@ -9,12 +10,14 @@
 #include "Framework/SFPlayerController.h"
 #include "Framework/SFBattleGameMode.h"
 #include "Components/StatusContainerComponent.h"
+#include "Components/StatusComponent.h"
 #include "Components/StateComponent.h"
 #include "Components/SkillComponent.h"
 
 #include "DataTable/SkillDataRow.h"
 
 #include "Net/UnrealNetwork.h"
+#include "Character/Mage/FireBall.h"
 
 ASFCharacter::ASFCharacter()
 {
@@ -46,6 +49,7 @@ ASFCharacter::ASFCharacter()
 	//MovementInputComponent = CreateDefaultSubobject<UMovementInputComponent>(TEXT("MoveInputComponent"));
 
 	StatusContainerComponent = CreateDefaultSubobject<UStatusContainerComponent>(TEXT("StatusContainerComponent"));	
+	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
 	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
 	SkillComponent = CreateDefaultSubobject<USkillComponent>(TEXT("SkillComponent"));
 	
@@ -68,8 +72,13 @@ void ASFCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StatusContainerComponent->InitStatusComponent(this);
+	//StatusContainerComponent->InitStatusComponent(this);
 	//StateComponent->Init();
+	if (StatusComponent)
+	{
+		StatusComponent->OnDeath.AddDynamic(this, &ASFCharacter::Die);
+		StatusComponent->OnHealthChanged.AddDynamic(this, &ASFCharacter::OnHPChanged);
+	}
 	SkillComponent->Initialize(SkillDataTable, StateComponent, this);
 	
 }
@@ -121,14 +130,14 @@ void ASFCharacter::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 }
 
-void ASFCharacter::RollPressed()
+void ASFCharacter::DodgePressed()
 {
 	// TO DO : Move To SKill Component
 	if (StateComponent->IsInAction()) return;
-	SkillComponent->HandleInputRoll();
+	SkillComponent->HandleInputDodge();
 }
 
-void ASFCharacter::RollReleased()
+void ASFCharacter::DodgeReleased()
 {
 
 }
@@ -139,12 +148,13 @@ void ASFCharacter::CrouchPressed()
 	if (!StateComponent->CanCrouch()) return;
 
 	Crouch();
-
+	StateComponent->SetState(ECharacterState::Crouching);
 }
 
 void ASFCharacter::CrouchReleased()
 {
 	UnCrouch();
+	StateComponent->SetState(ECharacterState::Idle);
 }
 
 void ASFCharacter::AttackPressed()
@@ -172,13 +182,27 @@ void ASFCharacter::SkillAttackReleased()
 
 void ASFCharacter::GuardPressed()
 {
-
+	if (GuardMontage)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(GuardMontage);
+		}
+	}
 
 }
 
 void ASFCharacter::GuardReleased()
 {
-
+	if (GuardMontage)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Stop(0.1f, GuardMontage);
+		}
+	}
 }
 
 void ASFCharacter::InteractionPressed()
@@ -199,6 +223,30 @@ void ASFCharacter::AttackTrace()
 	}
 }
 
+void ASFCharacter::SpawnFireBall()
+{
+	// 1. 손 위치 (소켓 위치)
+	const FVector SocketLocation = GetMesh()->GetSocketLocation("hand_r");
+
+	// 2. 캐릭터 방향 기준 회전
+	const FRotator CastingRotation = GetActorRotation();
+	const FVector Forward = CastingRotation.Vector();
+
+	// 3. 손 앞쪽으로 오프셋 추가 (예: 30~50cm)
+	const FVector SpawnLocation = SocketLocation + Forward * 50.f;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+	AFireBall* FireBall = GetWorld()->SpawnActor<AFireBall>(FireballClass, SpawnLocation, CastingRotation, SpawnParams);
+	if (FireBall)
+	{
+		FireBall->SetFireBallSpeed(1500);
+		FireBall->FireInDirection(CastingRotation.Vector());
+		UE_LOG(LogTemp, Warning, TEXT("Casting Fire Ball!!"));
+	}
+}
+
 
 // TO DO : Damage Component
 float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -206,20 +254,30 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	auto hasAuthority = HasAuthority();
 	ensureAlways(hasAuthority);
 
-	if (StatusContainerComponent)
+	if (StatusComponent)
 	{
-		StatusContainerComponent->ModifyStatus(EStatusType::CurHP, DamageAmount);
+		StatusComponent->ModifyStatus(EStatusType::CurHP, -DamageAmount);
 	}
 
-	Multicast_TakeDamageOnServer(DamageAmount, DamageEvent, DamageCauser);
+	//Multicast_TakeDamageOnServer(DamageAmount, DamageEvent, DamageCauser);
 
-	return 0.0f;
+	return DamageAmount;
 }
 
 void ASFCharacter::Multicast_TakeDamageOnServer_Implementation(const float Damage, const FDamageEvent& DamageEvent, AActor* DamageCauser)
 {
 
-	// TO DO : 
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Take Damage");
+ 
+}
+
+void ASFCharacter::OnHPChanged(AActor* AffectedActor, float HP)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s의 체력이 %f로 변경되었습니다."), *AffectedActor->GetName(), HP);
+
+	FString Message = FString::Printf(TEXT("Take Damage : %f"), HP);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Message);
+
 	if (OnDamageMontage)
 	{
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -228,88 +286,35 @@ void ASFCharacter::Multicast_TakeDamageOnServer_Implementation(const float Damag
 			AnimInstance->Montage_Play(OnDamageMontage);
 		}
 	}
-
-	//if()
-	// TO DO : 
-
 }
 
-// TO DO : Seperate Components
-void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(GetController()))
-	{
-		if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-		{
-			// Movement
-			//MovementInputComponent->SetupInput(EnhancedInput, SFPlayerController, this);
-			EnhancedInput->BindAction(SFPlayerController->MoveAction, ETriggerEvent::Triggered, this, &ASFCharacter::Move);
-
-			EnhancedInput->BindAction(SFPlayerController->JumpAction, ETriggerEvent::Started, this, &ASFCharacter::StartJump);
-			EnhancedInput->BindAction(SFPlayerController->JumpAction, ETriggerEvent::Completed, this, &ASFCharacter::StopJump);
-
-			EnhancedInput->BindAction(SFPlayerController->RollAction, ETriggerEvent::Started, this, &ASFCharacter::RollPressed);
-			EnhancedInput->BindAction(SFPlayerController->RollAction, ETriggerEvent::Completed, this, &ASFCharacter::RollReleased);
-
-			EnhancedInput->BindAction(SFPlayerController->CrouchAction, ETriggerEvent::Started, this, &ASFCharacter::CrouchPressed);
-			EnhancedInput->BindAction(SFPlayerController->CrouchAction, ETriggerEvent::Completed, this, &ASFCharacter::CrouchReleased);
-
-			// Ability
-			EnhancedInput->BindAction(SFPlayerController->AttackAction, ETriggerEvent::Started, this, &ASFCharacter::AttackPressed);
-			EnhancedInput->BindAction(SFPlayerController->AttackAction, ETriggerEvent::Completed, this, &ASFCharacter::AttackReleased);
-
-			EnhancedInput->BindAction(SFPlayerController->SkillAttackAction, ETriggerEvent::Started, this, &ASFCharacter::SkillAttackPressed);
-			EnhancedInput->BindAction(SFPlayerController->SkillAttackAction, ETriggerEvent::Completed, this, &ASFCharacter::SkillAttackReleased);
-
-			EnhancedInput->BindAction(SFPlayerController->GuardAction, ETriggerEvent::Started, this, &ASFCharacter::GuardPressed);
-			EnhancedInput->BindAction(SFPlayerController->GuardAction, ETriggerEvent::Completed, this, &ASFCharacter::GuardReleased);
-
-			// TO DO : Other Setup ex) Pause, ......
-			EnhancedInput->BindAction(SFPlayerController->InteractionAction, ETriggerEvent::Started, this, &ASFCharacter::InteractionPressed);
-			EnhancedInput->BindAction(SFPlayerController->InteractionAction, ETriggerEvent::Started, this, &ASFCharacter::InteractionPressed);
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
-	}
-}
-
-//void ASFCharacter::PerformAttack(int32 AttackIndex)
+//void ASFCharacter::OnCharacterDead()
 //{
-//	//bIsAttack = true;
+//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Character Is Dead.");
 //
-//	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-//	if (AnimInstance)
+//	// 1. 입력 차단
+//	AController* MyController = GetController();
+//	if (MyController && MyController->IsLocalController())
 //	{
-//		TArray<FSkillDataRow*> AllSkils;
-//		static const FString ContextString(TEXT("SkillDataText"));
-//		SkillDataTable->GetAllRows(ContextString, AllSkils);
-//
-//		if (AllSkils[0])
-//		{
-//			if (AllSkils[0]->SkillMontage)
-//			{
-//				AnimInstance->Montage_Play(AllSkils[0]->SkillMontage);
-//			}
-//		}
+//		DisableInput(Cast<APlayerController>(MyController));
 //	}
 //
-//	if (AttackHandlers.IsValidIndex(AttackIndex))
+//	// 2. 애니메이션 중지
+//	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 //	{
-//		if (IHandleAttack* Handler = Cast<IHandleAttack>(AttackHandlers[AttackIndex]))
-//		{
-//			Handler->PerformAttack();
-//		}
+//		AnimInstance->StopAllMontages(0.2f);
 //	}
-//}
 //
-//void ASFCharacter::AddAttackHandler(UObject* AttackHandler)
-//{
-//	AttackHandlers.Add(AttackHandler);
+//	// 3. Ragdoll (Physics 활성화)
+//	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
+//	GetMesh()->SetSimulatePhysics(true);
+//	GetCharacterMovement()->DisableMovement();
+//
+//	// 4. 캡슐 콜리전 비활성화 (원하는 경우)
+//	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 //}
+
 
 void ASFCharacter::Die()
 {
@@ -333,4 +338,48 @@ void ASFCharacter::Die()
 void ASFCharacter::DieImmediately()
 {
 	Die(); // 내부적으로 같은 처리
+}
+
+
+// TO DO : Seperate Components
+void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(GetController()))
+	{
+		if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+		{
+			// Movement
+			//MovementInputComponent->SetupInput(EnhancedInput, SFPlayerController, this);
+			EnhancedInput->BindAction(SFPlayerController->MoveAction, ETriggerEvent::Triggered, this, &ASFCharacter::Move);
+
+			EnhancedInput->BindAction(SFPlayerController->JumpAction, ETriggerEvent::Started, this, &ASFCharacter::StartJump);
+			EnhancedInput->BindAction(SFPlayerController->JumpAction, ETriggerEvent::Completed, this, &ASFCharacter::StopJump);
+
+			EnhancedInput->BindAction(SFPlayerController->DodgeAction, ETriggerEvent::Started, this, &ASFCharacter::DodgePressed);
+			EnhancedInput->BindAction(SFPlayerController->DodgeAction, ETriggerEvent::Completed, this, &ASFCharacter::DodgeReleased);
+
+			EnhancedInput->BindAction(SFPlayerController->CrouchAction, ETriggerEvent::Started, this, &ASFCharacter::CrouchPressed);
+			EnhancedInput->BindAction(SFPlayerController->CrouchAction, ETriggerEvent::Completed, this, &ASFCharacter::CrouchReleased);
+
+			// Ability
+			EnhancedInput->BindAction(SFPlayerController->AttackAction, ETriggerEvent::Started, this, &ASFCharacter::AttackPressed);
+			EnhancedInput->BindAction(SFPlayerController->AttackAction, ETriggerEvent::Completed, this, &ASFCharacter::AttackReleased);
+
+			EnhancedInput->BindAction(SFPlayerController->SkillAttackAction, ETriggerEvent::Started, this, &ASFCharacter::SkillAttackPressed);
+			EnhancedInput->BindAction(SFPlayerController->SkillAttackAction, ETriggerEvent::Completed, this, &ASFCharacter::SkillAttackReleased);
+
+			EnhancedInput->BindAction(SFPlayerController->GuardAction, ETriggerEvent::Started, this, &ASFCharacter::GuardPressed);
+			EnhancedInput->BindAction(SFPlayerController->GuardAction, ETriggerEvent::Completed, this, &ASFCharacter::GuardReleased);
+
+			// TO DO : Other Setup ex) Pause, ......
+			EnhancedInput->BindAction(SFPlayerController->InteractionAction, ETriggerEvent::Started, this, &ASFCharacter::InteractionPressed);
+			EnhancedInput->BindAction(SFPlayerController->InteractionAction, ETriggerEvent::Started, this, &ASFCharacter::InteractionPressed);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
 }

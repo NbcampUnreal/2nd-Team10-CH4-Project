@@ -15,6 +15,7 @@ class UMovementInputComponent;
 class ASFPlayerController;
 
 class UStatusContainerComponent;
+class UStatusComponent;
 class UStateComponent;
 class USkillComponent;
 
@@ -38,7 +39,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat")
 	TObjectPtr<UStatusContainerComponent> StatusContainerComponent;
 	//virtual UStatusContainerComponent* GetStatusContainerComponent() const override;
-
+	TObjectPtr<UStatusComponent> StatusComponent;
 	TObjectPtr<UStateComponent> StateComponent;
 	TObjectPtr<USkillComponent> SkillComponent;
 
@@ -65,6 +66,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UAnimMontage> OnDamageMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UAnimMontage> GuardMontage;
+
 protected:
 	// TO DO : Seperate Componenets
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -77,8 +81,8 @@ protected:
 
 	void Landed(const FHitResult& Hit) override;
 
-	void RollPressed();
-	void RollReleased();
+	void DodgePressed();
+	void DodgeReleased();
 
 	void CrouchPressed();
 	void CrouchReleased();
@@ -108,16 +112,18 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_TakeDamageOnServer(const float Damage, const FDamageEvent& DamageEvent, AActor* DamageCauser);
 
+	UFUNCTION()
+	void OnHPChanged(AActor* AffectedActor, float HP);
+
+	//UFUNCTION()
+	//void OnCharacterDead();
+
 public:
 	virtual void AttackTrace();	// For AnimNotify
+	void SpawnFireBall();
 
-//public:
-//	void PerformAttack(int32 AttackIndex);
-//	void AddAttackHandler(UObject* AttackHandler);
-//
-//protected:
-//	UPROPERTY()
-//	TArray<TObjectPtr<UObject>> AttackHandlers;
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	TSubclassOf<class AFireBall> FireballClass;
 
 private:
 	bool bIsItemEquipped;
