@@ -52,7 +52,7 @@ void ASFBattleGameMode::HandleStartingNewPlayer_Implementation(APlayerController
 	UE_LOG(LogTemp, Warning, TEXT("ASFBattleGameMode::HandleStartingNewPlayer_Implementation"));
 
 	APlayerState* PS = NewPlayer->PlayerState;
-	UE_LOG(LogTemp, Warning, TEXT("PostLogin: Controller = %s, PlayerState = %s"),
+	UE_LOG(LogTemp, Warning, TEXT("HandleStartingNewPlayer_Implementation: Controller = %s, PlayerState = %s"),
 		*NewPlayer->GetName(),
 		PS ? *PS->GetName() : TEXT("nullptr"));
 
@@ -139,6 +139,7 @@ void ASFBattleGameMode::HandleCharacterSpawnRequest(APlayerController* PC)
 	UE_LOG(LogTemp, Error, TEXT("ASFPlayerState : %s"), *PS->GetActorNameOrLabel());
 
 	const FString Context = TEXT("Character Context");
+	UE_LOG(LogTemp, Error, TEXT("GetSelectedCharacterRow : %s"), *PS->GetSelectedCharacterRow().ToString());
 	FCharacterDataRow* Row = CharacterDataTable->FindRow<FCharacterDataRow>(PS->GetSelectedCharacterRow(), Context);
 	if (!Row)
 	{
@@ -150,7 +151,6 @@ void ASFBattleGameMode::HandleCharacterSpawnRequest(APlayerController* PC)
 		UE_LOG(LogTemp, Error, TEXT("nullptr : Row->CharacterClass"));
 		return;
 	}
-	UE_LOG(LogTemp, Error, TEXT("GetSelectedCharacterRow : %s"), *PS->GetSelectedCharacterRow().ToString());
 
 	int32 Index = GameState->PlayerArray.IndexOfByKey(PS);
 	ASFCharacterSpawner* StartSpawner = SpawnPoints.IsValidIndex(Index) ? SpawnPoints[Index] : nullptr;
