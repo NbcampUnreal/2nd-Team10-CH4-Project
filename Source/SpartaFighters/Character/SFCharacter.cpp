@@ -71,6 +71,11 @@ void ASFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 //	return StatusContainerComponent;
 //}
 
+UStateComponent* ASFCharacter::GetStateComponent()
+{
+	return StateComponent;
+}
+
 void ASFCharacter::BeginPlay()
 {
 	Super::BeginPlay();

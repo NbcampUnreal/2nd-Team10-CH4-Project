@@ -43,6 +43,9 @@ public:
 	TObjectPtr<UStateComponent> StateComponent;
 	TObjectPtr<USkillComponent> SkillComponent;
 
+	UFUNCTION(BlueprintCallable)
+	UStateComponent* GetStateComponent();
+
 protected:
 	virtual void BeginPlay() override;
 

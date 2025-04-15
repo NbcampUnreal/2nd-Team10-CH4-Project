@@ -23,7 +23,7 @@ void USkillComponent::HandleInputBasicAttack()
 
 	if (OwnerCharacter->HasAuthority())
 	{
-		StateComponent->UpdateState(OwnerCharacter);
+		//StateComponent->UpdateState(OwnerCharacter);
 		Multicast_HandleBasicAttack(StateComponent->GetState());
 	}
 	else
@@ -36,7 +36,7 @@ void USkillComponent::Server_HandleBasicAttack_Implementation()
 {
 	if (StateComponent && OwnerCharacter)
 	{
-		StateComponent->UpdateState(OwnerCharacter);
+		//StateComponent->UpdateState(OwnerCharacter);
 	}
 
 	Multicast_HandleBasicAttack(StateComponent->GetState());
@@ -50,6 +50,7 @@ void USkillComponent::Multicast_HandleBasicAttack_Implementation(ECharacterState
 void USkillComponent::HandleBasicAttack(ECharacterState CurrentState)
 {
 	if (!StateComponent || StateComponent->IsInAction()) return;
+	UE_LOG(LogTemp, Warning, TEXT("Handle Basic Attack"));
 
 	FName RowName = TEXT("BaseAttack_1");
 
@@ -76,7 +77,7 @@ void USkillComponent::HandleInputSkillAttack()
 
 	if (OwnerCharacter->HasAuthority())
 	{
-		StateComponent->UpdateState(OwnerCharacter);
+		//StateComponent->UpdateState(OwnerCharacter);
 		Multicast_HandleSkillAttack(StateComponent->GetState());
 	}
 	else
@@ -89,7 +90,7 @@ void USkillComponent::Server_HandleSkillAttack_Implementation()
 {
 	if (StateComponent && OwnerCharacter)
 	{
-		StateComponent->UpdateState(OwnerCharacter);
+		//StateComponent->UpdateState(OwnerCharacter);
 	}
 
 	Multicast_HandleSkillAttack(StateComponent->GetState());
@@ -103,6 +104,7 @@ void USkillComponent::Multicast_HandleSkillAttack_Implementation(ECharacterState
 void USkillComponent::HandleSkillAttack(ECharacterState CurrentState)
 {
 	if (!StateComponent || StateComponent->IsInAction()) return;
+	UE_LOG(LogTemp, Warning, TEXT("Handle Skill Attack"));
 
 	FName RowName = TEXT("IdleSkill");
 
