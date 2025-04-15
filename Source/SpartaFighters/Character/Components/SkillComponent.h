@@ -17,8 +17,7 @@ enum class ESkillType : uint8
 };
 
 
-//struct FSkillDataRow;
-//class ECharacterState;
+class ASFCharacter;
 class UAnimInstance;
 class UAnimMontage;
 
@@ -30,7 +29,7 @@ class SPARTAFIGHTERS_API USkillComponent : public UActorComponent
 public:
 	USkillComponent();
 
-	void Initialize(UDataTable* InSkillDataTable, UStateComponent* InStateComp, ACharacter* Character);
+	void Initialize(UDataTable* InSkillDataTable, UStateComponent* InStateComp, ASFCharacter* Character);
 
 	// Handle Basic Attack
 	void HandleInputBasicAttack();
@@ -55,6 +54,8 @@ public:
 
 	void HandleSkillAttack(ECharacterState CurrentState);
 
+	void ExcuteSkill();
+
 	// Handle Skill Attack
 	void HandleInputDodge();
 
@@ -68,7 +69,7 @@ public:
 
 
 	// Handle Animation
-	void PlayAnimMontage(const FName& RowName);
+	void PlayAnimMontage();
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 
@@ -83,7 +84,7 @@ private:
 	UStateComponent* StateComponent;
 
 	UPROPERTY()
-	ACharacter* OwnerCharacter;
+	ASFCharacter* OwnerCharacter;
 
 	FSkillDataRow* CurrentSkillData;
 
