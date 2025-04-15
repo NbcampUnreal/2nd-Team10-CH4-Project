@@ -4,6 +4,7 @@
 #include "Framework/SFBattleGameMode.h"
 #include "Framework/SFPlayerState.h"
 #include "UI/UIManager/UIManager.h"
+#include "Kismet/GameplayStatics.h"
 
 ASFPlayerController::ASFPlayerController()
 {
@@ -115,4 +116,11 @@ void ASFPlayerController::OnPossess(APawn* InPawn)
 		AddMappingContext();
 		SetInputMode(FInputModeGameOnly());
 	}
+}
+
+void ASFPlayerController::Client_TravelToLobby_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Client is returning to Lobby!"));
+
+	UGameplayStatics::OpenLevel(this, FName("/Game/SpartaFighters/Level/Menu/LobbyMenu"));
 }

@@ -1,9 +1,10 @@
 #include "Framework/SFCooperativeGameMode.h"
 #include "Framework/SFGameStateBase.h"
 #include "Framework/SFPlayerState.h"
+#include "Framework/SFPlayerController.h"
+#include "Framework/SFGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "LevelObject/SFCharacterSpawner.h"
-#include "Framework/SFPlayerController.h"
 #include "DataTable/CharacterDataRow.h"
 #include "UI/UIManager/UIManager.h"
 
@@ -244,18 +245,19 @@ void ASFCooperativeGameMode::ReturnToLobby()
 		if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(*It))
 		{
 			SFPlayerController->Client_EndReturnToLobbyTimer();
-			Client_TravelToLobby_Implementation(SFPlayerController);
+			SFPlayerController->Client_TravelToLobby();
 		}
 	}
 }
 
-void ASFCooperativeGameMode::Client_TravelToLobby_Implementation(APlayerController* PC)
-{
-	if (PC)
-	{
-		PC->ClientTravel(TEXT("/Game/SpartaFighters/Level/LobbyMenu"), ETravelType::TRAVEL_Absolute);
-	}
-}
+//void ASFCooperativeGameMode::TravelToLobby(APlayerController* PC)
+//{
+//	if (PC)
+//	{
+//		PC->ClientTravel(TEXT("/Game/SpartaFighters/Level/LobbyMenu"), ETravelType::TRAVEL_Absolute);
+//		//PC->ClientTravel(TEXT("127.0.0.1:17777"), TRAVEL_Absolute);
+//	}
+//}
 
 void ASFCooperativeGameMode::RequestRespawn(AController* DeadController)
 {

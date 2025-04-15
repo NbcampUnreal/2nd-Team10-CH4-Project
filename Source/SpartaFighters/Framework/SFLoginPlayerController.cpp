@@ -47,3 +47,10 @@ void ASFLoginPlayerController::Client_ReceiveLoginResult_Implementation(bool bSu
         UE_LOG(LogTemp, Warning, TEXT("Login Failed: %s"), *Message);
     }
 }
+
+void ASFLoginPlayerController::Client_TravelToLobby_Implementation()
+{
+    UE_LOG(LogTemp, Warning, TEXT("Client is returning to Lobby!"));
+
+    UGameplayStatics::OpenLevel(this, FName("/Game/SpartaFighters/Level/Menu/LobbyMenu"));
+}
