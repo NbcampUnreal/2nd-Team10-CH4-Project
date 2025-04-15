@@ -16,6 +16,9 @@
 #include "Components/StateComponent.h"
 #include "Components/SkillComponent.h"
 
+#include "Engine/DamageEvents.h"
+#include "Common/SkillDamageEvent.h"
+#include "Kismet/GameplayStatics.h"
 #include "DataTable/SkillDataRow.h"
 
 #include "Net/UnrealNetwork.h"
@@ -74,6 +77,16 @@ void ASFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 //{
 //	return StatusContainerComponent;
 //}
+
+UStateComponent* ASFCharacter::GetStateComponent()
+{
+	return StateComponent;
+}
+
+UStatusComponent* ASFCharacter::GetStatusComponent()
+{
+	return StatusComponent;
+}
 
 void ASFCharacter::BeginPlay()
 {
@@ -230,34 +243,40 @@ void ASFCharacter::AttackTrace()
 	}
 }
 
+void ASFCharacter::Server_SpawnFireBall_Implementation()
+{
+	SpawnFireBall();
+}
+
 void ASFCharacter::SpawnFireBall()
 {
-	// 1. 손 위치 (소켓 위치)
-	const FVector SocketLocation = GetMesh()->GetSocketLocation("hand_r");
+	if (!HasAuthority()) return;
 
-	// 2. 캐릭터 방향 기준 회전
-	const FRotator CastingRotation = GetActorRotation();
-	const FVector Forward = CastingRotation.Vector();
-
-	// 3. 손 앞쪽으로 오프셋 추가 (예: 30~50cm)
-	const FVector SpawnLocation = SocketLocation + Forward * 50.f;
+	const FVector Forward = GetActorForwardVector();
+	const FVector SpawnLocation = GetActorLocation() + Forward * 100.f;
+	const FRotator SpawnRotation = GetActorRotation();
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = GetInstigator();
-	AFireBall* FireBall = GetWorld()->SpawnActor<AFireBall>(FireballClass, SpawnLocation, CastingRotation, SpawnParams);
+
+	AFireBall* FireBall = GetWorld()->SpawnActor<AFireBall>(FireballClass, SpawnLocation, SpawnRotation, SpawnParams);
 	if (FireBall)
 	{
-		FireBall->SetFireBallSpeed(1500);
-		FireBall->FireInDirection(CastingRotation.Vector());
+		auto CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>("IdleSkill", TEXT("SkillLookup"));
+		if (!CurrentSkillData || !CurrentSkillData->SkillMontage) return;
+
+		FireBall->InitFireBall(1500, CurrentSkillData->AttackPower);
 		UE_LOG(LogTemp, Warning, TEXT("Casting Fire Ball!!"));
+
+		StatusComponent->ModifyStatus(EStatusType::CurMP, -CurrentSkillData->MPCost);
 	}
 }
-
 
 // TO DO : Damage Component
 float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	auto hasAuthority = HasAuthority();
 	ensureAlways(hasAuthority);
 
@@ -266,25 +285,27 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 		StatusComponent->ModifyStatus(EStatusType::CurHP, -DamageAmount);
 	}
 
-	//Multicast_TakeDamageOnServer(DamageAmount, DamageEvent, DamageCauser);
+	Multicast_PlayTakeDamageAnimMontage();
+
+	// Knock Back
+	if (const FSkillDamageEvent* CustomEvent = static_cast<const FSkillDamageEvent*>(&DamageEvent))
+	{
+		float knockbackPower = CustomEvent->KnockBackPower;
+		FVector Direction = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
+		LaunchCharacter(Direction * knockbackPower, true, true);
+	}
+
+	// Damage Effect
+	if (const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent))
+	{
+		Multicast_SpawnHitEffect(PointDamageEvent->HitInfo.ImpactPoint, PointDamageEvent->ShotDirection.Rotation());
+	}
 
 	return DamageAmount;
 }
 
-void ASFCharacter::Multicast_TakeDamageOnServer_Implementation(const float Damage, const FDamageEvent& DamageEvent, AActor* DamageCauser)
+void ASFCharacter::Multicast_PlayTakeDamageAnimMontage_Implementation()
 {
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Take Damage");
- 
-}
-
-void ASFCharacter::OnHPChanged(AActor* AffectedActor, float HP)
-{
-	UE_LOG(LogTemp, Warning, TEXT("%s의 체력이 %f로 변경되었습니다."), *AffectedActor->GetName(), HP);
-
-	FString Message = FString::Printf(TEXT("Take Damage : %f"), HP);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Message);
-
 	if (OnDamageMontage)
 	{
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -296,32 +317,28 @@ void ASFCharacter::OnHPChanged(AActor* AffectedActor, float HP)
 }
 
 
-//void ASFCharacter::OnCharacterDead()
-//{
-//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Character Is Dead.");
-//
-//	// 1. 입력 차단
-//	AController* MyController = GetController();
-//	if (MyController && MyController->IsLocalController())
-//	{
-//		DisableInput(Cast<APlayerController>(MyController));
-//	}
-//
-//	// 2. 애니메이션 중지
-//	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-//	{
-//		AnimInstance->StopAllMontages(0.2f);
-//	}
-//
-//	// 3. Ragdoll (Physics 활성화)
-//	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
-//	GetMesh()->SetSimulatePhysics(true);
-//	GetCharacterMovement()->DisableMovement();
-//
-//	// 4. 캡슐 콜리전 비활성화 (원하는 경우)
-//	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-//}
+void ASFCharacter::Multicast_SpawnHitEffect_Implementation(const FVector& Location, const FRotator& Rotation)
+{
+	if (!HitEffect) return;
 
+	UGameplayStatics::SpawnEmitterAtLocation(
+		GetWorld(),
+		HitEffect,
+		Location,
+		Rotation,
+		true
+	);
+}
+
+void ASFCharacter::OnHPChanged(AActor* AffectedActor, float HP)
+{
+	//if (IsLocallyControlled())
+	//{
+	//	//FString Message = FString::Printf(TEXT("Take Damage : %f"), HP);
+	//	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Message);
+	//	UE_LOG(LogTemp, Warning, TEXT("%s의 체력이 %f로 변경되었습니다."), *AffectedActor->GetName(), HP);
+	//}
+}
 
 void ASFCharacter::Die()
 {
@@ -332,16 +349,17 @@ void ASFCharacter::Die()
 
 	bIsDead = true;
 
-	AController* ControllerInstance = GetController();
+	CachedController = GetController();
 
 	Multicast_PlayDeathEffect();
 
 	SetActorEnableCollision(false);
 	SetActorHiddenInGame(true);
 
-	if (ControllerInstance)
+	if (CachedController)
 	{
-		ControllerInstance->UnPossess();
+		SetOwner(CachedController);
+		CachedController->UnPossess();
 	}
 
 	GetWorldTimerManager().SetTimer(
@@ -360,27 +378,28 @@ void ASFCharacter::DieImmediately()
 
 void ASFCharacter::RequestRespawn()
 {
-	AController* ControllerInstance = GetController();
-
-	if (!ControllerInstance && IsValid(GetWorld()))
+	if (!CachedController && IsValid(GetWorld()))
 	{
-		ControllerInstance = Cast<AController>(GetOwner());
+		CachedController = Cast<AController>(GetOwner());
 	}
 
-	if (ControllerInstance)
+	if (CachedController)
 	{
+
 		if (ASFBattleGameMode* BattleGM = GetWorld()->GetAuthGameMode<ASFBattleGameMode>())
 		{
-			BattleGM->RequestRespawn(ControllerInstance);
+			BattleGM->RequestRespawn(CachedController);
 		}
 		else if (ASFCooperativeGameMode* CoopGM = GetWorld()->GetAuthGameMode<ASFCooperativeGameMode>())
 		{
-			CoopGM->RequestRespawn(ControllerInstance);
+			CoopGM->RequestRespawn(CachedController);
 		}
+
 	}
 
 	Destroy();
 }
+
 
 void ASFCharacter::Multicast_PlayDeathEffect_Implementation()
 {

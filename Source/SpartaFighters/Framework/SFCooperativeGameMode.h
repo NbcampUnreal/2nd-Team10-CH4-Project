@@ -38,6 +38,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Battle")
 	float BattleTime;
 
+	float ReturnToLobbyTime;
+
 	UPROPERTY()
 	TArray<ASFCharacterSpawner*> SpawnPoints;
 

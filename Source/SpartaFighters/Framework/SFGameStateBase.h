@@ -18,8 +18,12 @@ public:
     ASFPlayerState* GetWinner() const { return WinnerPlayerState; }
 
     float GetRemainingBattleTime() const;
-    void SetBattleStartTime(float TimeInput) { BattleStartTime = TimeInput;  }
-    void SetBattleDuration(float DurationInput) { BattleDuration = DurationInput; }
+    float GetReturnToLobbyTime() const;
+    void SetBattleStartTime(float TimeInput); 
+    void SetBattleDuration(float DurationInput);
+    void SetReturnToLobbyTime(float TimeInput);
+    void SetStartReturnToLobbyTime(float TimeInput);
+
 
 protected:
     UPROPERTY(ReplicatedUsing = OnRep_WinnerPlayerState)
@@ -30,6 +34,12 @@ protected:
 
     UPROPERTY(Replicated)
     float BattleDuration;
+
+    UPROPERTY(Replicated)
+    float ReturnToLobbyTime;
+
+    UPROPERTY(Replicated)
+    float StartReturnToLobbyTime;
 
     UFUNCTION()
     void OnRep_WinnerPlayerState();

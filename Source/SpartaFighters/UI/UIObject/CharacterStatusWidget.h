@@ -13,6 +13,16 @@ class SPARTAFIGHTERS_API UCharacterStatusWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+    void SetPlayerName(const FString& Name);
+    void BindToCharacter(APawn* TargetCharacter);
+    void UpdateHPBar(float CurrentHP, float MaxHP);
+
+    UFUNCTION()
+    void OnCharacterHPChanged(AActor* AffectedActor, float NewHP);
+
+    FString GetPlayerName() const;
+
 protected:
 	virtual void NativeConstruct() override;
 

@@ -44,6 +44,7 @@ public:
     ULobbyMenu* GetCachedLobbyMenu() const { return CachedLobbyMenu; }
     UShopMenu* GetCachedShopMenu() const { return CachedShopMenu; }
     UUserWidget* GetCurrentWidget() const { return CurrentWidget; }
+    UCombatHUD* GetCachedCombatHUD() const { return CachedCombatHUD; }
 
     void ShowMapSelectionWidget(EGameModeType GameModeType);
     void ShowSelectCharacterWidget();
@@ -52,12 +53,16 @@ public:
     void CloseCombatHUD();
     void CloseCombatResultHUD();
     void UpdateCombatHUD();
+    void UpdateCombatResult();
 
     UFUNCTION()
     void UpdateHUD();
 
     UFUNCTION()
     void StartHUDUpdate();
+    void StartCombatResultUpdate();
+    void EndCombatResultUpdate();
+    void EndHUDUpdate();
     void ShowCombatHUD();
 
     void ShowOptionsWidget();
@@ -120,4 +125,5 @@ private:
     APlayerController* OwningPlayer;
 	
     FTimerHandle HUDUpdateTimerHandle;
+    FTimerHandle CombatResultHUDUpdateTimerHandle;
 };

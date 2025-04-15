@@ -72,17 +72,38 @@ void ASFPlayerController::Client_StartHUDUpdate_Implementation()
 {
 	if (USFGameInstanceSubsystem* Subsystem = GetGameInstance()->GetSubsystem<USFGameInstanceSubsystem>())
 	{
-		/*if (UUIManager* UIManager = Subsystem->GetUIManager())
-		{
-			UIManager->StartHUDUpdate(); 
-		}*/
-
 		UUIManager* UIManager = Subsystem->GetUIManager();
 		if (UIManager != nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("please"));
 			UIManager->SetPlayerController(this);
 			UIManager->StartHUDUpdate();
+		}
+	}
+}
+
+void ASFPlayerController::Client_EndBattle_Implementation()
+{
+	if (USFGameInstanceSubsystem* Subsystem = GetGameInstance()->GetSubsystem<USFGameInstanceSubsystem>())
+	{
+		UUIManager* UIManager = Subsystem->GetUIManager();
+		if (UIManager != nullptr)
+		{
+			UIManager->EndHUDUpdate();
+			UIManager->CloseCombatHUD();
+			UIManager->ShowCombatResultHUD();
+			UIManager->StartCombatResultUpdate();
+		}
+	}
+}
+
+void ASFPlayerController::Client_EndReturnToLobbyTimer_Implementation()
+{
+	if (USFGameInstanceSubsystem* Subsystem = GetGameInstance()->GetSubsystem<USFGameInstanceSubsystem>())
+	{
+		UUIManager* UIManager = Subsystem->GetUIManager();
+		if (UIManager != nullptr)
+		{
+			UIManager->EndCombatResultUpdate();
 		}
 	}
 }

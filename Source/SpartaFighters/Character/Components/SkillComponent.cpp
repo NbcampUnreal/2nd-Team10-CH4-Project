@@ -3,6 +3,11 @@
 #include "Animation/AnimInstance.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character/SFCharacter.h"
+#include "Character/Components/StatusComponent.h"
+
+#include "Common/SkillDamageEvent.h"
+//#include "Engine/DamageEvents.h"
 
 
 USkillComponent::USkillComponent()
@@ -10,7 +15,7 @@ USkillComponent::USkillComponent()
 
 }
 
-void USkillComponent::Initialize(UDataTable* InSkillDataTable, UStateComponent* InStateComp, ACharacter* Character)
+void USkillComponent::Initialize(UDataTable* InSkillDataTable, UStateComponent* InStateComp, ASFCharacter* Character)
 {
 	SkillDataTable = InSkillDataTable;
 	StateComponent = InStateComp;
@@ -23,7 +28,7 @@ void USkillComponent::HandleInputBasicAttack()
 
 	if (OwnerCharacter->HasAuthority())
 	{
-		StateComponent->UpdateState(OwnerCharacter);
+		//StateComponent->UpdateState(OwnerCharacter);
 		Multicast_HandleBasicAttack(StateComponent->GetState());
 	}
 	else
@@ -36,7 +41,7 @@ void USkillComponent::Server_HandleBasicAttack_Implementation()
 {
 	if (StateComponent && OwnerCharacter)
 	{
-		StateComponent->UpdateState(OwnerCharacter);
+		//StateComponent->UpdateState(OwnerCharacter);
 	}
 
 	Multicast_HandleBasicAttack(StateComponent->GetState());
@@ -50,6 +55,7 @@ void USkillComponent::Multicast_HandleBasicAttack_Implementation(ECharacterState
 void USkillComponent::HandleBasicAttack(ECharacterState CurrentState)
 {
 	if (!StateComponent || StateComponent->IsInAction()) return;
+	UE_LOG(LogTemp, Warning, TEXT("Handle Basic Attack"));
 
 	FName RowName = TEXT("BaseAttack_1");
 
@@ -66,7 +72,8 @@ void USkillComponent::HandleBasicAttack(ECharacterState CurrentState)
 		break;
 	}
 
-	PlayAnimMontage(RowName);
+	CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>(RowName, TEXT("SkillLookup"));
+	PlayAnimMontage();
 }
 
 void USkillComponent::HandleInputSkillAttack()
@@ -76,7 +83,6 @@ void USkillComponent::HandleInputSkillAttack()
 
 	if (OwnerCharacter->HasAuthority())
 	{
-		StateComponent->UpdateState(OwnerCharacter);
 		Multicast_HandleSkillAttack(StateComponent->GetState());
 	}
 	else
@@ -87,11 +93,6 @@ void USkillComponent::HandleInputSkillAttack()
 
 void USkillComponent::Server_HandleSkillAttack_Implementation()
 {
-	if (StateComponent && OwnerCharacter)
-	{
-		StateComponent->UpdateState(OwnerCharacter);
-	}
-
 	Multicast_HandleSkillAttack(StateComponent->GetState());
 }
 
@@ -103,6 +104,7 @@ void USkillComponent::Multicast_HandleSkillAttack_Implementation(ECharacterState
 void USkillComponent::HandleSkillAttack(ECharacterState CurrentState)
 {
 	if (!StateComponent || StateComponent->IsInAction()) return;
+	UE_LOG(LogTemp, Warning, TEXT("Handle Skill Attack"));
 
 	FName RowName = TEXT("IdleSkill");
 
@@ -119,7 +121,32 @@ void USkillComponent::HandleSkillAttack(ECharacterState CurrentState)
 		break;
 	}
 
-	PlayAnimMontage(RowName);
+	CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>(RowName, TEXT("SkillLookup"));
+	ExcuteSkill();
+}
+
+void USkillComponent::ExcuteSkill()
+{
+	UStatusComponent* StatusComponet = OwnerCharacter->GetStatusComponent();
+	if (!IsValid(StatusComponet))
+	{
+		return;
+	}
+
+	if (!CurrentSkillData || !CurrentSkillData->SkillMontage) return;
+
+
+	float CurrentMP = StatusComponet->GetStatusValue(EStatusType::CurMP);
+	if (CurrentMP < CurrentSkillData->MPCost)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Current MP is Not Enought!! CurrentMP : %f, MPCost : %f"), CurrentMP, CurrentSkillData->MPCost);
+	}
+	else
+	{
+		StatusComponet->ModifyMP(-CurrentSkillData->MPCost);
+		PlayAnimMontage();
+	}
+	//StateComponent->Get
 }
 
 void USkillComponent::HandleInputDodge()
@@ -150,13 +177,13 @@ void USkillComponent::HandleDodge(ECharacterState CurrentState)
 {
 	FName RowName = TEXT("Dodge");
 	StateComponent->SetIsInAction(true);
-
-	PlayAnimMontage(RowName);
+	CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>(RowName, TEXT("SkillLookup"));
+	PlayAnimMontage();
 }
 
-void USkillComponent::PlayAnimMontage(const FName& RowName)
+void USkillComponent::PlayAnimMontage()
 {
-	CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>(RowName, TEXT("SkillLookup"));
+	//CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>(RowName, TEXT("SkillLookup"));
 	if (!CurrentSkillData || !CurrentSkillData->SkillMontage) return;
 
 	if (UAnimInstance* Anim = OwnerCharacter->GetMesh()->GetAnimInstance())
@@ -216,14 +243,17 @@ void USkillComponent::PerformAttackTrace()
 			if (AlreadyHitActors.Contains(HitActor)) continue;
 			AlreadyHitActors.Add(HitActor);
 
-			UGameplayStatics::ApplyPointDamage(
-				HitActor,
+			FSkillDamageEvent DamageEvent;
+			DamageEvent.HitInfo = Hit;
+			DamageEvent.ShotDirection = OwnerCharacter->GetActorForwardVector();
+			DamageEvent.DamageTypeClass = UDamageType::StaticClass();
+			DamageEvent.KnockBackPower = CurrentSkillData->KnockbackPower;
+
+			HitActor->TakeDamage(
 				CurrentSkillData->AttackPower,
-				SocketLocation,
-				Hit,
+				DamageEvent,
 				OwnerCharacter->GetController(),
-				OwnerCharacter,
-				UDamageType::StaticClass()
+				OwnerCharacter
 			);
 		}
 	}

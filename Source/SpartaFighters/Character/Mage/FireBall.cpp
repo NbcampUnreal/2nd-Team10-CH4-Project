@@ -2,10 +2,12 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Common/SKillDamageEvent.h"
 
 AFireBall::AFireBall()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	if (!RootComponent)
 	{
@@ -19,7 +21,10 @@ AFireBall::AFireBall()
 		CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
 		RootComponent = CollisionComponent;
 
-		CollisionComponent->OnComponentHit.AddDynamic(this, &AFireBall::OnHit); // TODO : OnHit Needs
+		if (GetLocalRole() == ROLE_Authority)
+		{
+			CollisionComponent->OnComponentHit.AddDynamic(this, &AFireBall::OnHit); // TODO : OnHit Needs
+		}
 	}
 
 	FireBallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FireBallMesh"));
@@ -39,6 +44,7 @@ AFireBall::AFireBall()
 	}
 
 	FireBallDamage = 10.f;
+
 }
 
 void AFireBall::BeginPlay()
@@ -51,7 +57,10 @@ void AFireBall::BeginPlay()
 
 void AFireBall::FireInDirection(const FVector& CastDirection)
 {
-	ProjectileMovement->Velocity = CastDirection * ProjectileMovement->InitialSpeed;
+	if (ProjectileMovement)
+	{
+		ProjectileMovement->Velocity = CastDirection * ProjectileMovement->InitialSpeed;
+	}
 }
 
 void AFireBall::SetFireBallSpeed(const float SpeedInput)
@@ -60,22 +69,42 @@ void AFireBall::SetFireBallSpeed(const float SpeedInput)
 	ProjectileMovement->Velocity = ProjectileMovement->Velocity.GetSafeNormal() * (ProjectileMovement->MaxSpeed);
 }
 
+void AFireBall::InitFireBall(const float SpeedInput, const float Damage)
+{
+	SetFireBallSpeed(SpeedInput);
+	FireBallDamage = Damage;
+}
+
 void AFireBall::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("FireBall Hit %s"), *OtherComponent->GetName()); << Collision Cylinder
+	if (!OtherActor || OtherActor == this || OtherActor == GetOwner())
+	{
+		return; // 자기 자신 또는 발사자면 무시
+	}
+
+	if (!HasAuthority()) return;
+
 	UE_LOG(LogTemp, Warning, TEXT("FireBall Hit %s"), *OtherActor->GetName());
-	// FireBall Destroy
+
 	ProjectileMovement->bShouldBounce = false;
 	GetWorld()->GetTimerManager().SetTimer(DestroyLazyTimer, this, &AFireBall::DestroyFireBall, 0.3f, false);
 
-	UGameplayStatics::ApplyDamage
-	(
-		OtherActor,
+	//  커스텀 데미지 이벤트 생성
+	FSkillDamageEvent DamageEvent;
+	DamageEvent.HitInfo = Hit;
+	DamageEvent.ShotDirection = GetActorForwardVector();  // 또는 NormalImpulse.GetSafeNormal()
+	DamageEvent.DamageTypeClass = UDamageType::StaticClass();
+	DamageEvent.KnockBackPower = 1200.f; // 혹은 FireBallDamage * 계수 등으로 계산 가능
+
+	// ?? 데미지 적용 (TakeDamage으로 직접)
+	OtherActor->TakeDamage(
 		FireBallDamage,
-		GetInstigatorController(),
-		this,
-		UDamageType::StaticClass()
+		DamageEvent,
+		GetInstigator() ? GetInstigator()->Controller : nullptr,
+		this
 	);
+
+	UE_LOG(LogTemp, Warning, TEXT("FireBall Apply Custom Damage %f"), FireBallDamage);
 
 	UE_LOG(LogTemp, Warning, TEXT("FireBall Apply Damage %f"), FireBallDamage);
 }

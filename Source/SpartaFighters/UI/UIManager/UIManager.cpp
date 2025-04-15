@@ -1,4 +1,4 @@
-#include "UIManager.h"
+﻿#include "UIManager.h"
 #include "UIManagerSettings.h"
 
 #include "UI/UIElements/LoginMenu.h"
@@ -263,6 +263,23 @@ void UUIManager::UpdateCombatHUD()
 	}
 }
 
+void UUIManager::UpdateCombatResult()
+{
+	if (UTextBlock* ReturnToLobbyText = Cast<UTextBlock>(CachedCombatResultHUD->GetWidgetFromName(TEXT("ReturnToLobbyTextBlock"))))
+	{
+		float ReturnToLobbyTime = 0.f;
+
+		if (ASFGameStateBase* GameState = OwningPlayer->GetWorld()->GetGameState<ASFGameStateBase>())
+		{
+			ReturnToLobbyTime = GameState->GetReturnToLobbyTime();
+		}
+
+		int32 ReturnToLobbySecond = FMath::FloorToInt(FMath::Fmod(ReturnToLobbyTime, 60.f));
+
+		ReturnToLobbyText->SetText(FText::FromString(FString::Printf(TEXT("After %d seconds, return to the lobby..."), ReturnToLobbySecond)));
+	}
+}
+
 void UUIManager::UpdateHUD()
 {
 	UpdateCombatHUD();
@@ -279,6 +296,36 @@ void UUIManager::StartHUDUpdate()
 			0.2f,
 			true
 		);
+	}
+}
+
+void UUIManager::StartCombatResultUpdate()
+{
+	if (UWorld* World = OwningPlayer ? OwningPlayer->GetWorld() : nullptr)
+	{
+		World->GetTimerManager().SetTimer(
+			CombatResultHUDUpdateTimerHandle,
+			this,
+			&UUIManager::UpdateCombatResult,
+			0.2f,
+			true
+		);
+	}
+}
+
+void UUIManager::EndCombatResultUpdate()
+{
+	if (UWorld* World = OwningPlayer ? OwningPlayer->GetWorld() : nullptr)
+	{
+		World->GetTimerManager().ClearTimer(CombatResultHUDUpdateTimerHandle);
+	}
+}
+
+void UUIManager::EndHUDUpdate()
+{
+	if (UWorld* World = OwningPlayer ? OwningPlayer->GetWorld() : nullptr)
+	{
+		World->GetTimerManager().ClearTimer(HUDUpdateTimerHandle);
 	}
 }
 

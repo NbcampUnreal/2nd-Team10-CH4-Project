@@ -43,6 +43,11 @@ public:
 	TObjectPtr<UStateComponent> StateComponent;
 	TObjectPtr<USkillComponent> SkillComponent;
 
+	UFUNCTION(BlueprintCallable)
+	UStateComponent* GetStateComponent();
+	UFUNCTION(BlueprintCallable)
+	UStatusComponent* GetStatusComponent();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -68,6 +73,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UAnimMontage> GuardMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UParticleSystem> HitEffect;
 
 protected:
 	// TO DO : Seperate Componenets
@@ -110,19 +118,24 @@ protected:
 		AActor* DamageCauser) override;
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_TakeDamageOnServer(const float Damage, const FDamageEvent& DamageEvent, AActor* DamageCauser);
+	void Multicast_PlayTakeDamageAnimMontage();
 
 	UFUNCTION()
 	void OnHPChanged(AActor* AffectedActor, float HP);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SpawnHitEffect(const FVector& Location, const FRotator& Rotation);
 
 	//UFUNCTION()
 	//void OnCharacterDead();
 
 public:
 	virtual void AttackTrace();	// For AnimNotify
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnFireBall();
 	void SpawnFireBall();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class AFireBall> FireballClass;
 
 private:
@@ -137,8 +150,14 @@ public:
 
 	void RequestRespawn();
 
+	//UFUNCTION(NetMulticast, Unreliable)
+	//void Multicast_PlayHeatEffect();
+
 protected:
 	bool bIsDead = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Reference");
+	TObjectPtr<AController> CachedController;
 
 	FTimerHandle RespawnTimer;
 
@@ -147,4 +166,5 @@ protected:
 
 	UFUNCTION(NetMulticast,Unreliable)
 	void Multicast_PlayDeathEffect();
+
 };
