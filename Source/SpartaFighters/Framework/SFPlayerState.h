@@ -35,6 +35,8 @@ public:
 	FString CustomPlayerID;
 
 	FString GetUniqueID() const;
+	UFUNCTION(BlueprintCallable)
+	FString BP_GetUnique_ID() const;
 	void SetUniqueID(FString InUniqueID) { CustomPlayerID = InUniqueID; }
 
 public:
@@ -88,4 +90,5 @@ public:
 	USFEquipableBase* CharacterEquippedExclusive;
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Equipment")
 	USFEquipableBase* CharacterEquippedCosmetic;
+
 };

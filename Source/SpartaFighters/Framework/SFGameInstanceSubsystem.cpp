@@ -31,6 +31,7 @@ void USFGameInstanceSubsystem::Deinitialize()
 	CurrentGameModeInstance = nullptr;
 	PlayerInventories.Empty();
 	PlayerEquipments.Empty();
+	PendingShopPurchases.Empty();
 }
 
 void USFGameInstanceSubsystem::SetCurrentGameState(EGameState NewGameState)
@@ -196,4 +197,30 @@ const USFEquipableBase* USFGameInstanceSubsystem::GetPlayerEquippedItem(const FS
 		}
 	}
 	return nullptr;
+}
+
+//Inventory logic when(no character)
+void USFGameInstanceSubsystem::AddPendingShopPurchase(const FString& PlayerID, TSubclassOf<class USFItemBase> ItemClass)
+{
+	if (!PendingShopPurchases.Contains(PlayerID))
+	{
+		PendingShopPurchases.Add(PlayerID, TArray<TSubclassOf<class USFItemBase>>());
+	}
+	PendingShopPurchases[PlayerID].Add(ItemClass);
+	UE_LOG(LogTemp, Log, TEXT("Added pending shop purchase for Player: %s, Item: %s"), *PlayerID, *ItemClass->GetName());
+}
+
+TArray<TSubclassOf<class USFItemBase>> USFGameInstanceSubsystem::GetPendingShopPurchases(const FString& PlayerID) const
+{
+	if (PendingShopPurchases.Contains(PlayerID))
+	{
+		return PendingShopPurchases[PlayerID];
+	}
+	return TArray<TSubclassOf<class USFItemBase>>();
+}
+
+void USFGameInstanceSubsystem::ClearPendingShopPurchases(const FString& PlayerID)
+{
+	PendingShopPurchases.Remove(PlayerID);
+	UE_LOG(LogTemp, Log, TEXT("Cleared pending shop purchases for Player: %s"), *PlayerID);
 }

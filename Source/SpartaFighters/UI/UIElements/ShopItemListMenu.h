@@ -4,7 +4,9 @@
 #include "UI/BaseUserWidget.h"
 #include "UI/PopUp/SelectPopUpBase.h"
 #include "Items/FSFItemData.h"
+#include "Items/SFItemBase.h"
 #include "ShopItemListMenu.generated.h"
+
 
 class UTextBlock;
 class UButton;
@@ -12,6 +14,8 @@ class ULobbyMenu;
 class UShopMenu;
 class UShopItemWidget;
 class UListView;
+class USFInventoryComponent;
+class USFGameInstanceSubsystem;
 
 UCLASS()
 class SPARTAFIGHTERS_API UShopItemListMenu : public USelectPopUpBase
@@ -31,6 +35,8 @@ private:
 	UListView* ItemListView;
 	UPROPERTY(meta = (BindWidget))
 	UButton* PurchaseButton;
+	UPROPERTY(meta = (BindWidget))
+	UButton* EquipButton;
 	UPROPERTY()
 	TArray<USFItemBase*> ShopItems;
 	UPROPERTY()
@@ -51,7 +57,14 @@ public:
 	void OnItemSelectionChanged(UObject* SelectedItemObject);
 	UFUNCTION(BlueprintCallable)
 	void OnPurchaseButtonClicked();
+	UFUNCTION(BlueprintCallable)
+	void OnEquipButtonClicked();
 	void UpdateCurrentGoldText();
 	void OnExitClicked() override;
 	
+	void SetItemTypeTextBlock(EItemType Type);
+	void UpdateEquipButtonVisibility();
+
+	USFInventoryComponent* GetInventoryComponent();
+	USFGameInstanceSubsystem* GetGameInstanceSubsystem();
 };

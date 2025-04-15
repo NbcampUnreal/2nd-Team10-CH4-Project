@@ -7,7 +7,7 @@
 ASFPlayerState::ASFPlayerState()
 {
 	bReplicates = true;
-	CurrentGold = 0.0f;
+	CurrentGold = 100.0f;
 }
 
 void ASFPlayerState::OnRep_bIsReady()
@@ -37,6 +37,11 @@ void ASFPlayerState::CopyProperties(APlayerState* PlayerState)
 }
 
 FString ASFPlayerState::GetUniqueID() const
+{
+	return CustomPlayerID;
+}
+
+FString ASFPlayerState::BP_GetUnique_ID() const
 {
 	return CustomPlayerID;
 }
@@ -121,3 +126,4 @@ void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASFPlayerState, CharacterEquippedExclusive);
 	DOREPLIFETIME(ASFPlayerState, CharacterEquippedCosmetic);
 }
+

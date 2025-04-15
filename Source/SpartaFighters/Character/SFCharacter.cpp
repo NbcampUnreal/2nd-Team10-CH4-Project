@@ -22,6 +22,9 @@
 #include "Character/Mage/FireBall.h"
 #include "NiagaraFunctionLibrary.h"
 
+
+
+
 ASFCharacter::ASFCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -58,6 +61,7 @@ ASFCharacter::ASFCharacter()
 	
 	bReplicates = true;
 	GetCharacterMovement()->SetIsReplicated(true);
+
 }
 
 void ASFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -84,7 +84,7 @@ void USFInventoryComponent::Server_AddItemByClass_Implementation(TSubclassOf<USF
 				if (NewItem)
 				{
 					Inventory.Add(NewItem);
-					//Internal_UpdateData();
+					Internal_UpdateData();
 					bInventoryUpdated = !bInventoryUpdated;
 				}
 			}
@@ -106,7 +106,7 @@ void USFInventoryComponent::Server_RemoveItem_Implementation(FName ItemNameToRem
 			if (Inventory[i]->ItemName == ItemNameToRemove)
 			{
 				Inventory.RemoveAt(i);
-				//Internal_UpdateData();
+				Internal_UpdateData();
 				bInventoryUpdated = !bInventoryUpdated;
 				return;
 			}
@@ -192,7 +192,7 @@ void USFInventoryComponent::Server_UnequipItem_Implementation(SFEquipSlot EquipS
 					if (NewItem)
 					{
 						Inventory.Add(NewItem);
-						//Internal_UpdateData();
+						Internal_UpdateData();
 						bInventoryUpdated = !bInventoryUpdated;
 					}
 				}

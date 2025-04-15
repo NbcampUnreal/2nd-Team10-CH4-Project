@@ -18,6 +18,7 @@
 #include "Framework/SFGameStateBase.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Items/SFItemBase.h"
 
 UUIManager::UUIManager()
 {
@@ -111,10 +112,26 @@ void UUIManager::ShowShopMenu()
 	SwitchToWidget(CachedShopMenu);
 }
 
-void UUIManager::ShowShopItemListMenu()
+void UUIManager::ShowShopItemListMenu(EItemType Type)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ShowShopItemListMenu"));
-	SwitchToWidget(CachedShopItemListMenu);
+	switch (Type)
+	{
+	case EItemType::Common:
+		CachedShopItemListMenu->SetItemTypeTextBlock(EItemType::Common);
+		SwitchToWidget(CachedShopItemListMenu);
+		break;
+	case EItemType::Exclusive:
+		CachedShopItemListMenu->SetItemTypeTextBlock(EItemType::Exclusive);
+		SwitchToWidget(CachedShopItemListMenu);
+		break;
+	case EItemType::Cosmetic:
+		CachedShopItemListMenu->SetItemTypeTextBlock(EItemType::Cosmetic);
+		SwitchToWidget(CachedShopItemListMenu);
+		break;
+	default:
+		break;
+	}
 }
 
 void UUIManager::SwitchToWidget(UUserWidget* NewWidget)

@@ -43,6 +43,8 @@ private:
 	//Inventory
 	TMap<FString, TArray<USFItemBase*>> PlayerInventories;
 	TMap<FString, TArray<USFEquipableBase*>> PlayerEquipments;
+	//Inventory when(no character)
+	TMap<FString, TArray<TSubclassOf<class USFItemBase>>> PendingShopPurchases;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Data")
@@ -80,5 +82,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	const USFEquipableBase* GetPlayerEquippedItem(const FString& PlayerID, SFEquipSlot Slot) const;
+
+	//(Inventory when no character)
+	UFUNCTION(BlueprintCallable)
+	void AddPendingShopPurchase(const FString& PlayerID, TSubclassOf<class USFItemBase> ItemClass);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<TSubclassOf<class USFItemBase>> GetPendingShopPurchases(const FString& PlayerID) const;
+
+	UFUNCTION(BlueprintCallable)
+	void ClearPendingShopPurchases(const FString& PlayerID);
 };
 

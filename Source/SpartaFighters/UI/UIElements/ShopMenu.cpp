@@ -50,7 +50,7 @@ void UShopMenu::OnCommonItemClicked()
 {
     if (UUIManager* UIManager = ResolveUIManager())
 	{
-		UIManager->ShowShopItemListMenu();
+		UIManager->ShowShopItemListMenu(EItemType::Common);
         UE_LOG(LogTemp, Warning, TEXT("OnCommonItemClicked"));
 	}
 }
@@ -59,7 +59,7 @@ void UShopMenu::OnExclusiveItemClicked()
 {
     if (UUIManager* UIManager = ResolveUIManager())
     {
-        UIManager->ShowShopItemListMenu();
+        UIManager->ShowShopItemListMenu(EItemType::Exclusive);
         UE_LOG(LogTemp, Warning, TEXT("OnExclusiveItemClicked!"));
     }
 }
@@ -68,7 +68,7 @@ void UShopMenu::OnCosmeticItemClicked()
 {
     if (UUIManager* UIManager = ResolveUIManager())
     {
-        UIManager->ShowShopItemListMenu();
+        UIManager->ShowShopItemListMenu(EItemType::Cosmetic);
         UE_LOG(LogTemp, Warning, TEXT("OnCosmeticItemClicked!"));
     }
 }
