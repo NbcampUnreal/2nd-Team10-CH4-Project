@@ -216,6 +216,17 @@ void ULoginMenu::OnRegisterClicked()
 void ULoginMenu::OnOptionClicked()
 {
 	UE_LOG(LogTemp, Log, TEXT("Option Button Clicked"));
+	UE_LOG(LogTemp, Log, TEXT("OnOptionButtonClicked"));
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	{
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			if (UUIManager* UIManager = Subsystem->GetUIManager())
+			{
+				UIManager->ShowOptionsWidget();
+			}
+		}
+	}
 }
 
 void ULoginMenu::OnQuitGameClicked()

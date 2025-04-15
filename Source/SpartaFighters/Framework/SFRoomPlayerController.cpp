@@ -22,6 +22,7 @@ void ASFRoomPlayerController::BeginPlay()
         {
             if (UUIManager* UIManager = Subsystem->GetUIManager())
             {
+                UIManager->Init(this);
                 UIManager->ShowRoomMenu();
             }
         }

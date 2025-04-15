@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UI/BaseUserWidget.h"
+#include "DataTable/CharacterDataRow.h"
 #include "RoomWidget.generated.h"
 
 class UButton;
@@ -54,6 +55,9 @@ private:
 	void OnReadyButtonClicked();
 
 public:
+	UPROPERTY(EditDefaultsOnly, Category = "Data")
+	UDataTable* CharacterDataTable;
+
 	void UpdatePlayerSlots();
 
 	void UpdateUIState();
