@@ -93,6 +93,19 @@ bool ASFPlayerState::RemoveGold(float Amount)
 	return false;
 }
 
+//Set Inventory
+void ASFPlayerState::SetCharacterInventory(const TArray<USFItemBase*>& NewInventory)
+{
+	CharacterInventory = NewInventory;
+}
+
+//Set Equipment
+void ASFPlayerState::SetCharacterEquipment(USFEquipableBase* Common, USFEquipableBase* Exclusive, USFEquipableBase* Cosmetic)
+{
+	CharacterEquippedCommon = Common;
+	CharacterEquippedExclusive = Exclusive;
+	CharacterEquippedCosmetic = Cosmetic;
+}
 
 void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -103,4 +116,8 @@ void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASFPlayerState, bIsAI);
 	DOREPLIFETIME(ASFPlayerState, SelectedCharacterRow);
 	DOREPLIFETIME(ASFPlayerState, CurrentGold);
+	DOREPLIFETIME(ASFPlayerState, CharacterInventory);
+	DOREPLIFETIME(ASFPlayerState, CharacterEquippedCommon);
+	DOREPLIFETIME(ASFPlayerState, CharacterEquippedExclusive);
+	DOREPLIFETIME(ASFPlayerState, CharacterEquippedCosmetic);
 }

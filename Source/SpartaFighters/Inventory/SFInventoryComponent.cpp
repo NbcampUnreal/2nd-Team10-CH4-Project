@@ -3,7 +3,7 @@
 #include "Items/EquipItems/SFEquipableBase.h"
 #include "Net/UnrealNetwork.h"
 #include "Framework/SFPlayerState.h"
-
+#include "Framework/SFGameInstanceSubsystem.h"
 
 USFInventoryComponent::USFInventoryComponent()
 {
@@ -47,19 +47,19 @@ void USFInventoryComponent::Internal_UpdateData()
 				if (OwnerState)
 				{
 					// Save inventory info on PlayerState
-					// OwnerState->SetCharacterInventory(Inventory);
-					// OwnerState->SetCharacterEquipment(EquippedItems);
+					OwnerState->SetCharacterInventory(Inventory);
+					OwnerState->SetCharacterEquipment(EquippedCommon, EquippedExclusive, EquippedCosmetic);
 
 					// Save inventory info on GameInstance 
 					UGameInstance* GameInstance = GetWorld()->GetGameInstance();
 					if (GameInstance)
 					{
-						// USFGameInstance* SFGameInstance = Cast<USFGameInstance>(GameInstance);
-						// if (SFGameInstance)
-						// {
-						//     SFGameInstance->UpdatePlayerInventory(OwnerState->GetUniqueId(), Inventory);
-						//     SFGameInstance->UpdatePlayerEquipment(OwnerState->GetUniqueId(), EquippedItems);
-						// }
+						USFGameInstanceSubsystem* SFGameInstanceSubsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>();
+						if (SFGameInstanceSubsystem)
+						{
+							SFGameInstanceSubsystem->UpdatePlayerInventory(OwnerState->GetUniqueID(), Inventory);
+							SFGameInstanceSubsystem->UpdatePlayerEquipment(OwnerState->GetUniqueID(), EquippedCommon, EquippedExclusive, EquippedCosmetic);
+						}
 					}
 				}
 			}

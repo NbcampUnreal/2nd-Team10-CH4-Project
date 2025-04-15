@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "Items/SFItemBase.h"
+#include "Items/EquipItems/SFEquipableBase.h"
 #include "SFPlayerState.generated.h"
 
 class ASFGameStateBase;
@@ -72,4 +74,18 @@ protected:
 	void CopyProperties(APlayerState* PlayerState) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+public:
+	//Inventory
+	void SetCharacterInventory(const TArray<USFItemBase*>& NewInventory);
+	void SetCharacterEquipment(USFEquipableBase* Common, USFEquipableBase* Exclusive, USFEquipableBase* Cosmetic);
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Inventory")
+	TArray<USFItemBase*> CharacterInventory;
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Equipment")
+	USFEquipableBase* CharacterEquippedCommon;
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Equipment")
+	USFEquipableBase* CharacterEquippedExclusive;
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Equipment")
+	USFEquipableBase* CharacterEquippedCosmetic;
 };

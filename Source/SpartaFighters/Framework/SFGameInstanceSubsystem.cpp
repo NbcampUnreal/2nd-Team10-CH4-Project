@@ -29,6 +29,8 @@ void USFGameInstanceSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
 	CurrentGameModeInstance = nullptr;
+	PlayerInventories.Empty();
+	PlayerEquipments.Empty();
 }
 
 void USFGameInstanceSubsystem::SetCurrentGameState(EGameState NewGameState)
@@ -148,4 +150,50 @@ void USFGameInstanceSubsystem::ConnectToServerByAddress(const FString& ServerAdd
 	FURL DedicatedServerURL(nullptr, *ServerURL, TRAVEL_Absolute);
 	FString ErrorMessage;
 	GEngine->Browse(GEngine->GetWorldContextFromWorldChecked(GetWorld()), DedicatedServerURL, ErrorMessage);
+}
+
+//Add inventory logic
+void USFGameInstanceSubsystem::UpdatePlayerInventory(const FString& PlayerID, const TArray<USFItemBase*>& Inventory)
+{
+	PlayerInventories.Emplace(PlayerID, Inventory);
+	UE_LOG(LogTemp, Log, TEXT("Updated inventory for Player: %s, Item Count: %d"), *PlayerID, Inventory.Num());
+}
+
+void USFGameInstanceSubsystem::UpdatePlayerEquipment(const FString& PlayerID, USFEquipableBase* Common, USFEquipableBase* Exclusive, USFEquipableBase* Cosmetic)
+{
+	TArray<USFEquipableBase*> Equipment;
+	Equipment.Add(Common);
+	Equipment.Add(Exclusive);
+	Equipment.Add(Cosmetic);
+	PlayerEquipments.Emplace(PlayerID, Equipment);
+	UE_LOG(LogTemp, Log, TEXT("Updated equipment for Player: %s"), *PlayerID);
+}
+
+TArray<USFItemBase*> USFGameInstanceSubsystem::GetPlayerInventory(const FString& PlayerID) const
+{
+	if (PlayerInventories.Contains(PlayerID))
+	{
+		return PlayerInventories[PlayerID];
+	}
+	return TArray<USFItemBase*>();
+}
+
+const USFEquipableBase* USFGameInstanceSubsystem::GetPlayerEquippedItem(const FString& PlayerID, SFEquipSlot Slot) const
+{
+	if (PlayerEquipments.Contains(PlayerID))
+	{
+		const TArray<USFEquipableBase*>& Equipment = PlayerEquipments[PlayerID];
+		switch (Slot)
+		{
+		case SFEquipSlot::CommonSlot:
+			return Equipment.IsValidIndex(0) ? Equipment[0] : nullptr;
+		case SFEquipSlot::ExclusiveSlot:
+			return Equipment.IsValidIndex(1) ? Equipment[1] : nullptr;
+		case SFEquipSlot::CosmeticSlot:
+			return Equipment.IsValidIndex(2) ? Equipment[2] : nullptr;
+		default:
+			return nullptr;
+		}
+	}
+	return nullptr;
 }

@@ -4,6 +4,9 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "DataTypes/GameModeType.h"
 #include "DataTable/MapInfoRow.h"
+#include "Items/SFItemBase.h"
+#include "Items/EquipItems/SFEquipableBase.h"
+#include "Inventory/SFInventoryComponent.h"
 #include "SFGameInstanceSubsystem.generated.h"
 
 UENUM(BlueprintType)
@@ -37,6 +40,10 @@ private:
 	UPROPERTY()
 	UUIManager* UIManager;
 
+	//Inventory
+	TMap<FString, TArray<USFItemBase*>> PlayerInventories;
+	TMap<FString, TArray<USFEquipableBase*>> PlayerEquipments;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Data")
 	TObjectPtr<UDataTable> MapDataTable;
@@ -60,4 +67,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ConnectToServerByAddress(const FString& ServerAddress);
 
+	//Player Inventory update
+	UFUNCTION(BlueprintCallable)
+	void UpdatePlayerInventory(const FString& PlayerID, const TArray<USFItemBase*>& Inventory);
+
+	//Player Equipment update
+	UFUNCTION(BlueprintCallable)
+	void UpdatePlayerEquipment(const FString& PlayerID, USFEquipableBase* Common, USFEquipableBase* Exclusive, USFEquipableBase* Cosmetic);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<USFItemBase*> GetPlayerInventory(const FString& PlayerID) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	const USFEquipableBase* GetPlayerEquippedItem(const FString& PlayerID, SFEquipSlot Slot) const;
 };
+
