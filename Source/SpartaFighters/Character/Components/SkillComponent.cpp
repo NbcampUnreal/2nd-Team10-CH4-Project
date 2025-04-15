@@ -7,7 +7,6 @@
 #include "Character/Components/StatusComponent.h"
 
 #include "Common/SkillDamageEvent.h"
-//#include "Engine/DamageEvents.h"
 
 
 USkillComponent::USkillComponent()
@@ -26,12 +25,7 @@ void USkillComponent::HandleInputBasicAttack()
 {
 	if (!IsValid(OwnerCharacter) || !IsValid(SkillDataTable)) return;
 
-	if (OwnerCharacter->HasAuthority())
-	{
-		//StateComponent->UpdateState(OwnerCharacter);
-		Multicast_HandleBasicAttack(StateComponent->GetState());
-	}
-	else
+	if (!OwnerCharacter->HasAuthority())
 	{
 		Server_HandleBasicAttack();
 	}
@@ -39,27 +33,12 @@ void USkillComponent::HandleInputBasicAttack()
 
 void USkillComponent::Server_HandleBasicAttack_Implementation()
 {
-	if (StateComponent && OwnerCharacter)
-	{
-		//StateComponent->UpdateState(OwnerCharacter);
-	}
-
-	Multicast_HandleBasicAttack(StateComponent->GetState());
-}
-
-void USkillComponent::Multicast_HandleBasicAttack_Implementation(ECharacterState State)
-{
-	HandleBasicAttack(State);
-}
-
-void USkillComponent::HandleBasicAttack(ECharacterState CurrentState)
-{
 	if (!StateComponent || StateComponent->IsInAction()) return;
-	UE_LOG(LogTemp, Warning, TEXT("Handle Basic Attack"));
+	UE_LOG(LogTemp, Warning, TEXT("[Server] Handle Basic Attack"));
 
 	FName RowName = TEXT("BaseAttack_1");
 
-	switch (CurrentState)
+	switch (StateComponent->GetState())
 	{
 	case ECharacterState::Moving:
 		RowName = FName("MoveBaseAttack");
@@ -70,22 +49,36 @@ void USkillComponent::HandleBasicAttack(ECharacterState CurrentState)
 	case ECharacterState::Crouching:
 		RowName = FName("CrouchBaseAttack");
 		break;
+	case ECharacterState::Idle:
+		ComboCount++;
+		UE_LOG(LogTemp, Warning, TEXT("ComboCount : %d"), ComboCount);
+		if (ComboCount > MaxComboCount) return;
+		RowName = *FString::Printf(TEXT("BaseAttack_%d"), ComboCount);
+		break;
 	}
 
 	CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>(RowName, TEXT("SkillLookup"));
-	PlayAnimMontage();
+
+	Multicast_HandleBasicAttack(*CurrentSkillData);
 }
+
+void USkillComponent::Multicast_HandleBasicAttack_Implementation(FSkillDataRow Data)
+{
+	HandleBasicAttack(&Data);
+}
+
+void USkillComponent::HandleBasicAttack(FSkillDataRow* Data)
+{
+	PlayAnimMontage(Data);
+
+}
+
 
 void USkillComponent::HandleInputSkillAttack()
 {
-	// TO DO : Handling
 	if (!IsValid(OwnerCharacter) || !IsValid(SkillDataTable)) return;
 
-	if (OwnerCharacter->HasAuthority())
-	{
-		Multicast_HandleSkillAttack(StateComponent->GetState());
-	}
-	else
+	if (!OwnerCharacter->HasAuthority())
 	{
 		Server_HandleSkillAttack();
 	}
@@ -93,22 +86,12 @@ void USkillComponent::HandleInputSkillAttack()
 
 void USkillComponent::Server_HandleSkillAttack_Implementation()
 {
-	Multicast_HandleSkillAttack(StateComponent->GetState());
-}
-
-void USkillComponent::Multicast_HandleSkillAttack_Implementation(ECharacterState State)
-{
-	HandleSkillAttack(State);
-}
-
-void USkillComponent::HandleSkillAttack(ECharacterState CurrentState)
-{
 	if (!StateComponent || StateComponent->IsInAction()) return;
 	UE_LOG(LogTemp, Warning, TEXT("Handle Skill Attack"));
 
 	FName RowName = TEXT("IdleSkill");
 
-	switch (CurrentState)
+	switch (StateComponent->GetState())
 	{
 	case ECharacterState::Moving:
 		RowName = FName("MoveSkill");
@@ -122,10 +105,16 @@ void USkillComponent::HandleSkillAttack(ECharacterState CurrentState)
 	}
 
 	CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>(RowName, TEXT("SkillLookup"));
-	ExcuteSkill();
+
+	Multicast_HandleSkillAttack(*CurrentSkillData);
 }
 
-void USkillComponent::ExcuteSkill()
+void USkillComponent::Multicast_HandleSkillAttack_Implementation(FSkillDataRow Data)
+{
+	HandleSkillAttack(&Data);
+}
+
+void USkillComponent::HandleSkillAttack(FSkillDataRow* Data)
 {
 	UStatusComponent* StatusComponet = OwnerCharacter->GetStatusComponent();
 	if (!IsValid(StatusComponet))
@@ -133,20 +122,19 @@ void USkillComponent::ExcuteSkill()
 		return;
 	}
 
-	if (!CurrentSkillData || !CurrentSkillData->SkillMontage) return;
+	if (!Data || !Data->SkillMontage) return;
 
 
 	float CurrentMP = StatusComponet->GetStatusValue(EStatusType::CurMP);
-	if (CurrentMP < CurrentSkillData->MPCost)
+	if (CurrentMP < Data->MPCost)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Current MP is Not Enought!! CurrentMP : %f, MPCost : %f"), CurrentMP, CurrentSkillData->MPCost);
+		UE_LOG(LogTemp, Log, TEXT("Current MP is Not Enought!! CurrentMP : %f, MPCost : %f"), CurrentMP, Data->MPCost);
 	}
 	else
 	{
-		StatusComponet->ModifyMP(-CurrentSkillData->MPCost);
-		PlayAnimMontage();
+		StatusComponet->ModifyMP(-Data->MPCost);
+		PlayAnimMontage(Data);
 	}
-	//StateComponent->Get
 }
 
 void USkillComponent::HandleInputDodge()
@@ -163,14 +151,14 @@ void USkillComponent::HandleInputDodge()
 	}
 }
 
-void USkillComponent::Multicast_HandleDodge_Implementation(ECharacterState State)
-{
-	HandleDodge(State);
-}
-
 void USkillComponent::Server_HandleDodge_Implementation()
 {
 	Multicast_HandleDodge(StateComponent->GetState());
+}
+
+void USkillComponent::Multicast_HandleDodge_Implementation(ECharacterState State)
+{
+	HandleDodge(State);
 }
 
 void USkillComponent::HandleDodge(ECharacterState CurrentState)
@@ -190,9 +178,9 @@ void USkillComponent::PlayAnimMontage()
 	{
 		Anim->Montage_Play(CurrentSkillData->SkillMontage);
 
-		FOnMontageEnded EndDelegate;
-		EndDelegate.BindUObject(this, &USkillComponent::OnMontageEnded);
-		Anim->Montage_SetEndDelegate(EndDelegate, CurrentSkillData->SkillMontage);
+		//FOnMontageEnded EndDelegate;
+		//EndDelegate.BindUObject(this, &USkillComponent::OnMontageEnded);
+		//Anim->Montage_SetEndDelegate(EndDelegate, CurrentSkillData->SkillMontage);
 
 		StateComponent->SetIsInAction(true);
 	}
@@ -206,6 +194,34 @@ void USkillComponent::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	}
 
 	ClearHitActors();
+	ComboCount = 0;
+}
+
+void USkillComponent::PlayAnimMontage(FSkillDataRow* Data)
+{
+	if (!Data || !Data->SkillMontage) return;
+
+	if (UAnimInstance* Anim = OwnerCharacter->GetMesh()->GetAnimInstance())
+	{
+		Anim->Montage_Play(Data->SkillMontage);
+
+		//FOnMontageEnded EndDelegate;
+		//EndDelegate.BindUObject(this, &USkillComponent::OnMontageEnded);
+		//Anim->Montage_SetEndDelegate(EndDelegate, Data->SkillMontage);
+
+		StateComponent->SetIsInAction(true);
+	}
+}
+
+void USkillComponent::OnMontageEnded()
+{
+	if (StateComponent)
+	{
+		StateComponent->SetIsInAction(false);
+	}
+
+	ClearHitActors();
+	ComboCount = 0;
 }
 
 void USkillComponent::PerformAttackTrace()
@@ -279,4 +295,12 @@ void USkillComponent::PerformAttackTrace()
 void USkillComponent::ClearHitActors()
 {
 	AlreadyHitActors.Empty();
+}
+
+void USkillComponent::CanNextCombo()
+{
+	if (StateComponent)
+	{
+		StateComponent->SetIsInAction(false);
+	}
 }
