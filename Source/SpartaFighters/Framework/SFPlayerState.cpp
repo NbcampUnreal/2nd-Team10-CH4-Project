@@ -7,6 +7,7 @@
 ASFPlayerState::ASFPlayerState()
 {
 	bReplicates = true;
+	CurrentGold = 0.0f;
 }
 
 void ASFPlayerState::OnRep_bIsReady()
@@ -71,6 +72,27 @@ FString ASFPlayerState::PrintSelectedCharacterRow()
 	return SelectedChar;
 }
 
+bool ASFPlayerState::AddGold(float Amount)
+{
+	if (Amount > 0)
+	{
+		CurrentGold += Amount;
+		return true;
+	}
+	return false;
+}
+
+bool ASFPlayerState::RemoveGold(float Amount)
+{
+	if (Amount > 0 && CurrentGold >= Amount)
+	{
+		CurrentGold -= Amount;
+		return true;
+	}
+	return false;
+}
+
+
 void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -79,4 +101,5 @@ void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASFPlayerState, bIsRoomOwner);
 	DOREPLIFETIME(ASFPlayerState, bIsAI);
 	DOREPLIFETIME(ASFPlayerState, SelectedCharacterRow);
+	DOREPLIFETIME(ASFPlayerState, CurrentGold);
 }

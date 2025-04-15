@@ -17,6 +17,8 @@ void UStatusComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UStatusComponent, CurHP);
 	DOREPLIFETIME(UStatusComponent, MaxHP);
+	DOREPLIFETIME(UStatusComponent, AttackPower);
+	DOREPLIFETIME(UStatusComponent, BaseAttackPower);
 }
 
 void UStatusComponent::InitializeStatus()
@@ -36,6 +38,11 @@ void UStatusComponent::ModifyStatus(EStatusType Type, float Amount)
 	if (Type == EStatusType::CurHP)
 	{
 		ModifyHP(Amount);
+		return;
+	}
+	else if (Type == EStatusType::AttackPower)
+	{
+		ModifyAttackPower(Amount);
 		return;
 	}
 
@@ -58,6 +65,18 @@ void UStatusComponent::ModifyHP(float Amount)
 void UStatusComponent::OnRep_CurHP()
 {
 	OnHealthChanged.Broadcast(GetOwner(), CurHP);
+}
+
+void UStatusComponent::ModifyAttackPower(float Amount)
+{
+	const float NewAttackPower = AttackPower + Amount;
+	AttackPower = NewAttackPower;
+	StatusStruct.Set(EStatusType::AttackPower, AttackPower);
+}
+
+void UStatusComponent::OnRep_AttackPower()
+{
+	OnAttackPowerChanged.Broadcast(GetOwner(), AttackPower);
 }
 
 void UStatusComponent::Multicast_OnDeath_Implementation()
