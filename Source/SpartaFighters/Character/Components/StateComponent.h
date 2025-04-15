@@ -27,6 +27,7 @@ class SPARTAFIGHTERS_API UStateComponent : public UActorComponent
 public:	
 	UStateComponent();
 
+	UFUNCTION(BlueprintCallable)
 	void UpdateState(ACharacter* Character);
 
 	void SetState(ECharacterState NewState);

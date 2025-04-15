@@ -19,7 +19,10 @@ AFireBall::AFireBall()
 		CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
 		RootComponent = CollisionComponent;
 
-		CollisionComponent->OnComponentHit.AddDynamic(this, &AFireBall::OnHit); // TODO : OnHit Needs
+		if (GetLocalRole() == ROLE_Authority)
+		{
+			CollisionComponent->OnComponentHit.AddDynamic(this, &AFireBall::OnHit); // TODO : OnHit Needs
+		}
 	}
 
 	FireBallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FireBallMesh"));
@@ -39,6 +42,9 @@ AFireBall::AFireBall()
 	}
 
 	FireBallDamage = 10.f;
+
+	bReplicates = true;
+	SetReplicateMovement(true);
 }
 
 void AFireBall::BeginPlay()
@@ -62,20 +68,38 @@ void AFireBall::SetFireBallSpeed(const float SpeedInput)
 
 void AFireBall::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (!OtherActor || OtherActor == this || OtherActor == GetOwner())
+	{
+		return; // 자기 자신 또는 발사자면 무시
+	}
+
 	//UE_LOG(LogTemp, Warning, TEXT("FireBall Hit %s"), *OtherComponent->GetName()); << Collision Cylinder
 	UE_LOG(LogTemp, Warning, TEXT("FireBall Hit %s"), *OtherActor->GetName());
 	// FireBall Destroy
 	ProjectileMovement->bShouldBounce = false;
 	GetWorld()->GetTimerManager().SetTimer(DestroyLazyTimer, this, &AFireBall::DestroyFireBall, 0.3f, false);
 
-	UGameplayStatics::ApplyDamage
-	(
+	//FCollisionQueryParams Params;
+	//Params.AddIgnoredActor(OwnerCharacter);
+
+	UGameplayStatics::ApplyPointDamage(
 		OtherActor,
 		FireBallDamage,
-		GetInstigatorController(),
+		NormalImpulse,
+		Hit,
+		GetInstigator() ? GetInstigator()->Controller : nullptr,
 		this,
 		UDamageType::StaticClass()
 	);
+
+	//UGameplayStatics::ApplyDamage
+	//(
+	//	OtherActor,
+	//	FireBallDamage,
+	//	GetInstigatorController(),
+	//	this,
+	//	UDamageType::StaticClass()
+	//);
 
 	UE_LOG(LogTemp, Warning, TEXT("FireBall Apply Damage %f"), FireBallDamage);
 }
