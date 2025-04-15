@@ -10,6 +10,7 @@
 #include "UI/UIElements/CombatResultHUD.h"
 #include "UI/UIObject/MapSelectionWidget.h"
 #include "UI/UIObject/SelectCharacterWidget.h"
+#include "UI/UIObject/OptionsWidget.h"
 #include "Components/TextBlock.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
@@ -40,6 +41,7 @@ void UUIManager::Init(APlayerController* PlayerController)
 			CombatHUDClass = Settings->FromBPCombatHUDClass;
 			CombatResultHUDClass = Settings->FromBPCombatResultHUDClass;
 			SelectCharacterWidgetClass = Settings->FromBPSelectCharacterWidgetClass;
+			OptionsWidgetClass = Settings->FromBPOptionsWidgetClass;
 
 			if (!CachedLoginMenu && LoginMenuClass)
 			{
@@ -70,6 +72,11 @@ void UUIManager::Init(APlayerController* PlayerController)
 			{
 				CachedCombatResultHUD = CreateWidget<UCombatResultHUD>(OwningPlayer, CombatResultHUDClass);
 				//CachedCombatResultHUD->AddToViewport();
+			}
+			if (!CachedOptionsWidget && OptionsWidgetClass)
+			{
+				CachedOptionsWidget = CreateWidget<UOptionsWidget>(OwningPlayer, OptionsWidgetClass);
+				CachedOptionsWidget->AddToViewport(100);
 			}
 		}
 	}
@@ -176,9 +183,31 @@ void UUIManager::ShowSelectCharacterWidget()
 
 void UUIManager::ShowCombatHUD()
 {
-	ensureAlways(CachedCombatHUD);
-	CachedCombatHUD->AddToViewport();
-	UE_LOG(LogTemp, Warning, TEXT("Show Combat HUD Completed!!"));
+	//ensureAlways(CachedCombatHUD);
+	//CachedCombatHUD->AddToViewport();
+	//UE_LOG(LogTemp, Warning, TEXT("Show Combat HUD Completed!!"));
+
+	if (CachedCombatHUD)
+	{
+		CachedCombatHUD->AddToViewport();
+	}
+	else
+	{
+		// Handle the error, log it, or initialize the HUD properly
+	}
+}
+
+void UUIManager::ShowOptionsWidget()
+{
+	ensureAlways(CachedOptionsWidget);
+	CachedOptionsWidget->AddToViewport();
+	CachedOptionsWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UUIManager::CloseOptionsWidget()
+{
+	ensureAlways(CachedOptionsWidget);
+	CachedOptionsWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UUIManager::ShowCombatResultHUD()

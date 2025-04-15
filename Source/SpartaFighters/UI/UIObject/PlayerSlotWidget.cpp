@@ -2,25 +2,40 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Components/Border.h"
+#include "DataTable/CharacterDataRow.h"
 
-void UPlayerSlotWidget::SetupPlayerSlot(const FString& PlayerName, const FString& CharacterPreviewPath, bool bIsReady)
+#include "Framework/SFPlayerState.h"
+
+void UPlayerSlotWidget::SetupPlayerSlot(ASFPlayerState* PlayerState, UDataTable* InCharacterDataTable)
 {
+	if (!PlayerState || !InCharacterDataTable)
+	{
+		return;
+	}
+
 	if (PlayerNameText)
 	{
-		PlayerNameText->SetText(FText::FromString(PlayerName));
-		SlotPlayerID = PlayerName;
+		PlayerNameText->SetText(FText::FromString(PlayerState->GetUniqueID()));
+		SlotPlayerID = PlayerState->GetUniqueID();
 	}
-	/*if (CharacterPreviewImage && CharacterPreview)
-	{
-		CharacterPreviewImage->SetBrushFromTexture(CharacterPreview);
-	}*/
+
 	if (ReadyStateText)
 	{
-		ReadyStateText->SetText(bIsReady ? FText::FromString(TEXT("Ready")) : FText::FromString(TEXT("Not Ready")));
+		ReadyStateText->SetText(PlayerState->bIsReady ? FText::FromString(TEXT("Ready")) : FText::FromString(TEXT("Not Ready")));
+	}
+
+	const FString ContextString(TEXT("CharacterDataLookup"));
+	if (const FCharacterDataRow* CharacterData = InCharacterDataTable->FindRow<FCharacterDataRow>(PlayerState->SelectedCharacterRow, ContextString))
+	{
+		if (CharacterPreviewImage && CharacterData->Thumbnail)
+		{
+			CharacterPreviewImage->SetBrushFromTexture(CharacterData->Thumbnail);
+		}
 	}
 
 	SetVisibility(ESlateVisibility::Visible);
 }
+
 
 void UPlayerSlotWidget::SetReadyState(bool bIsReady)
 {
