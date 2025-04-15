@@ -72,6 +72,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UAnimMontage> GuardMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UParticleSystem> HitEffect;
+
 protected:
 	// TO DO : Seperate Componenets
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -118,14 +121,19 @@ protected:
 	UFUNCTION()
 	void OnHPChanged(AActor* AffectedActor, float HP);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SpawnHitEffect(const FVector& Location, const FRotator& Rotation);
+
 	//UFUNCTION()
 	//void OnCharacterDead();
 
 public:
 	virtual void AttackTrace();	// For AnimNotify
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnFireBall();
 	void SpawnFireBall();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class AFireBall> FireballClass;
 
 private:
@@ -140,6 +148,9 @@ public:
 
 	void RequestRespawn();
 
+	//UFUNCTION(NetMulticast, Unreliable)
+	//void Multicast_PlayHeatEffect();
+
 protected:
 	bool bIsDead = false;
 
@@ -150,4 +161,5 @@ protected:
 
 	UFUNCTION(NetMulticast,Unreliable)
 	void Multicast_PlayDeathEffect();
+
 };

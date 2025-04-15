@@ -16,6 +16,8 @@
 #include "Components/StateComponent.h"
 #include "Components/SkillComponent.h"
 
+#include "Engine/DamageEvents.h"
+#include "Kismet/GameplayStatics.h"
 #include "DataTable/SkillDataRow.h"
 
 #include "Net/UnrealNetwork.h"
@@ -231,34 +233,62 @@ void ASFCharacter::AttackTrace()
 	}
 }
 
+void ASFCharacter::Server_SpawnFireBall_Implementation()
+{
+	SpawnFireBall();
+}
+
 void ASFCharacter::SpawnFireBall()
 {
-	// 1. 손 위치 (소켓 위치)
-	const FVector SocketLocation = GetMesh()->GetSocketLocation("hand_r");
+	//// 1. 손 위치 (소켓 위치)
+	//const FVector SocketLocation = GetMesh()->GetSocketLocation("hand_r");
 
-	// 2. 캐릭터 방향 기준 회전
-	const FRotator CastingRotation = GetActorRotation();
-	const FVector Forward = CastingRotation.Vector();
+	//// 2. 캐릭터 방향 기준 회전
+	//const FRotator CastingRotation = GetActorRotation();
+	//const FVector Forward = CastingRotation.Vector();
 
-	// 3. 손 앞쪽으로 오프셋 추가 (예: 30~50cm)
-	const FVector SpawnLocation = SocketLocation + Forward * 50.f;
+	//// 3. 손 앞쪽으로 오프셋 추가 (예: 30~50cm)
+	//const FVector SpawnLocation = GetActorLocation() + Forward * 50.f;
+
+	//FActorSpawnParameters SpawnParams;
+	//SpawnParams.Owner = this;
+	//SpawnParams.Instigator = GetInstigator();
+	//AFireBall* FireBall = GetWorld()->SpawnActor<AFireBall>(FireballClass, SpawnLocation, CastingRotation, SpawnParams);
+	//if (FireBall)
+	//{
+	//	FireBall->SetFireBallSpeed(1500);
+	//	FireBall->FireInDirection(CastingRotation.Vector());
+	//	UE_LOG(LogTemp, Warning, TEXT("Casting Fire Ball!!"));
+	//}
+
+	if (!HasAuthority()) return;
+
+	// 1. 캐릭터의 앞방향 가져오기
+	const FVector Forward = GetActorForwardVector(); // == FRotationMatrix(GetActorRotation()).GetUnitAxis(EAxis::X)
+
+	// 2. Spawn 위치 : 캐릭터 위치 + 앞방향 * 오프셋
+	const FVector SpawnLocation = GetActorLocation() + Forward * 100.f;
+
+	// 3. 회전은 캐릭터 앞방향을 기준으로 생성
+	const FRotator SpawnRotation = Forward.Rotation();
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = GetInstigator();
-	AFireBall* FireBall = GetWorld()->SpawnActor<AFireBall>(FireballClass, SpawnLocation, CastingRotation, SpawnParams);
+
+	AFireBall* FireBall = GetWorld()->SpawnActor<AFireBall>(FireballClass, SpawnLocation, SpawnRotation, SpawnParams);
 	if (FireBall)
 	{
 		FireBall->SetFireBallSpeed(1500);
-		FireBall->FireInDirection(CastingRotation.Vector());
+		FireBall->FireInDirection(Forward);
 		UE_LOG(LogTemp, Warning, TEXT("Casting Fire Ball!!"));
 	}
 }
 
-
 // TO DO : Damage Component
 float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	auto hasAuthority = HasAuthority();
 	ensureAlways(hasAuthority);
 
@@ -267,9 +297,30 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 		StatusComponent->ModifyStatus(EStatusType::CurHP, -DamageAmount);
 	}
 
-	//Multicast_TakeDamageOnServer(DamageAmount, DamageEvent, DamageCauser);
+	// Knock Back
+	FVector Direction = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
+	LaunchCharacter(Direction * 800.0f, true, true); // Launch with override XY/Z
+
+	// Damage Effect
+	if (const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent))
+	{
+		Multicast_SpawnHitEffect(PointDamageEvent->HitInfo.ImpactPoint, PointDamageEvent->ShotDirection.Rotation());
+	}
 
 	return DamageAmount;
+}
+
+void ASFCharacter::Multicast_SpawnHitEffect_Implementation(const FVector& Location, const FRotator& Rotation)
+{
+	if (!HitEffect) return;
+
+	UGameplayStatics::SpawnEmitterAtLocation(
+		GetWorld(),
+		HitEffect,
+		Location,
+		Rotation,
+		true
+	);
 }
 
 void ASFCharacter::Multicast_TakeDamageOnServer_Implementation(const float Damage, const FDamageEvent& DamageEvent, AActor* DamageCauser)
@@ -281,10 +332,13 @@ void ASFCharacter::Multicast_TakeDamageOnServer_Implementation(const float Damag
 
 void ASFCharacter::OnHPChanged(AActor* AffectedActor, float HP)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s의 체력이 %f로 변경되었습니다."), *AffectedActor->GetName(), HP);
+	if (IsLocallyControlled())
+	{
+		FString Message = FString::Printf(TEXT("Take Damage : %f"), HP);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Message);
 
-	FString Message = FString::Printf(TEXT("Take Damage : %f"), HP);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Message);
+		UE_LOG(LogTemp, Warning, TEXT("%s의 체력이 %f로 변경되었습니다."), *AffectedActor->GetName(), HP);
+	}
 
 	if (OnDamageMontage)
 	{
@@ -382,6 +436,7 @@ void ASFCharacter::RequestRespawn()
 
 	Destroy();
 }
+
 
 void ASFCharacter::Multicast_PlayDeathEffect_Implementation()
 {
