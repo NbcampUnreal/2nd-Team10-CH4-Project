@@ -25,6 +25,9 @@ public:
     UUIManager();
 
     void Init(APlayerController* PlayerController);
+    virtual void BeginDestroy();
+
+    void SetPlayerController(APlayerController* PlayerController);
 
     /* Menu Change */
     void ShowLoginMenu();
@@ -46,6 +49,13 @@ public:
     void ShowCombatResultHUD();
     void CloseCombatHUD();
     void CloseCombatResultHUD();
+    void UpdateCombatHUD();
+
+    UFUNCTION()
+    void UpdateHUD();
+
+    UFUNCTION()
+    void StartHUDUpdate();
     void ShowCombatHUD();
 
 private:
@@ -100,4 +110,5 @@ private:
     UPROPERTY()
     APlayerController* OwningPlayer;
 	
+    FTimerHandle HUDUpdateTimerHandle;
 };

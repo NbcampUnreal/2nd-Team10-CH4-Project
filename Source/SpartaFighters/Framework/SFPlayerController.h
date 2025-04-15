@@ -55,5 +55,8 @@ public:
 public:
 	UFUNCTION(Server, Reliable)
 	void Server_RequestSpawnCharacter();
+	UFUNCTION(Client, Reliable)
+	void Client_StartHUDUpdate();
+
 	void OnPossess(APawn* InPawn) override;
 };

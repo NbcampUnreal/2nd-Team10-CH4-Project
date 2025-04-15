@@ -10,11 +10,13 @@
 #include "UI/UIElements/CombatResultHUD.h"
 #include "UI/UIObject/MapSelectionWidget.h"
 #include "UI/UIObject/SelectCharacterWidget.h"
+#include "Components/TextBlock.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Framework/SFGameInstance.h"
+#include "Framework/SFGameStateBase.h"
 
 #include "Kismet/GameplayStatics.h"
-#include "Framework/SFGameInstance.h"
 
 UUIManager::UUIManager()
 {
@@ -62,15 +64,20 @@ void UUIManager::Init(APlayerController* PlayerController)
 			if (!CachedCombatHUD && CombatHUDClass)
 			{
 				CachedCombatHUD = CreateWidget<UCombatHUD>(OwningPlayer, CombatHUDClass);
-				CachedCombatHUD->AddToViewport();
+				//CachedCombatHUD->AddToViewport();
 			}
 			if (!CachedCombatResultHUD && CombatResultHUDClass)
 			{
 				CachedCombatResultHUD = CreateWidget<UCombatResultHUD>(OwningPlayer, CombatResultHUDClass);
-				CachedCombatResultHUD->AddToViewport();
+				//CachedCombatResultHUD->AddToViewport();
 			}
 		}
 	}
+}
+
+void UUIManager::BeginDestroy()
+{
+	Super::BeginDestroy();
 }
 
 void UUIManager::ShowLoginMenu()
@@ -170,13 +177,14 @@ void UUIManager::ShowSelectCharacterWidget()
 void UUIManager::ShowCombatHUD()
 {
 	ensureAlways(CachedCombatHUD);
-	CachedCombatHUD->SetVisibility(ESlateVisibility::Visible);
+	CachedCombatHUD->AddToViewport();
+	UE_LOG(LogTemp, Warning, TEXT("Show Combat HUD Completed!!"));
 }
 
 void UUIManager::ShowCombatResultHUD()
 {
 	ensureAlways(CachedCombatResultHUD);
-	CachedCombatResultHUD->SetVisibility(ESlateVisibility::Visible);
+	CachedCombatResultHUD->AddToViewport();
 }
 
 void UUIManager::CloseCombatHUD()
@@ -189,4 +197,46 @@ void UUIManager::CloseCombatResultHUD()
 {
 	ensureAlways(CachedCombatResultHUD);
 	CachedCombatResultHUD->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UUIManager::UpdateCombatHUD()
+{
+	if (UTextBlock* PlayTimeText = Cast<UTextBlock>(CachedCombatHUD->GetWidgetFromName(TEXT("PlayTimerTextBlock"))))
+	{
+		float RemainingTime = 0.f;
+
+		if (ASFGameStateBase* GameState = OwningPlayer->GetWorld()->GetGameState<ASFGameStateBase>())
+		{
+			RemainingTime = GameState->GetRemainingBattleTime();
+		}
+
+		int32 Minutes = FMath::FloorToInt(RemainingTime / 60.f);
+		int32 Seconds = FMath::FloorToInt(FMath::Fmod(RemainingTime, 60.f));
+
+		PlayTimeText->SetText(FText::FromString(FString::Printf(TEXT("%d : %02d"), Minutes, Seconds)));
+	}
+}
+
+void UUIManager::UpdateHUD()
+{
+	UpdateCombatHUD();
+}
+
+void UUIManager::StartHUDUpdate()
+{
+	if (UWorld* World = OwningPlayer ? OwningPlayer->GetWorld() : nullptr)
+	{
+		World->GetTimerManager().SetTimer(
+			HUDUpdateTimerHandle,
+			this,
+			&UUIManager::UpdateHUD,
+			0.2f,
+			true
+		);
+	}
+}
+
+void UUIManager::SetPlayerController(APlayerController* PlayerController)
+{
+	OwningPlayer = PlayerController;
 }
