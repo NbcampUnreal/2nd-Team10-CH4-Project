@@ -387,16 +387,17 @@ void ASFCharacter::Die()
 
 	bIsDead = true;
 
-	AController* ControllerInstance = GetController();
+	CachedController = GetController();
 
 	Multicast_PlayDeathEffect();
 
 	SetActorEnableCollision(false);
 	SetActorHiddenInGame(true);
 
-	if (ControllerInstance)
+	if (CachedController)
 	{
-		ControllerInstance->UnPossess();
+		SetOwner(CachedController);
+		CachedController->UnPossess();
 	}
 
 	GetWorldTimerManager().SetTimer(
@@ -415,23 +416,23 @@ void ASFCharacter::DieImmediately()
 
 void ASFCharacter::RequestRespawn()
 {
-	AController* ControllerInstance = GetController();
-
-	if (!ControllerInstance && IsValid(GetWorld()))
+	if (!CachedController && IsValid(GetWorld()))
 	{
-		ControllerInstance = Cast<AController>(GetOwner());
+		CachedController = Cast<AController>(GetOwner());
 	}
 
-	if (ControllerInstance)
+	if (CachedController)
 	{
+
 		if (ASFBattleGameMode* BattleGM = GetWorld()->GetAuthGameMode<ASFBattleGameMode>())
 		{
-			BattleGM->RequestRespawn(ControllerInstance);
+			BattleGM->RequestRespawn(CachedController);
 		}
 		else if (ASFCooperativeGameMode* CoopGM = GetWorld()->GetAuthGameMode<ASFCooperativeGameMode>())
 		{
-			CoopGM->RequestRespawn(ControllerInstance);
+			CoopGM->RequestRespawn(CachedController);
 		}
+
 	}
 
 	Destroy();

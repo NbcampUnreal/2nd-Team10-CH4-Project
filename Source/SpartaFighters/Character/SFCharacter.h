@@ -154,6 +154,9 @@ public:
 protected:
 	bool bIsDead = false;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Reference");
+	TObjectPtr<AController> CachedController;
+
 	FTimerHandle RespawnTimer;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effects");
