@@ -10,6 +10,7 @@
 #include "UI/UIElements/CombatResultHUD.h"
 #include "UI/UIObject/MapSelectionWidget.h"
 #include "UI/UIObject/SelectCharacterWidget.h"
+#include "UI/UIObject/OptionsWidget.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
@@ -38,6 +39,7 @@ void UUIManager::Init(APlayerController* PlayerController)
 			CombatHUDClass = Settings->FromBPCombatHUDClass;
 			CombatResultHUDClass = Settings->FromBPCombatResultHUDClass;
 			SelectCharacterWidgetClass = Settings->FromBPSelectCharacterWidgetClass;
+			OptionWidgetClass = Settings->FromBPOptionWidgetClass;
 
 			if (!CachedLoginMenu && LoginMenuClass)
 			{
@@ -68,6 +70,11 @@ void UUIManager::Init(APlayerController* PlayerController)
 			{
 				CachedCombatResultHUD = CreateWidget<UCombatResultHUD>(OwningPlayer, CombatResultHUDClass);
 				CachedCombatResultHUD->AddToViewport();
+			}
+			if (!CachedOptionWidget && OptionWidgetClass)
+			{
+				CachedOptionWidget = CreateWidget<UOptionsWidget>(OwningPlayer, OptionWidgetClass);
+				CachedOptionWidget->AddToViewport(100);
 			}
 		}
 	}
@@ -189,4 +196,25 @@ void UUIManager::CloseCombatResultHUD()
 {
 	ensureAlways(CachedCombatResultHUD);
 	CachedCombatResultHUD->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UUIManager::ShowOptionsWidget()
+{
+	ensureAlways(CachedOptionWidget);
+	if (!CachedOptionWidget && OptionWidgetClass)
+	{
+		CachedOptionWidget = CreateWidget<UOptionsWidget>(GetWorld(), OptionWidgetClass);
+		CachedOptionWidget->AddToViewport();
+	}
+
+	if (CachedOptionWidget)
+	{
+		CachedOptionWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void UUIManager::CloseOptionsWidget()
+{
+	ensureAlways(CachedOptionWidget);
+	CachedOptionWidget->SetVisibility(ESlateVisibility::Hidden);
 }

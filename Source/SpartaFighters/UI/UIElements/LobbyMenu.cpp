@@ -102,8 +102,17 @@ void ULobbyMenu::NativeDestruct()
 
 void ULobbyMenu::OnOptionClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnOptionClicked!"));
-	// Open the Option menu UI
+	UE_LOG(LogTemp, Log, TEXT("OnOptionButtonClicked"));
+	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	{
+		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
+		{
+			if (UUIManager* UIManager = Subsystem->GetUIManager())
+			{
+				UIManager->ShowOptionsWidget();
+			}
+		}
+	}
 }
 
 void ULobbyMenu::OnQuitGameClicked()

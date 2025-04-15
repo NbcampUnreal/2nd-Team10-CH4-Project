@@ -15,6 +15,7 @@ class UUIManagerSettings;
 class URoomWidget;
 class UCombatHUD;
 class UCombatResultHUD;
+class UOptionsWidget;
 
 UCLASS()
 class SPARTAFIGHTERS_API UUIManager : public UObject
@@ -48,6 +49,9 @@ public:
     void CloseCombatResultHUD();
     void ShowCombatHUD();
 
+    void ShowOptionsWidget();
+    void CloseOptionsWidget();
+
 private:
     UPROPERTY()
     UMapSelectionWidget* MapSelectionWidgetInstance;
@@ -79,6 +83,8 @@ private:
     TSubclassOf<UCombatHUD> CombatHUDClass;
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UCombatResultHUD> CombatResultHUDClass;
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UOptionsWidget> OptionWidgetClass;
     
     /* Chacing Widget */
     UPROPERTY()
@@ -95,6 +101,8 @@ private:
     UCombatHUD* CachedCombatHUD;
     UPROPERTY()
     UCombatResultHUD* CachedCombatResultHUD;
+    UPROPERTY()
+    UOptionsWidget* CachedOptionWidget;
 
     /* Controller save */
     UPROPERTY()
