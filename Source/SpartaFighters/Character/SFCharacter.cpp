@@ -78,6 +78,11 @@ UStateComponent* ASFCharacter::GetStateComponent()
 	return StateComponent;
 }
 
+UStatusComponent* ASFCharacter::GetStatusComponent()
+{
+	return StatusComponent;
+}
+
 void ASFCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -240,37 +245,11 @@ void ASFCharacter::Server_SpawnFireBall_Implementation()
 
 void ASFCharacter::SpawnFireBall()
 {
-	//// 1. 손 위치 (소켓 위치)
-	//const FVector SocketLocation = GetMesh()->GetSocketLocation("hand_r");
-
-	//// 2. 캐릭터 방향 기준 회전
-	//const FRotator CastingRotation = GetActorRotation();
-	//const FVector Forward = CastingRotation.Vector();
-
-	//// 3. 손 앞쪽으로 오프셋 추가 (예: 30~50cm)
-	//const FVector SpawnLocation = GetActorLocation() + Forward * 50.f;
-
-	//FActorSpawnParameters SpawnParams;
-	//SpawnParams.Owner = this;
-	//SpawnParams.Instigator = GetInstigator();
-	//AFireBall* FireBall = GetWorld()->SpawnActor<AFireBall>(FireballClass, SpawnLocation, CastingRotation, SpawnParams);
-	//if (FireBall)
-	//{
-	//	FireBall->SetFireBallSpeed(1500);
-	//	FireBall->FireInDirection(CastingRotation.Vector());
-	//	UE_LOG(LogTemp, Warning, TEXT("Casting Fire Ball!!"));
-	//}
-
 	if (!HasAuthority()) return;
 
-	// 1. 캐릭터의 앞방향 가져오기
-	const FVector Forward = GetActorForwardVector(); // == FRotationMatrix(GetActorRotation()).GetUnitAxis(EAxis::X)
-
-	// 2. Spawn 위치 : 캐릭터 위치 + 앞방향 * 오프셋
+	const FVector Forward = GetActorForwardVector();
 	const FVector SpawnLocation = GetActorLocation() + Forward * 100.f;
-
-	// 3. 회전은 캐릭터 앞방향을 기준으로 생성
-	const FRotator SpawnRotation = Forward.Rotation();
+	const FRotator SpawnRotation = GetActorRotation();
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
@@ -279,9 +258,13 @@ void ASFCharacter::SpawnFireBall()
 	AFireBall* FireBall = GetWorld()->SpawnActor<AFireBall>(FireballClass, SpawnLocation, SpawnRotation, SpawnParams);
 	if (FireBall)
 	{
-		FireBall->SetFireBallSpeed(1500);
-		FireBall->FireInDirection(Forward);
+		auto CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>("IdleSkill", TEXT("SkillLookup"));
+		if (!CurrentSkillData || !CurrentSkillData->SkillMontage) return;
+
+		FireBall->InitFireBall(1500, CurrentSkillData->AttackPower);
 		UE_LOG(LogTemp, Warning, TEXT("Casting Fire Ball!!"));
+
+		StatusComponent->ModifyStatus(EStatusType::CurMP, -CurrentSkillData->MPCost);
 	}
 }
 
@@ -297,6 +280,8 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 		StatusComponent->ModifyStatus(EStatusType::CurHP, -DamageAmount);
 	}
 
+	Multicast_PlayTakeDamageAnimMontage();
+
 	// Knock Back
 	FVector Direction = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
 	LaunchCharacter(Direction * 800.0f, true, true); // Launch with override XY/Z
@@ -309,6 +294,19 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 	return DamageAmount;
 }
+
+void ASFCharacter::Multicast_PlayTakeDamageAnimMontage_Implementation()
+{
+	if (OnDamageMontage)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(OnDamageMontage);
+		}
+	}
+}
+
 
 void ASFCharacter::Multicast_SpawnHitEffect_Implementation(const FVector& Location, const FRotator& Rotation)
 {
@@ -323,60 +321,15 @@ void ASFCharacter::Multicast_SpawnHitEffect_Implementation(const FVector& Locati
 	);
 }
 
-void ASFCharacter::Multicast_TakeDamageOnServer_Implementation(const float Damage, const FDamageEvent& DamageEvent, AActor* DamageCauser)
-{
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Take Damage");
- 
-}
-
 void ASFCharacter::OnHPChanged(AActor* AffectedActor, float HP)
 {
-	if (IsLocallyControlled())
-	{
-		FString Message = FString::Printf(TEXT("Take Damage : %f"), HP);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Message);
-
-		UE_LOG(LogTemp, Warning, TEXT("%s의 체력이 %f로 변경되었습니다."), *AffectedActor->GetName(), HP);
-	}
-
-	if (OnDamageMontage)
-	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
-		{
-			AnimInstance->Montage_Play(OnDamageMontage);
-		}
-	}
+	//if (IsLocallyControlled())
+	//{
+	//	//FString Message = FString::Printf(TEXT("Take Damage : %f"), HP);
+	//	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Message);
+	//	UE_LOG(LogTemp, Warning, TEXT("%s의 체력이 %f로 변경되었습니다."), *AffectedActor->GetName(), HP);
+	//}
 }
-
-
-//void ASFCharacter::OnCharacterDead()
-//{
-//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Character Is Dead.");
-//
-//	// 1. 입력 차단
-//	AController* MyController = GetController();
-//	if (MyController && MyController->IsLocalController())
-//	{
-//		DisableInput(Cast<APlayerController>(MyController));
-//	}
-//
-//	// 2. 애니메이션 중지
-//	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-//	{
-//		AnimInstance->StopAllMontages(0.2f);
-//	}
-//
-//	// 3. Ragdoll (Physics 활성화)
-//	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
-//	GetMesh()->SetSimulatePhysics(true);
-//	GetCharacterMovement()->DisableMovement();
-//
-//	// 4. 캡슐 콜리전 비활성화 (원하는 경우)
-//	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-//}
-
 
 void ASFCharacter::Die()
 {

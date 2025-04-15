@@ -39,6 +39,8 @@ public:
 	void SetFireBallSpeed(const float SpeedInput);
 	void SetFireBallDamage(float DamageInput) { FireBallDamage = DamageInput; }
 
+	void InitFireBall(const float SpeedInput, const float Damage);
+
 protected:
 	virtual void BeginPlay() override;
 

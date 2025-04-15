@@ -45,6 +45,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UStateComponent* GetStateComponent();
+	UFUNCTION(BlueprintCallable)
+	UStatusComponent* GetStatusComponent();
 
 protected:
 	virtual void BeginPlay() override;
@@ -116,7 +118,7 @@ protected:
 		AActor* DamageCauser) override;
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_TakeDamageOnServer(const float Damage, const FDamageEvent& DamageEvent, AActor* DamageCauser);
+	void Multicast_PlayTakeDamageAnimMontage();
 
 	UFUNCTION()
 	void OnHPChanged(AActor* AffectedActor, float HP);

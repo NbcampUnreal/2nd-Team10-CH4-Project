@@ -6,6 +6,7 @@
 AFireBall::AFireBall()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	if (!RootComponent)
 	{
@@ -43,8 +44,6 @@ AFireBall::AFireBall()
 
 	FireBallDamage = 10.f;
 
-	bReplicates = true;
-	SetReplicateMovement(true);
 }
 
 void AFireBall::BeginPlay()
@@ -57,13 +56,22 @@ void AFireBall::BeginPlay()
 
 void AFireBall::FireInDirection(const FVector& CastDirection)
 {
-	ProjectileMovement->Velocity = CastDirection * ProjectileMovement->InitialSpeed;
+	if (ProjectileMovement)
+	{
+		ProjectileMovement->Velocity = CastDirection * ProjectileMovement->InitialSpeed;
+	}
 }
 
 void AFireBall::SetFireBallSpeed(const float SpeedInput)
 {
 	ProjectileMovement->MaxSpeed = ProjectileMovement->InitialSpeed + SpeedInput;
 	ProjectileMovement->Velocity = ProjectileMovement->Velocity.GetSafeNormal() * (ProjectileMovement->MaxSpeed);
+}
+
+void AFireBall::InitFireBall(const float SpeedInput, const float Damage)
+{
+	SetFireBallSpeed(SpeedInput);
+	FireBallDamage = Damage;
 }
 
 void AFireBall::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
@@ -73,14 +81,12 @@ void AFireBall::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 		return; // 자기 자신 또는 발사자면 무시
 	}
 
-	//UE_LOG(LogTemp, Warning, TEXT("FireBall Hit %s"), *OtherComponent->GetName()); << Collision Cylinder
+	if (!HasAuthority()) return;
+
 	UE_LOG(LogTemp, Warning, TEXT("FireBall Hit %s"), *OtherActor->GetName());
-	// FireBall Destroy
+
 	ProjectileMovement->bShouldBounce = false;
 	GetWorld()->GetTimerManager().SetTimer(DestroyLazyTimer, this, &AFireBall::DestroyFireBall, 0.3f, false);
-
-	//FCollisionQueryParams Params;
-	//Params.AddIgnoredActor(OwnerCharacter);
 
 	UGameplayStatics::ApplyPointDamage(
 		OtherActor,
@@ -91,15 +97,6 @@ void AFireBall::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 		this,
 		UDamageType::StaticClass()
 	);
-
-	//UGameplayStatics::ApplyDamage
-	//(
-	//	OtherActor,
-	//	FireBallDamage,
-	//	GetInstigatorController(),
-	//	this,
-	//	UDamageType::StaticClass()
-	//);
 
 	UE_LOG(LogTemp, Warning, TEXT("FireBall Apply Damage %f"), FireBallDamage);
 }
