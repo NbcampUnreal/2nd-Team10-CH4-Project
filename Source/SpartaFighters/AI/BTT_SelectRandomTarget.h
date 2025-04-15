@@ -22,7 +22,7 @@ protected:
 
 private:
     UPROPERTY(EditAnywhere, Category = "Blackboard")
-    struct FBlackboardKeySelector TargetKey;
+    FBlackboardKeySelector TargetKey;
 
     // if use othermode
     //UPROPERTY(EditAnywhere, Category = "Target Selection")

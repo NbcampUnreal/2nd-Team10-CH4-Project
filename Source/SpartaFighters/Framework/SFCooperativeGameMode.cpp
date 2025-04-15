@@ -242,7 +242,6 @@ void ASFCooperativeGameMode::Client_TravelToLobby_Implementation(APlayerControll
 		PC->ClientTravel(TEXT("/Game/SpartaFighters/Level/LobbyMenu"), ETravelType::TRAVEL_Absolute);
 	}
 }
-}
 
 void ASFCooperativeGameMode::RequestRespawn(AController* DeadController)
 {

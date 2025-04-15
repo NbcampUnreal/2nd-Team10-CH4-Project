@@ -33,6 +33,8 @@ EBTNodeResult::Type UBTT_SelectRandomTarget::ExecuteTask(UBehaviorTreeComponent&
     TArray<AActor*> AllCharacters;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), AllCharacters);
 
+    // TODO : Dead Character is need exeption
+
     // Except self
     TArray<AActor*> PossibleTargets;
     for (AActor* Actor : AllCharacters)
