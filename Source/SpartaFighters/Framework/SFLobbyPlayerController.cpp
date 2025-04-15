@@ -20,6 +20,7 @@ void ASFLobbyPlayerController::BeginPlay()
 		{
 			if (UUIManager* UIManager = Subsystem->GetUIManager())
 			{
+				UIManager->Init(this);
 				UIManager->ShowLobbyMenu();
 			}
 		}

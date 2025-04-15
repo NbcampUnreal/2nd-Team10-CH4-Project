@@ -46,14 +46,10 @@ void ASFItemPickup::BeginPlay()
 void ASFItemPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ASFCharacter* PlayerCharacter = Cast<ASFCharacter>(OtherActor);
-	if (PlayerCharacter && PlayerCharacter->IsLocallyControlled() && HasAuthority())
+	if (PlayerCharacter && PlayerCharacter->IsLocallyControlled())
 	{
 		//Server request
 		Server_UsePickup(PlayerCharacter);
-	}
-	else if (PlayerCharacter && PlayerCharacter->IsLocallyControlled() && !HasAuthority())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Item used by client"));
 		Destroy();
 	}
 }

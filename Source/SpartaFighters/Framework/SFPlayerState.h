@@ -47,6 +47,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FString PrintSelectedCharacterRow();
 
+	//Gold property
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Gold")
+	float CurrentGold;
+
+	UFUNCTION(BlueprintCallable, Category = "Gold")
+	bool AddGold(float Amount);
+
+	UFUNCTION(BlueprintCallable, Category = "Gold")
+	bool RemoveGold(float Amount);
 protected:
 	UPROPERTY(Replicated)
 	int32 DeathCount = 0;

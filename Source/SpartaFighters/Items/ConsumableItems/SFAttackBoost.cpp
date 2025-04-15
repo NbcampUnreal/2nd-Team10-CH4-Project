@@ -1,6 +1,8 @@
 #include "Items/ConsumableItems/SFAttackBoost.h"
 #include "Character/SFCharacter.h"
 #include "TimerManager.h"
+#include "Character/Components/StatusComponent.h"
+
 
 
 USFAttackBoost::USFAttackBoost()
@@ -17,15 +19,21 @@ void USFAttackBoost::Server_ApplyConsumableEffect_Implementation(ASFCharacter* I
 
 	if (InPlayerCharacter&&InPlayerCharacter->GetLocalRole() == ROLE_Authority)
 	{
-		//InPlayerCharacter->IncreaseAttackPower(AttackBoostAmount);
-		UE_LOG(LogTemp, Warning, TEXT("%s used! Attackpower increased by %f . (Duration %f)"), *ItemName.ToString(), AttackBoostAmount, EffectDuration);
+		if (UStatusComponent* StatusComp = InPlayerCharacter->FindComponentByClass<UStatusComponent>())
+		{
+			StatusComp->ModifyAttackPower(AttackBoostAmount);
+			UE_LOG(LogTemp, Warning, TEXT("%s used! Attackpower increased by %f . (Duration %f)"), *ItemName.ToString(), AttackBoostAmount, EffectDuration);
 
-		//return by timer
-		FTimerHandle TimerHandle;
-		FTimerDelegate TimerDelegate;
-		TimerDelegate.BindUFunction(this, "RevertAttackBoost", InPlayerCharacter, AttackBoostAmount);
-		InPlayerCharacter->GetWorldTimerManager().SetTimer(TimerHandle, TimerDelegate, EffectDuration, false);
-
+			//return by timer
+			FTimerHandle TimerHandle;
+			FTimerDelegate TimerDelegate;
+			TimerDelegate.BindUFunction(this, "RevertAttackBoost", InPlayerCharacter, AttackBoostAmount);
+			InPlayerCharacter->GetWorldTimerManager().SetTimer(TimerHandle, TimerDelegate, EffectDuration, false);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Character '%s' does not have a UStatusComponent."), *InPlayerCharacter->GetName());
+		}
 
 	}
 }
@@ -34,7 +42,10 @@ void USFAttackBoost::RevertAttackBoost(ASFCharacter* InPlayerCharacter, float Am
 {
 	if (InPlayerCharacter&& InPlayerCharacter->GetLocalRole() == ROLE_Authority)
 	{
-		//InPlayerCharacter->DecreaseAttackPower(Amount);
-		UE_LOG(LogTemp, Warning, TEXT("%s Effect End."), *ItemName.ToString());
+		if (UStatusComponent* StatusComp = InPlayerCharacter->FindComponentByClass<UStatusComponent>())
+		{
+			StatusComp->ModifyAttackPower(-Amount); //Negative amount
+			UE_LOG(LogTemp, Warning, TEXT("%s Effect End. Attack power decreased by %f."), *ItemName.ToString(), Amount);
+		}
 	}
 }

@@ -5,94 +5,101 @@
 #include "AI/AICharacterController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UBTT_MoveToTarget::UBTT_MoveToTarget()
 {
-	NodeName = "Move To Target";
-	AcceptanceRadius = 200.0f;
-	bNotifyTaskFinished = true;
-	// each AI created
-	bCreateNodeInstance = true;
-
-	bTaskFinished = false;
+    NodeName = "Move To Target";
+    bNotifyTick = true;
+    bNotifyTaskFinished = true;
+    AcceptanceRadius = 150.0f;
 }
 
 EBTNodeResult::Type UBTT_MoveToTarget::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	BTComponent = &OwnerComp;
-	bTaskFinished = false;
+    AIPawn = OwnerComp.GetAIOwner()->GetPawn();
 
-	AAIController* AIController = OwnerComp.GetAIOwner();
-	if (!AIController)
-	{
-		return EBTNodeResult::Failed;
-	}
+    if (!AIPawn)
+    {
+        return EBTNodeResult::Failed;
+    }
 
-	if (AIController->ReceiveMoveCompleted.IsAlreadyBound(this, &UBTT_MoveToTarget::OnMoveCompleted))
-	{
-		AIController->ReceiveMoveCompleted.RemoveDynamic(this, &UBTT_MoveToTarget::OnMoveCompleted);
-	}
+    UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 
-	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (!BlackboardComp)
-	{
-		return EBTNodeResult::Failed;
-	}
+    if (!BlackboardComp)
+    {
+        return EBTNodeResult::Failed;
+    }
 
-	AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
-	if (!TargetActor)
-	{
-		return EBTNodeResult::Failed;
-	}
+    TargetCharacter = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle_MoveTimeout, [this, &OwnerComp]()
-		{
-			if (!bTaskFinished)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Move timed out!"));
-				FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-			}
-		}, 3.0f, false);
+    if (!TargetCharacter)
+    {
+        return EBTNodeResult::Failed;
+    }
 
-	float Distance = FVector::Dist(AIController->GetPawn()->GetActorLocation(), TargetActor->GetActorLocation());
-	if (Distance <= AcceptanceRadius)
-	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-		return EBTNodeResult::Succeeded;
-	}
+    // if there is a problem with this, force quit
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle_MoveTimeout, [&]()
+        {
+            if (!bTaskFinished)
+            {
+                FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+                UE_LOG(LogTemp, Warning, TEXT("Move timed out!"));
+            }
+        }, 10.0f, false);
 
-	FAIRequestID RequestID = AIController->MoveToActor(TargetActor, AcceptanceRadius, true, true, true);
-	if (RequestID.IsValid())
-	{
-		AIController->ReceiveMoveCompleted.AddDynamic(this, &UBTT_MoveToTarget::OnMoveCompleted);
-		return EBTNodeResult::InProgress;
-	}
-
-	return EBTNodeResult::Failed;
+    return EBTNodeResult::InProgress;
 }
 
-void UBTT_MoveToTarget::OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result)
-{
-	if (bTaskFinished)
-	{
-		return;
-	}
-	bTaskFinished = true;
 
-	if (BTComponent)
-	{
-		AAIController* AIController = BTComponent->GetAIOwner();
-		if (AIController)
-		{
-			AIController->ReceiveMoveCompleted.RemoveDynamic(this, &UBTT_MoveToTarget::OnMoveCompleted);
-		}
-		if (Result == EPathFollowingResult::Success)
-		{
-			FinishLatentTask(*BTComponent, EBTNodeResult::Succeeded); 
-		}
-		else
-		{
-			FinishLatentTask(*BTComponent, EBTNodeResult::Failed);
-		}
-	}
+// TickTask works when the task is in InProgress state.
+void UBTT_MoveToTarget::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+{
+    Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+
+    if (!AIPawn || !TargetCharacter)
+    {
+        FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+        return;
+    }
+
+    const FVector TargetLocation = TargetCharacter->GetActorLocation();
+    const FVector CurrentLocation = AIPawn->GetActorLocation();
+
+    if (FVector::Dist(CurrentLocation, TargetLocation) <= AcceptanceRadius)
+    {
+        GetWorld()->GetTimerManager().ClearTimer(TimerHandle_MoveTimeout);
+        FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+        return;
+    }
+
+    const FVector MovementDirection = Calculate8Direction(CurrentLocation, TargetLocation);
+    UpdateMovement(MovementDirection);
+}
+
+FVector UBTT_MoveToTarget::Calculate8Direction(const FVector& CurrentLocation, const FVector& TargetLocation) const
+{
+    const FVector Direction = (TargetLocation - CurrentLocation).GetSafeNormal2D();
+    const float Angle = FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
+    const float SnappedAngle = FMath::RoundToFloat(Angle / 45.0f) * 45.0f;
+
+    return FVector(
+        FMath::Cos(FMath::DegreesToRadians(SnappedAngle)),
+        FMath::Sin(FMath::DegreesToRadians(SnappedAngle)),
+        0
+    ).GetSafeNormal();
+}
+
+void UBTT_MoveToTarget::UpdateMovement(const FVector& Direction) const
+{
+    if (UCharacterMovementComponent* MovementComp = Cast<UCharacterMovementComponent>(AIPawn->GetMovementComponent()))
+    {
+        MovementComp->AddInputVector(Direction * 1.5f);
+
+        const FRotator TargetRotation = Direction.Rotation();
+        // Natural rotation, but is it really necessary?
+        const FRotator NewRotation = FMath::RInterpTo(AIPawn->GetActorRotation(),TargetRotation, GetWorld()->GetDeltaSeconds(), 8.0f);
+
+        AIPawn->SetActorRotation(NewRotation);
+    }
 }

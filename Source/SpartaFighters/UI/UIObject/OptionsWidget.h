@@ -36,5 +36,6 @@ protected:
     UFUNCTION()
     void OnScreenModeSelected(FString SelectedItem, ESelectInfo::Type SelectionType);
 
+    UFUNCTION()
     void OnApplyButtonClicked();
 };

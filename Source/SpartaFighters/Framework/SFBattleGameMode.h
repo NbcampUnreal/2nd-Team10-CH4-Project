@@ -65,4 +65,21 @@ protected:
     FTimerHandle SpawnPollingTimerHandle;
     TMap<APlayerController*, bool> bWaitingForSpawn;
 
+
+
+
+
+
+
+
+    // AI 관련 설정 추가
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+    TSubclassOf<ACharacter> AICharacterClass; // 스폰할 AI 캐릭터 클래스
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+    int32 NumAICharactersToSpawn = 2; // 스폰할 AI 캐릭터 수
+
+
+    // AI 스폰 함수 추가
+    void SpawnAICharacters();
 };
