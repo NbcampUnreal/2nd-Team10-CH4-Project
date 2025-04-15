@@ -21,6 +21,7 @@ ASFCooperativeGameMode::ASFCooperativeGameMode()
 
 	BattleStartDelay = 3.f;
 	BattleTime = 180.f;
+	ReturnToLobbyTime = 5.f;
 }
 
 void ASFCooperativeGameMode::BeginPlay()
@@ -34,12 +35,6 @@ void ASFCooperativeGameMode::BeginPlay()
 		&ASFCooperativeGameMode::StartBattle,
 		BattleStartDelay,
 		false);
-
-	if (ASFGameStateBase* SFGameState = GetGameState<ASFGameStateBase>())
-	{
-		SFGameState->SetBattleStartTime(GetWorld()->GetTimeSeconds());
-		SFGameState->SetBattleDuration(BattleTime);
-	}
 
 	TArray<AActor*> FoundSpawners;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASFCharacterSpawner::StaticClass(), FoundSpawners);
@@ -172,12 +167,19 @@ void ASFCooperativeGameMode::StartBattle()
 		BattleTime,
 		false);
 
+	if (ASFGameStateBase* SFGameState = GetGameState<ASFGameStateBase>())
+	{
+		SFGameState->SetBattleStartTime(GetWorld()->GetTimeSeconds());
+		SFGameState->SetBattleDuration(BattleTime);
+		SFGameState->SetReturnToLobbyTime(ReturnToLobbyTime);
+	}
+
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
 		if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(*It))
 		{
-			// 이건 서버의 PlayerController지만,
-			// Client RPC는 여기서 호출하면 클라이언트로 날아감 (정상 작동)
+			// This is Server PlayerController
+			// But, Client RPC is this called.. Go Client..
 			SFPlayerController->Client_StartHUDUpdate();
 		}
 	}
@@ -189,18 +191,29 @@ void ASFCooperativeGameMode::EndBattle()
 {
 	UE_LOG(LogTemp, Log, TEXT("Battle Ended"));
 
-	ASFPlayerState* Winner = CalculateWinner();
-	ASFGameStateBase* BattleGameState = GetGameState<ASFGameStateBase>();
-
-	if (BattleGameState)
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
-		BattleGameState->SetWinner(Winner);
+		if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(*It))
+		{
+			// This is Server PlayerController
+			// But, Client RPC is this called.. Go Client..
+			SFPlayerController->Client_EndBattle();
+		}
+	}
+
+	ASFPlayerState* Winner = CalculateWinner();
+	ASFGameStateBase* SFGameState = GetGameState<ASFGameStateBase>();
+
+	if (SFGameState)
+	{
+		SFGameState->SetWinner(Winner);
+		SFGameState->SetStartReturnToLobbyTime(GetWorld()->GetTimeSeconds());
 	}
 
 	GetWorldTimerManager().SetTimer(
 		ReturnLobbyTimerHandle,
 		this, &ASFCooperativeGameMode::ReturnToLobby,
-		5.0f,
+		ReturnToLobbyTime,
 		false);
 }
 
@@ -228,9 +241,10 @@ void ASFCooperativeGameMode::ReturnToLobby()
 
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
-		if (APlayerController* PC = It->Get())
+		if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(*It))
 		{
-			Client_TravelToLobby_Implementation(PC);
+			SFPlayerController->Client_EndReturnToLobbyTimer();
+			Client_TravelToLobby_Implementation(SFPlayerController);
 		}
 	}
 }
@@ -241,7 +255,6 @@ void ASFCooperativeGameMode::Client_TravelToLobby_Implementation(APlayerControll
 	{
 		PC->ClientTravel(TEXT("/Game/SpartaFighters/Level/LobbyMenu"), ETravelType::TRAVEL_Absolute);
 	}
-}
 }
 
 void ASFCooperativeGameMode::RequestRespawn(AController* DeadController)

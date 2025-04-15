@@ -57,6 +57,10 @@ public:
 	void Server_RequestSpawnCharacter();
 	UFUNCTION(Client, Reliable)
 	void Client_StartHUDUpdate();
+	UFUNCTION(Client, Reliable)
+	void Client_EndBattle();
+	UFUNCTION(Client, Reliable)
+	void Client_EndReturnToLobbyTimer();
 
 	void OnPossess(APawn* InPawn) override;
 };

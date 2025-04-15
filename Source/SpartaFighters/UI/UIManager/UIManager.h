@@ -50,12 +50,16 @@ public:
     void CloseCombatHUD();
     void CloseCombatResultHUD();
     void UpdateCombatHUD();
+    void UpdateCombatResult();
 
     UFUNCTION()
     void UpdateHUD();
 
     UFUNCTION()
     void StartHUDUpdate();
+    void StartCombatResultUpdate();
+    void EndCombatResultUpdate();
+    void EndHUDUpdate();
     void ShowCombatHUD();
 
 private:
@@ -111,4 +115,5 @@ private:
     APlayerController* OwningPlayer;
 	
     FTimerHandle HUDUpdateTimerHandle;
+    FTimerHandle CombatResultHUDUpdateTimerHandle;
 };
