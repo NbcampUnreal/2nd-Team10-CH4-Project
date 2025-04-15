@@ -1,5 +1,6 @@
 #include "Items/ConsumableItems/SFHealthPotion.h"
 #include "Character/SFCharacter.h"
+#include "Character/Components/StatusComponent.h"
 
 
 void USFHealthPotion::Server_ApplyConsumableEffect_Implementation(ASFCharacter* InPlayerCharacter)
@@ -8,7 +9,16 @@ void USFHealthPotion::Server_ApplyConsumableEffect_Implementation(ASFCharacter* 
 
 	if (InPlayerCharacter&&InPlayerCharacter->GetLocalRole() == ROLE_Authority)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s activated."), *ItemName.ToString(), RecoveryAmount);
+		if (UStatusComponent* StatusComp = InPlayerCharacter->FindComponentByClass<UStatusComponent>())
+		{
+			StatusComp->ModifyHP(RecoveryAmount);
+			UE_LOG(LogTemp, Warning, TEXT("%s activated."), *ItemName.ToString(), RecoveryAmount);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Character '%s' does not have a UStatusComponent."), *InPlayerCharacter->GetName());
+		}
+		
 	}
 }
 

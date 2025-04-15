@@ -1,3 +1,5 @@
+#pragma once
+
 #include "CoreMinimal.h"
 #include "Items/SFItemBase.h"
 #include "Items/EquipItems/SFEquipableBase.h"
@@ -13,7 +15,7 @@ public:
 	FName ItemId;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Data")
-	FString ItemName;
+	FName ItemName;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Data", meta = (MultiLine = "true"))
 	FString ItemDescription;
@@ -23,6 +25,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Data")
 	TSubclassOf<USFItemBase> ItemClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Data")
+	EItemType ItemType;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Data")
 	int32 Price = 0;

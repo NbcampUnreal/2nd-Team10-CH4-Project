@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, AActor*, OwnerActor, float, NewHP);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAttackPowerChanged, AActor*, OwnerActor, float, NewAttackPower);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SPARTAFIGHTERS_API UStatusComponent : public UActorComponent
@@ -37,6 +38,11 @@ public:
 	UFUNCTION()
 	void OnRep_CurHP();
 
+	// 공격력 관련
+	void ModifyAttackPower(float Amount);
+	UFUNCTION()
+	void OnRep_AttackPower();
+
 	// 상태 구조 전체 반환
 	FStatusStruct GetStruct() const { return StatusStruct; }
 
@@ -45,6 +51,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnDeathEvent OnDeath;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnAttackPowerChanged OnAttackPowerChanged;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Status")
@@ -55,6 +64,12 @@ private:
 
 	UPROPERTY(Replicated)
 	float MaxHP;
+
+	UPROPERTY(ReplicatedUsing = OnRep_AttackPower)
+	float AttackPower;
+
+	UPROPERTY(Replicated)
+	float BaseAttackPower;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnDeath();

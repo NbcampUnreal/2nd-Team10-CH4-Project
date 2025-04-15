@@ -35,9 +35,9 @@ public:
 	FText ItemDescription;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
 	EItemType ItemType;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
+	int32 Price;
 	
-
-
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void SetItemData(const FName& Name, TSoftObjectPtr<UTexture2D> IconPath, FText Description, EItemType Type);
 
