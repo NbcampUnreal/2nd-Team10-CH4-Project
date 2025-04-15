@@ -3,6 +3,7 @@
 #include "Framework/SFGameInstanceSubsystem.h"
 #include "Framework/SFLobbyPlayerController.h"
 #include "Framework/SFPlayerState.h"
+#include "Framework/SFLoginPlayerController.h"
 
 #include "Components/EditableTextBox.h"
 #include "Components/Button.h"
@@ -116,7 +117,7 @@ void ULoginMenu::ProcessLogin()
 						switch (ResultCode)
 						{
 						case EResultCode::OK:
-							OnLogInSucces();
+							OnLogInSuccess();
 							break;
 							//case EResultCode::AccountNotFound:
 							//	OnLogInFailed("Fail : Account Not Found!");
@@ -142,7 +143,7 @@ void ULoginMenu::ProcessLogin()
 		{
 			if (ID == "TestUser" && Password == "1234")
 			{
-				OnLogInSucces();
+				OnLogInSuccess();
 			}
 			else
 			{
@@ -270,17 +271,23 @@ void ULoginMenu::ResetInstructionText()
 void ULoginMenu::EnterLobby()
 {
 	
-	if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	/*if (USFGameInstance* GameInstance = Cast<USFGameInstance>(GetGameInstance()))
 	{
 		if (USFGameInstanceSubsystem* Subsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>())
 		{
 			const FString LobbyMapName = TEXT("LobbyMenu");
 			Subsystem->ChangeLevelByMapName(LobbyMapName);
 		}
+	}*/
+	
+	ASFLoginPlayerController* LoginPlayerController = Cast<ASFLoginPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (LoginPlayerController != nullptr)
+	{
+		LoginPlayerController->Client_TravelToLobby();
 	}
 }
 
-void ULoginMenu::OnLogInSucces()
+void ULoginMenu::OnLogInSuccess()
 {
 	UE_LOG(LogTemp, Log, TEXT("Login Successful"));
 

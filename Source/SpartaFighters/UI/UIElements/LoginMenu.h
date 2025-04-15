@@ -70,7 +70,7 @@ private:
     void ResetInstructionText();
     void EnterLobby();
 
-    void OnLogInSucces();
+    void OnLogInSuccess();
     void OnLogInFailed(FString FailMessage);
 
 

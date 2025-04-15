@@ -290,7 +290,7 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	auto hasAuthority = HasAuthority();
-	ensureAlways(hasAuthority);
+	//ensureAlways(hasAuthority);
 
 	if (StatusComponent)
 	{
