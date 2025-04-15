@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, AActor*, OwnerActor, float, NewHP);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnMPChanged, AActor*, OwnerActor, float, NewMP);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAttackPowerChanged, AActor*, OwnerActor, float, NewAttackPower);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -35,8 +36,15 @@ public:
 
 	// 체력 관련
 	void ModifyHP(float Amount);
+
+	// 마나 관련
+	void ModifyMP(float Amount);
+
 	UFUNCTION()
 	void OnRep_CurHP();
+
+	UFUNCTION()
+	void OnRep_CurMP();
 
 	// 공격력 관련
 	void ModifyAttackPower(float Amount);
@@ -48,6 +56,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMPChanged OnMPChanged;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnDeathEvent OnDeath;
@@ -65,6 +76,9 @@ private:
 	UPROPERTY(Replicated)
 	float MaxHP;
 
+	UPROPERTY(ReplicatedUsing = OnRep_CurMP)
+	float CurMP;
+
 	UPROPERTY(ReplicatedUsing = OnRep_AttackPower)
 	float AttackPower;
 
@@ -73,7 +87,5 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnDeath();
-	void Die();
-
 		
 };

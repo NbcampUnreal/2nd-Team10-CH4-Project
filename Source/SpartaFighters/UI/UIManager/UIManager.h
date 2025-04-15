@@ -43,6 +43,7 @@ public:
     ULobbyMenu* GetCachedLobbyMenu() const { return CachedLobbyMenu; }
     UShopMenu* GetCachedShopMenu() const { return CachedShopMenu; }
     UUserWidget* GetCurrentWidget() const { return CurrentWidget; }
+    UCombatHUD* GetCachedCombatHUD() const { return CachedCombatHUD; }
 
     void ShowMapSelectionWidget(EGameModeType GameModeType);
     void ShowSelectCharacterWidget();
