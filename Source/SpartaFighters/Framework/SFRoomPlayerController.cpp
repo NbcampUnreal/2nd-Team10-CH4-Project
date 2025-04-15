@@ -25,6 +25,8 @@ void ASFRoomPlayerController::BeginPlay()
                 UIManager->ShowRoomMenu();
             }
         }
+        bShowMouseCursor = true;
+        SetInputMode(FInputModeUIOnly());
     }
 }
 
