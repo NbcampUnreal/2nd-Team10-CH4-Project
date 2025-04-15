@@ -26,12 +26,13 @@ EBTNodeResult::Type UBTT_StopCrouch::ExecuteTask(UBehaviorTreeComponent& OwnerCo
         return EBTNodeResult::Failed;
     }
 
-     if (!Character->bIsCrouched)
-     {
-         UE_LOG(LogTemp, Log, TEXT("BTT_StopCrouch: Character is not crouched. Returning Succeeded anyway."));
-         return EBTNodeResult::Succeeded;
-     }
+    if (!Character->bIsCrouched)
+    {
+        UE_LOG(LogTemp, Log, TEXT("BTT_StopCrouch: Character is already not crouched. Returning Succeeded."));
+        return EBTNodeResult::Succeeded;
+    }
 
     Character->UnCrouch();
+
     return EBTNodeResult::Succeeded;
 }

@@ -71,8 +71,6 @@ EBTNodeResult::Type UBTT_ExecuteAIAction::ExecuteTask(UBehaviorTreeComponent& Ow
 
     bool bActionStarted = false;
 
-    UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction::ExecuteTask - Attempting Action: %s"), *UEnum::GetValueAsString(SelectedAction));
-
     switch (SelectedAction)
     {
     case EAIActionType::Attack:
@@ -89,7 +87,6 @@ EBTNodeResult::Type UBTT_ExecuteAIAction::ExecuteTask(UBehaviorTreeComponent& Ow
         if (SkillComp->GetClass()->FindFunctionByName(FName("HandleInputGuard")))
         {
 
-            UE_LOG(LogTemp, Warning, TEXT("UBTT_ExecuteAIAction: Guard action selected, assuming HandleInputGuard exists in SkillComponent."));
             bActionStarted = true;
         }
         else
@@ -104,11 +101,9 @@ EBTNodeResult::Type UBTT_ExecuteAIAction::ExecuteTask(UBehaviorTreeComponent& Ow
         break;
 
     case EAIActionType::Retreat:
-        UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction: Retreat action is navigational, should be handled by MoveTo tasks. Failing this task."));
         return EBTNodeResult::Failed;
 
     case EAIActionType::Chase:
-        UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction: Chase action is navigational, should be handled by MoveTo tasks. Failing this task."));
         return EBTNodeResult::Failed;
 
     default:
@@ -118,7 +113,6 @@ EBTNodeResult::Type UBTT_ExecuteAIAction::ExecuteTask(UBehaviorTreeComponent& Ow
 
     if (bActionStarted)
     {
-        UE_LOG(LogTemp, Log, TEXT("UBTT_ExecuteAIAction::ExecuteTask - Action request sent successfully. Returning Succeeded."));
         return EBTNodeResult::Succeeded;
     }
     else

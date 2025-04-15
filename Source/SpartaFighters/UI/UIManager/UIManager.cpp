@@ -176,9 +176,18 @@ void UUIManager::ShowSelectCharacterWidget()
 
 void UUIManager::ShowCombatHUD()
 {
-	ensureAlways(CachedCombatHUD);
-	CachedCombatHUD->AddToViewport();
-	UE_LOG(LogTemp, Warning, TEXT("Show Combat HUD Completed!!"));
+	//ensureAlways(CachedCombatHUD);
+	//CachedCombatHUD->AddToViewport();
+	//UE_LOG(LogTemp, Warning, TEXT("Show Combat HUD Completed!!"));
+
+	if (CachedCombatHUD)
+	{
+		CachedCombatHUD->AddToViewport();
+	}
+	else
+	{
+		// Handle the error, log it, or initialize the HUD properly
+	}
 }
 
 void UUIManager::ShowCombatResultHUD()
