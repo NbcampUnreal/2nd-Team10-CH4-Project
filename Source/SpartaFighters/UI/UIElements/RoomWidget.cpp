@@ -212,12 +212,15 @@ void URoomWidget::UpdatePlayerSlots()
 	for (APlayerState* CurrentPlayerState : Players)
 	{
 		ASFPlayerState* SFPS = Cast<ASFPlayerState>(CurrentPlayerState);
-		if (!SFPS) continue;
-
+		if (!SFPS)
+		{
+			continue;
+		}
+	
 		UPlayerSlotWidget* PlayerSlotWidgetInstance = CreateWidget<UPlayerSlotWidget>(this, PlayerSlotWidgetClass);
 		if (PlayerSlotWidgetInstance)
 		{
-			PlayerSlotWidgetInstance->SetupPlayerSlot(SFPS->GetPlayerName(), "nullptr", SFPS->bIsReady);
+			PlayerSlotWidgetInstance->SetupPlayerSlot(SFPS, CharacterDataTable);
 			PlayerSlotWidgetInstance->UpdateRoomOwner(SFPS->bIsRoomOwner ? SFPS->GetPlayerName() : TEXT(""));
 			PlayerGridPanel->AddChildToUniformGrid(PlayerSlotWidgetInstance, 0, Index);
 			Index++;
@@ -259,8 +262,16 @@ void URoomWidget::UpdateUIState()
 
 	const bool bLock = SFPS->bIsReady;
 
-	if (ShopButton) ShopButton->SetIsEnabled(!bLock);
-	if (PlayerInfoButton) PlayerInfoButton->SetIsEnabled(!bLock);
-	if (OptionButton) OptionButton->SetIsEnabled(!bLock);
-	if (LobbyButton) LobbyButton->SetIsEnabled(!bLock);
+	if (ShopButton)
+	{
+		ShopButton->SetIsEnabled(!bLock);
+	}
+	if (PlayerInfoButton)
+	{
+		PlayerInfoButton->SetIsEnabled(!bLock);
+	}
+	if (OptionButton)
+	{
+		OptionButton->SetIsEnabled(!bLock);
+	}
 }

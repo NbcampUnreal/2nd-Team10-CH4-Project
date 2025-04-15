@@ -94,7 +94,7 @@ private:
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UCombatResultHUD> CombatResultHUDClass;
     UPROPERTY(EditAnywhere, Category = "UI")
-    TSubclassOf<UOptionsWidget> OptionWidgetClass;
+    TSubclassOf<UOptionsWidget> OptionsWidgetClass;
     
     /* Chacing Widget */
     UPROPERTY()
@@ -112,7 +112,7 @@ private:
     UPROPERTY()
     UCombatResultHUD* CachedCombatResultHUD;
     UPROPERTY()
-    UOptionsWidget* CachedOptionWidget;
+    UOptionsWidget* CachedOptionsWidget;
 
     /* Controller save */
     UPROPERTY()

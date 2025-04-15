@@ -15,9 +15,10 @@ class SPARTAFIGHTERS_API UPlayerSlotWidget : public UUserWidget
 public:
 	UPROPERTY()
 	FString SlotPlayerID;
+	
 
 	UFUNCTION()
-	void SetupPlayerSlot(const FString& PlayerName, const FString& CharacterPreviewPath, bool bIsReady);
+	void SetupPlayerSlot(ASFPlayerState* PlayerState, UDataTable* InCharacterDataTable);
 	UFUNCTION()
 	void SetReadyState(bool bIsReady);
 	UFUNCTION()

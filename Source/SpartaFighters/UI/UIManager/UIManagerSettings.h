@@ -40,6 +40,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UCombatResultHUD> FromBPCombatResultHUDClass;
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UOptionsWidget> FromBPOptionWidgetClass;
+	TSubclassOf<UOptionsWidget> FromBPOptionsWidgetClass;
 	
 };
