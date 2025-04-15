@@ -17,6 +17,7 @@
 #include "Components/SkillComponent.h"
 
 #include "Engine/DamageEvents.h"
+#include "Common/SkillDamageEvent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DataTable/SkillDataRow.h"
 
@@ -283,8 +284,12 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	Multicast_PlayTakeDamageAnimMontage();
 
 	// Knock Back
-	FVector Direction = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
-	LaunchCharacter(Direction * 800.0f, true, true); // Launch with override XY/Z
+	if (const FSkillDamageEvent* CustomEvent = static_cast<const FSkillDamageEvent*>(&DamageEvent))
+	{
+		float knockbackPower = CustomEvent->KnockBackPower;
+		FVector Direction = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
+		LaunchCharacter(Direction * knockbackPower, true, true);
+	}
 
 	// Damage Effect
 	if (const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent))

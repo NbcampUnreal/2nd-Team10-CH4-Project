@@ -6,6 +6,9 @@
 #include "Character/SFCharacter.h"
 #include "Character/Components/StatusComponent.h"
 
+#include "Common/SkillDamageEvent.h"
+//#include "Engine/DamageEvents.h"
+
 
 USkillComponent::USkillComponent()
 {
@@ -240,14 +243,17 @@ void USkillComponent::PerformAttackTrace()
 			if (AlreadyHitActors.Contains(HitActor)) continue;
 			AlreadyHitActors.Add(HitActor);
 
-			UGameplayStatics::ApplyPointDamage(
-				HitActor,
+			FSkillDamageEvent DamageEvent;
+			DamageEvent.HitInfo = Hit;
+			DamageEvent.ShotDirection = OwnerCharacter->GetActorForwardVector();
+			DamageEvent.DamageTypeClass = UDamageType::StaticClass();
+			DamageEvent.KnockBackPower = CurrentSkillData->KnockbackPower;
+
+			HitActor->TakeDamage(
 				CurrentSkillData->AttackPower,
-				SocketLocation,
-				Hit,
+				DamageEvent,
 				OwnerCharacter->GetController(),
-				OwnerCharacter,
-				UDamageType::StaticClass()
+				OwnerCharacter
 			);
 		}
 	}

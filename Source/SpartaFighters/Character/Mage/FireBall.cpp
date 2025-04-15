@@ -2,6 +2,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Common/SKillDamageEvent.h"
 
 AFireBall::AFireBall()
 {
@@ -88,15 +89,22 @@ void AFireBall::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 	ProjectileMovement->bShouldBounce = false;
 	GetWorld()->GetTimerManager().SetTimer(DestroyLazyTimer, this, &AFireBall::DestroyFireBall, 0.3f, false);
 
-	UGameplayStatics::ApplyPointDamage(
-		OtherActor,
+	//  커스텀 데미지 이벤트 생성
+	FSkillDamageEvent DamageEvent;
+	DamageEvent.HitInfo = Hit;
+	DamageEvent.ShotDirection = GetActorForwardVector();  // 또는 NormalImpulse.GetSafeNormal()
+	DamageEvent.DamageTypeClass = UDamageType::StaticClass();
+	DamageEvent.KnockBackPower = 1200.f; // 혹은 FireBallDamage * 계수 등으로 계산 가능
+
+	// ?? 데미지 적용 (TakeDamage으로 직접)
+	OtherActor->TakeDamage(
 		FireBallDamage,
-		NormalImpulse,
-		Hit,
+		DamageEvent,
 		GetInstigator() ? GetInstigator()->Controller : nullptr,
-		this,
-		UDamageType::StaticClass()
+		this
 	);
+
+	UE_LOG(LogTemp, Warning, TEXT("FireBall Apply Custom Damage %f"), FireBallDamage);
 
 	UE_LOG(LogTemp, Warning, TEXT("FireBall Apply Damage %f"), FireBallDamage);
 }
