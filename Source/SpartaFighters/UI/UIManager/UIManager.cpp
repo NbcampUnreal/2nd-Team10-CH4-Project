@@ -10,12 +10,13 @@
 #include "UI/UIElements/CombatResultHUD.h"
 #include "UI/UIObject/MapSelectionWidget.h"
 #include "UI/UIObject/SelectCharacterWidget.h"
-#include "UI/UIObject/OptionsWidget.h"
+#include "Components/TextBlock.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Framework/SFGameInstance.h"
+#include "Framework/SFGameStateBase.h"
 
 #include "Kismet/GameplayStatics.h"
-#include "Framework/SFGameInstance.h"
 
 UUIManager::UUIManager()
 {
@@ -39,7 +40,6 @@ void UUIManager::Init(APlayerController* PlayerController)
 			CombatHUDClass = Settings->FromBPCombatHUDClass;
 			CombatResultHUDClass = Settings->FromBPCombatResultHUDClass;
 			SelectCharacterWidgetClass = Settings->FromBPSelectCharacterWidgetClass;
-			OptionWidgetClass = Settings->FromBPOptionWidgetClass;
 
 			if (!CachedLoginMenu && LoginMenuClass)
 			{
@@ -64,20 +64,20 @@ void UUIManager::Init(APlayerController* PlayerController)
 			if (!CachedCombatHUD && CombatHUDClass)
 			{
 				CachedCombatHUD = CreateWidget<UCombatHUD>(OwningPlayer, CombatHUDClass);
-				CachedCombatHUD->AddToViewport();
+				//CachedCombatHUD->AddToViewport();
 			}
 			if (!CachedCombatResultHUD && CombatResultHUDClass)
 			{
 				CachedCombatResultHUD = CreateWidget<UCombatResultHUD>(OwningPlayer, CombatResultHUDClass);
-				CachedCombatResultHUD->AddToViewport();
-			}
-			if (!CachedOptionWidget && OptionWidgetClass)
-			{
-				CachedOptionWidget = CreateWidget<UOptionsWidget>(OwningPlayer, OptionWidgetClass);
-				CachedOptionWidget->AddToViewport(100);
+				//CachedCombatResultHUD->AddToViewport();
 			}
 		}
 	}
+}
+
+void UUIManager::BeginDestroy()
+{
+	Super::BeginDestroy();
 }
 
 void UUIManager::ShowLoginMenu()
@@ -177,13 +177,14 @@ void UUIManager::ShowSelectCharacterWidget()
 void UUIManager::ShowCombatHUD()
 {
 	ensureAlways(CachedCombatHUD);
-	CachedCombatHUD->SetVisibility(ESlateVisibility::Visible);
+	CachedCombatHUD->AddToViewport();
+	UE_LOG(LogTemp, Warning, TEXT("Show Combat HUD Completed!!"));
 }
 
 void UUIManager::ShowCombatResultHUD()
 {
 	ensureAlways(CachedCombatResultHUD);
-	CachedCombatResultHUD->SetVisibility(ESlateVisibility::Visible);
+	CachedCombatResultHUD->AddToViewport();
 }
 
 void UUIManager::CloseCombatHUD()
@@ -198,23 +199,44 @@ void UUIManager::CloseCombatResultHUD()
 	CachedCombatResultHUD->SetVisibility(ESlateVisibility::Hidden);
 }
 
-void UUIManager::ShowOptionsWidget()
+void UUIManager::UpdateCombatHUD()
 {
-	ensureAlways(CachedOptionWidget);
-	if (!CachedOptionWidget && OptionWidgetClass)
+	if (UTextBlock* PlayTimeText = Cast<UTextBlock>(CachedCombatHUD->GetWidgetFromName(TEXT("PlayTimerTextBlock"))))
 	{
-		CachedOptionWidget = CreateWidget<UOptionsWidget>(GetWorld(), OptionWidgetClass);
-		CachedOptionWidget->AddToViewport();
-	}
+		float RemainingTime = 0.f;
 
-	if (CachedOptionWidget)
-	{
-		CachedOptionWidget->SetVisibility(ESlateVisibility::Visible);
+		if (ASFGameStateBase* GameState = OwningPlayer->GetWorld()->GetGameState<ASFGameStateBase>())
+		{
+			RemainingTime = GameState->GetRemainingBattleTime();
+		}
+
+		int32 Minutes = FMath::FloorToInt(RemainingTime / 60.f);
+		int32 Seconds = FMath::FloorToInt(FMath::Fmod(RemainingTime, 60.f));
+
+		PlayTimeText->SetText(FText::FromString(FString::Printf(TEXT("%d : %02d"), Minutes, Seconds)));
 	}
 }
 
-void UUIManager::CloseOptionsWidget()
+void UUIManager::UpdateHUD()
 {
-	ensureAlways(CachedOptionWidget);
-	CachedOptionWidget->SetVisibility(ESlateVisibility::Hidden);
+	UpdateCombatHUD();
+}
+
+void UUIManager::StartHUDUpdate()
+{
+	if (UWorld* World = OwningPlayer ? OwningPlayer->GetWorld() : nullptr)
+	{
+		World->GetTimerManager().SetTimer(
+			HUDUpdateTimerHandle,
+			this,
+			&UUIManager::UpdateHUD,
+			0.2f,
+			true
+		);
+	}
+}
+
+void UUIManager::SetPlayerController(APlayerController* PlayerController)
+{
+	OwningPlayer = PlayerController;
 }

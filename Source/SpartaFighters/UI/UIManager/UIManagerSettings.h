@@ -35,6 +35,7 @@ public:
 	TSubclassOf<UMapSelectionWidget> FromBPMapSelectionWidgetClass;
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<USelectCharacterWidget> FromBPSelectCharacterWidgetClass;
+	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UCombatHUD> FromBPCombatHUDClass;
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UCombatResultHUD> FromBPCombatResultHUDClass;

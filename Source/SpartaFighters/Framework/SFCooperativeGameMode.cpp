@@ -5,6 +5,7 @@
 #include "LevelObject/SFCharacterSpawner.h"
 #include "Framework/SFPlayerController.h"
 #include "DataTable/CharacterDataRow.h"
+#include "UI/UIManager/UIManager.h"
 
 ASFCooperativeGameMode::ASFCooperativeGameMode()
 {
@@ -17,6 +18,9 @@ ASFCooperativeGameMode::ASFCooperativeGameMode()
 	{
 		CharacterDataTable = DT_CharacterData.Object;
 	}
+
+	BattleStartDelay = 3.f;
+	BattleTime = 180.f;
 }
 
 void ASFCooperativeGameMode::BeginPlay()
@@ -24,6 +28,18 @@ void ASFCooperativeGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	UE_LOG(LogTemp, Warning, TEXT("ASFCoopGameMode::BeginPlay"));
+	GetWorldTimerManager().SetTimer(
+		BattleStartTimerHandle,
+		this,
+		&ASFCooperativeGameMode::StartBattle,
+		BattleStartDelay,
+		false);
+
+	if (ASFGameStateBase* SFGameState = GetGameState<ASFGameStateBase>())
+	{
+		SFGameState->SetBattleStartTime(GetWorld()->GetTimeSeconds());
+		SFGameState->SetBattleDuration(BattleTime);
+	}
 
 	TArray<AActor*> FoundSpawners;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASFCharacterSpawner::StaticClass(), FoundSpawners);
@@ -72,7 +88,6 @@ void ASFCooperativeGameMode::PollCharacterSpawnRequests()
 		APlayerController* PC = Elem.Key;
 		if (!IsValid(PC))
 		{
-
 			continue;
 		}
 
@@ -144,6 +159,89 @@ void ASFCooperativeGameMode::HandleCharacterSpawnRequest(APlayerController* PC)
 		UE_LOG(LogTemp, Warning, TEXT("After Possess: PC->GetPawn(): %s"),
 			(SFPlayerController->GetPawn() ? *SFPlayerController->GetPawn()->GetName() : TEXT("None")));
 	}
+}
+
+void ASFCooperativeGameMode::StartBattle()
+{
+	UE_LOG(LogTemp, Log, TEXT("Battle Started"));
+
+	GetWorldTimerManager().SetTimer(
+		BattleTimerHandle,
+		this,
+		&ASFCooperativeGameMode::EndBattle,
+		BattleTime,
+		false);
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(*It))
+		{
+			// 이건 서버의 PlayerController지만,
+			// Client RPC는 여기서 호출하면 클라이언트로 날아감 (정상 작동)
+			SFPlayerController->Client_StartHUDUpdate();
+		}
+	}
+
+	//Multicast_StartBattle();
+}
+
+void ASFCooperativeGameMode::EndBattle()
+{
+	UE_LOG(LogTemp, Log, TEXT("Battle Ended"));
+
+	ASFPlayerState* Winner = CalculateWinner();
+	ASFGameStateBase* BattleGameState = GetGameState<ASFGameStateBase>();
+
+	if (BattleGameState)
+	{
+		BattleGameState->SetWinner(Winner);
+	}
+
+	GetWorldTimerManager().SetTimer(
+		ReturnLobbyTimerHandle,
+		this, &ASFCooperativeGameMode::ReturnToLobby,
+		5.0f,
+		false);
+}
+
+ASFPlayerState* ASFCooperativeGameMode::CalculateWinner()
+{
+	ASFPlayerState* Winner = nullptr;
+	int32 LowestDeath = MAX_int32;
+
+	for (APlayerState* PS : GameState->PlayerArray)
+	{
+		ASFPlayerState* SFPS = Cast<ASFPlayerState>(PS);
+		if (SFPS && SFPS->GetDeathCount() < LowestDeath)
+		{
+			LowestDeath = SFPS->GetDeathCount();
+			Winner = SFPS;
+		}
+	}
+
+	return Winner;
+}
+
+void ASFCooperativeGameMode::ReturnToLobby()
+{
+	UE_LOG(LogTemp, Log, TEXT("Returning all players to lobby"));
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (APlayerController* PC = It->Get())
+		{
+			Client_TravelToLobby_Implementation(PC);
+		}
+	}
+}
+
+void ASFCooperativeGameMode::Client_TravelToLobby_Implementation(APlayerController* PC)
+{
+	if (PC)
+	{
+		PC->ClientTravel(TEXT("/Game/SpartaFighters/Level/LobbyMenu"), ETravelType::TRAVEL_Absolute);
+	}
+}
 }
 
 void ASFCooperativeGameMode::RequestRespawn(AController* DeadController)
