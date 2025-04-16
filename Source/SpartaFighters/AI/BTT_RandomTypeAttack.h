@@ -13,10 +13,13 @@ class SPARTAFIGHTERS_API UBTT_RandomTypeAttack : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
-	
+public:
+	UBTT_RandomTypeAttack();
 
-	// TODO : Get PlayerCharacter CurrentState
-	// TODO : 
-	// TODO : 
-	// TODO : 
+protected:
+	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+
+public:
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	struct FBlackboardKeySelector AttackTypeKey;
 };
