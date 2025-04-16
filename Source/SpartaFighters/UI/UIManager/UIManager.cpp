@@ -188,7 +188,7 @@ void UUIManager::ShowMapSelectionWidget(EGameModeType GameModeType)
 
 void UUIManager::ShowSelectCharacterWidget()
 {
-	if (SelectCharacterWidgetInstance == nullptr && SelectCharacterWidgetClass)
+	/*if (SelectCharacterWidgetInstance == nullptr && SelectCharacterWidgetClass)
 	{
 		SelectCharacterWidgetInstance = CreateWidget<USelectCharacterWidget>(GetWorld(), SelectCharacterWidgetClass);
 		SelectCharacterWidgetInstance->AddToViewport();
@@ -196,6 +196,17 @@ void UUIManager::ShowSelectCharacterWidget()
 	}
 	else
 	{
+		SelectCharacterWidgetInstance->AddToViewport();
+		SelectCharacterWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+	}*/
+	if (SelectCharacterWidgetInstance != nullptr)
+	{
+		SelectCharacterWidgetInstance->RemoveFromParent();
+	}
+
+	if (SelectCharacterWidgetClass)
+	{
+		SelectCharacterWidgetInstance = CreateWidget<USelectCharacterWidget>(GetWorld(), SelectCharacterWidgetClass);
 		SelectCharacterWidgetInstance->AddToViewport();
 		SelectCharacterWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 	}

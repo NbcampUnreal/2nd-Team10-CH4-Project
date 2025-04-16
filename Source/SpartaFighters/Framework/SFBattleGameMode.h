@@ -52,6 +52,8 @@ protected:
     
     void ReturnToLobby();
 
+    void ServerTravelToLobby();
+
     // RPCs
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_StartBattle();
@@ -60,6 +62,7 @@ protected:
     FTimerHandle BattleStartTimerHandle;
     FTimerHandle BattleTimerHandle;
     FTimerHandle ReturnLobbyTimerHandle;
+    FTimerHandle LazyServerTravelTimerHandle;
 
     // SFBattleGameMode.h
     FTimerHandle SpawnPollingTimerHandle;
