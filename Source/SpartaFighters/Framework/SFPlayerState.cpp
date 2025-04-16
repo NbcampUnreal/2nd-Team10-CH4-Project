@@ -32,6 +32,7 @@ void ASFPlayerState::CopyProperties(APlayerState* PlayerState)
 	if (ASFPlayerState* NewState = Cast<ASFPlayerState>(PlayerState))
 	{
 		NewState->SelectedCharacterRow = this->SelectedCharacterRow;
+		NewState->CustomPlayerID = this->CustomPlayerID;
 	UE_LOG(LogTemp, Warning, TEXT("CopyProperties SelectedCharacterRow : %s"), *SelectedCharacterRow.ToString());
 	}
 }
@@ -120,6 +121,7 @@ void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASFPlayerState, bIsRoomOwner);
 	DOREPLIFETIME(ASFPlayerState, bIsAI);
 	DOREPLIFETIME(ASFPlayerState, SelectedCharacterRow);
+	DOREPLIFETIME(ASFPlayerState, CustomPlayerID);
 	DOREPLIFETIME(ASFPlayerState, CurrentGold);
 	DOREPLIFETIME(ASFPlayerState, CharacterInventory);
 	DOREPLIFETIME(ASFPlayerState, CharacterEquippedCommon);

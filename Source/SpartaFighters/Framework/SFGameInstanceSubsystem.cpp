@@ -111,10 +111,8 @@ void USFGameInstanceSubsystem::ChangeLevelByMapID(int32 MapID)
 
 				FName LevelName = FPackageName::GetShortFName(FName(*LevelToLoad));
 
-				/*World->GetAuthGameMode()->bUseSeamlessTravel = true;
-				World->ServerTravel(LevelName.ToString(), true);*/
-				World->GetAuthGameMode()->bUseSeamlessTravel = false;
-				World->ServerTravel(LevelName.ToString(), false, false);
+				World->GetAuthGameMode()->bUseSeamlessTravel = true;
+				World->ServerTravel(LevelName.ToString(), true);
 
 				/*FString URL = FString::Printf(TEXT("%s?listen"), *LevelToLoad);
 				GetWorld()->ServerTravel(URL);*/
