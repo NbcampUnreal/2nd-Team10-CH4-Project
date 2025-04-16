@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameplayTagContainer.h"
 #include "AI/Boss/AIMagicDamageArea.h"
 #include "AIBossCharacter.generated.h"
 
@@ -79,6 +80,37 @@ protected:
 	FTimerHandle TimerHandle_EnableRagdoll;
 
 	void EnableRagdoll();
+
+public:
+	UPROPERTY(ReplicatedUsing = OnRep_BossTags, EditAnywhere, Category = "Boss Phase")
+	FGameplayTagContainer BossCharacterTags;
+
+	// 페이즈 태그 에셋 설정
+	UPROPERTY(EditAnywhere, Category = "Boss Phase")
+	FGameplayTag Phase1Tag;
+
+	UPROPERTY(EditAnywhere, Category = "Boss Phase")
+	FGameplayTag Phase2Tag;
+
+	UPROPERTY(EditAnywhere, Category = "Boss Phase")
+	FGameplayTag Phase3Tag;
+
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UMaterialInterface* Phase2Material;
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UNiagaraSystem* Phase2AuraSystem;
+
+protected:
+	UFUNCTION()
+	void OnRep_BossTags();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ChangePhase(const FGameplayTag& NewPhaseTag);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ApplyPhaseEffects(const FGameplayTag& PhaseTag);
 
 	//------------BreathAttack---------------
 

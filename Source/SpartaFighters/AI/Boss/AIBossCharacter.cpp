@@ -73,6 +73,11 @@ AAIBossCharacter::AAIBossCharacter()
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 	}
+
+	Phase1Tag = FGameplayTag::RequestGameplayTag("Boss.Phase.1");
+	Phase2Tag = FGameplayTag::RequestGameplayTag("Boss.Phase.2");
+	Phase3Tag = FGameplayTag::RequestGameplayTag("Boss.Phase.3");
+	BossCharacterTags.AddTag(Phase1Tag);
 }
 
 void AAIBossCharacter::BeginPlay()
@@ -108,19 +113,19 @@ float AAIBossCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	{
 		StatusComponent->ModifyStatus(EStatusType::CurHP, -DamageAmount);
 		float CurrentHP = StatusComponent->GetStatusValue(EStatusType::CurHP);
+		float MaxHP = StatusComponent->GetStatusValue(EStatusType::MaxHP);
 		UE_LOG(LogTemp, Warning, TEXT("Boss Damaged - Current HP: %.2f"), CurrentHP);
+
+		if (HasAuthority() && BossCharacterTags.HasTag(Phase1Tag))
+		{
+			float HealthPercent = CurrentHP / MaxHP;
+			if (HealthPercent <= 0.5f)
+			{
+				Server_ChangePhase(Phase2Tag);
+			}
+		}
 	}
 
-
-
-	// if need Phase chage
-	//float healthPercentage = StatusComponent->GetStatusValue(EStatusType::CurHP) /
-	//	StatusComponent->GetStatusValue(EStatusType::MaxHP);
-
-	//if (healthPercentage <= 0.5f && CurrentPhase == EBossPhase::Phase1)
-	//{
-	//	ChangeToPhase2();
-	//}
 
 	//Multicast_PlayTakeDamageAnimMontage();
 
@@ -269,6 +274,46 @@ void AAIBossCharacter::EnableRagdoll()
 	if (GetCapsuleComponent())
 	{
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void AAIBossCharacter::OnRep_BossTags()
+{
+	if (BossCharacterTags.HasTag(Phase2Tag))
+	{
+		GetMesh()->SetMaterial(0, Phase2Material);
+	}
+}
+
+void AAIBossCharacter::Server_ChangePhase_Implementation(const FGameplayTag& NewPhaseTag)
+{
+	BossCharacterTags.RemoveTag(Phase1Tag);
+	BossCharacterTags.RemoveTag(Phase2Tag);
+	BossCharacterTags.RemoveTag(Phase3Tag);
+
+	BossCharacterTags.AddTag(NewPhaseTag);
+
+	Multicast_ApplyPhaseEffects(NewPhaseTag);
+}
+
+void AAIBossCharacter::Multicast_ApplyPhaseEffects_Implementation(const FGameplayTag& PhaseTag)
+{
+	if (PhaseTag == Phase2Tag)
+	{
+		GetMesh()->SetMaterial(0, Phase2Material);
+
+		if (Phase2AuraSystem)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAttached(
+				Phase2AuraSystem,
+				GetMesh(),
+				NAME_None,
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				EAttachLocation::SnapToTarget,
+				true
+			);
+		}
 	}
 }
 
@@ -721,6 +766,7 @@ void AAIBossCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(AAIBossCharacter, bIsDead);
 	DOREPLIFETIME(AAIBossCharacter, CurrentAttackSequence);
 	DOREPLIFETIME(AAIBossCharacter, DissolveProgress);
+	DOREPLIFETIME(AAIBossCharacter, BossCharacterTags);
 }
 
 
