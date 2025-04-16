@@ -5,6 +5,7 @@
 #include "DataTypes/GameModeType.h"
 #include "UI/UIObject/MapSelectionWidget.h"
 #include "UI/UIObject/SelectCharacterWidget.h"
+#include "Items/SFItemBase.h"
 #include "UIManager.generated.h"
 
 class ULoginMenu;
@@ -36,7 +37,7 @@ public:
     void ShowRoomMenu();
 
     void ShowShopMenu();
-    void ShowShopItemListMenu();
+    void ShowShopItemListMenu(EItemType Type);
     void SwitchToWidget(UUserWidget* NewWidget);
 
     /** Get Widget */

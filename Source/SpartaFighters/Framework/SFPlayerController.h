@@ -6,6 +6,9 @@
 
 class UInputAction;
 class UInputMappingContext;
+class ASFCharacter;
+class USFInventoryComponent;
+class USFGameInstanceSubsystem;
 
 UCLASS()
 class SPARTAFIGHTERS_API ASFPlayerController : public APlayerController
@@ -47,6 +50,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* SettingAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* InventoryCheckAction;
 public:
 	void AddMappingContext();
 	// Move to SFLobbyPlayerController.cpp
@@ -65,4 +70,10 @@ public:
 	void Client_TravelToLobby();
 
 	void OnPossess(APawn* InPawn) override;
+
+private:
+	void SetupCharacterInventory();
+
+	UFUNCTION(BlueprintPure, Category = "Game Instance")
+	USFGameInstanceSubsystem* GetGameInstanceSubsystem() const;
 };

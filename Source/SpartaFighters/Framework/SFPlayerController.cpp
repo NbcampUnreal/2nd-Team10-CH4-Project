@@ -6,6 +6,9 @@
 #include "UI/UIManager/UIManager.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "Character/SFCharacter.h"
+#include "Inventory/SFInventoryComponent.h"
+
 ASFPlayerController::ASFPlayerController()
 {
 	InputMappingContext = nullptr;
@@ -116,6 +119,45 @@ void ASFPlayerController::OnPossess(APawn* InPawn)
 		AddMappingContext();
 		SetInputMode(FInputModeGameOnly());
 	}
+
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		SetupCharacterInventory();
+	}
+}
+
+//Inventory logic for shop
+void ASFPlayerController::SetupCharacterInventory()
+{
+	ASFCharacter* PossessedCharacter = Cast<ASFCharacter>(GetPawn());
+	if (PossessedCharacter)
+	{
+		USFInventoryComponent* InventoryComp = PossessedCharacter->FindComponentByClass<USFInventoryComponent>();
+		USFGameInstanceSubsystem* GameInstanceSubsystem = GetGameInstanceSubsystem();
+
+		if (InventoryComp && GameInstanceSubsystem)
+		{
+			if (ASFPlayerState* PS = GetPlayerState<ASFPlayerState>())
+			{
+				TArray<TSubclassOf<class USFItemBase>> PendingPurchases = GameInstanceSubsystem->GetPendingShopPurchases(PS->GetUniqueID());
+				for (const auto& ItemClass : PendingPurchases)
+				{
+					InventoryComp->Server_AddItemByClass(ItemClass);
+				}
+				GameInstanceSubsystem->ClearPendingShopPurchases(PS->GetUniqueID());
+			}
+		}
+	}
+}
+
+USFGameInstanceSubsystem* ASFPlayerController::GetGameInstanceSubsystem() const
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance)
+	{
+		return GameInstance->GetSubsystem<USFGameInstanceSubsystem>();
+	}
+	return nullptr;
 }
 
 void ASFPlayerController::Client_TravelToLobby_Implementation()

@@ -3,7 +3,7 @@
 #include "Items/EquipItems/SFEquipableBase.h"
 #include "Net/UnrealNetwork.h"
 #include "Framework/SFPlayerState.h"
-
+#include "Framework/SFGameInstanceSubsystem.h"
 
 USFInventoryComponent::USFInventoryComponent()
 {
@@ -47,19 +47,19 @@ void USFInventoryComponent::Internal_UpdateData()
 				if (OwnerState)
 				{
 					// Save inventory info on PlayerState
-					// OwnerState->SetCharacterInventory(Inventory);
-					// OwnerState->SetCharacterEquipment(EquippedItems);
+					OwnerState->SetCharacterInventory(Inventory);
+					OwnerState->SetCharacterEquipment(EquippedCommon, EquippedExclusive, EquippedCosmetic);
 
 					// Save inventory info on GameInstance 
 					UGameInstance* GameInstance = GetWorld()->GetGameInstance();
 					if (GameInstance)
 					{
-						// USFGameInstance* SFGameInstance = Cast<USFGameInstance>(GameInstance);
-						// if (SFGameInstance)
-						// {
-						//     SFGameInstance->UpdatePlayerInventory(OwnerState->GetUniqueId(), Inventory);
-						//     SFGameInstance->UpdatePlayerEquipment(OwnerState->GetUniqueId(), EquippedItems);
-						// }
+						USFGameInstanceSubsystem* SFGameInstanceSubsystem = GameInstance->GetSubsystem<USFGameInstanceSubsystem>();
+						if (SFGameInstanceSubsystem)
+						{
+							SFGameInstanceSubsystem->UpdatePlayerInventory(OwnerState->GetUniqueID(), Inventory);
+							SFGameInstanceSubsystem->UpdatePlayerEquipment(OwnerState->GetUniqueID(), EquippedCommon, EquippedExclusive, EquippedCosmetic);
+						}
 					}
 				}
 			}
@@ -84,7 +84,7 @@ void USFInventoryComponent::Server_AddItemByClass_Implementation(TSubclassOf<USF
 				if (NewItem)
 				{
 					Inventory.Add(NewItem);
-					//Internal_UpdateData();
+					Internal_UpdateData();
 					bInventoryUpdated = !bInventoryUpdated;
 				}
 			}
@@ -106,7 +106,7 @@ void USFInventoryComponent::Server_RemoveItem_Implementation(FName ItemNameToRem
 			if (Inventory[i]->ItemName == ItemNameToRemove)
 			{
 				Inventory.RemoveAt(i);
-				//Internal_UpdateData();
+				Internal_UpdateData();
 				bInventoryUpdated = !bInventoryUpdated;
 				return;
 			}
@@ -192,7 +192,7 @@ void USFInventoryComponent::Server_UnequipItem_Implementation(SFEquipSlot EquipS
 					if (NewItem)
 					{
 						Inventory.Add(NewItem);
-						//Internal_UpdateData();
+						Internal_UpdateData();
 						bInventoryUpdated = !bInventoryUpdated;
 					}
 				}
