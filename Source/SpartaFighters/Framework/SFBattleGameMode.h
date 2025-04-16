@@ -34,9 +34,11 @@ protected:
 
     // Manage Rule
     UPROPERTY(EditDefaultsOnly, Category = "Battle")
-    float BattleStartDelay = 3.0f;
+    float BattleStartDelay;
     UPROPERTY(EditDefaultsOnly, Category = "Battle")
-    float BattleTime = 180.0f;
+    float BattleTime;
+
+    float ReturnToLobbyTime;
     
     UFUNCTION()
     void StartBattle();
@@ -53,8 +55,6 @@ protected:
     // RPCs
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_StartBattle();
-    UFUNCTION(Client, Reliable)
-    void Client_TravelToLobby(APlayerController* PC);
 
     // FTimerHandle 
     FTimerHandle BattleStartTimerHandle;

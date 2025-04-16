@@ -4,10 +4,10 @@
 #include "Framework/SFBattleGameMode.h"
 #include "Framework/SFPlayerState.h"
 #include "UI/UIManager/UIManager.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "Character/SFCharacter.h"
 #include "Inventory/SFInventoryComponent.h"
-#include "Framework/SFGameInstanceSubsystem.h"
 
 ASFPlayerController::ASFPlayerController()
 {
@@ -158,4 +158,11 @@ USFGameInstanceSubsystem* ASFPlayerController::GetGameInstanceSubsystem() const
 		return GameInstance->GetSubsystem<USFGameInstanceSubsystem>();
 	}
 	return nullptr;
+}
+
+void ASFPlayerController::Client_TravelToLobby_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Client is returning to Lobby!"));
+
+	UGameplayStatics::OpenLevel(this, FName("/Game/SpartaFighters/Level/Menu/LobbyMenu"));
 }
