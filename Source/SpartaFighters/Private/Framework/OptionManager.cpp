@@ -30,13 +30,13 @@ UOptionManager::UOptionManager()
 void UOptionManager::BGSoundValue(float Value) 
 {
 	backgroundSound = Value;
-	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, SC_BackGround, backgroundSound);
+	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, SC_BackGround, backgroundSound*2);
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MainSoundMix);
 }
 void UOptionManager::EFSoundValue(float Value)
 {
 	effectSound = Value;
-	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, SC_Effect, backgroundSound);
+	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, SC_Effect, backgroundSound*2);
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MainSoundMix);
 }
 
