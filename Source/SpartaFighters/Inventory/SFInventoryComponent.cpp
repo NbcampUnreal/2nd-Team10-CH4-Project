@@ -245,13 +245,13 @@ void USFInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 //Inv UI Update
 void USFInventoryComponent::OnRep_InventoryUpdated()
 {
-	//OnInventoryUpdated.Broadcast();
+	OnInventoryUpdated.Broadcast();
 }
 
 //Eq UI Update
 void USFInventoryComponent::OnRep_EquippedItemsUpdated()
 {
-	//OnEquippedItemsUpdated.Broadcast();
+	OnEquippedItemsUpdated.Broadcast();
 }
 
 //Return equipped item pointer

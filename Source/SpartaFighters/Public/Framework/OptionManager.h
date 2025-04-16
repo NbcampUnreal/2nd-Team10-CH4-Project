@@ -51,4 +51,14 @@ public:
 	void ChangeScreen(EScreenMode Mode);
 	UFUNCTION()
 	void ChangeResolution(FIntPoint Resolution);
+	UFUNCTION()
+	const float GetBGSound();
+	UFUNCTION()
+	void SetBGSound(float Volume);
+	UFUNCTION()
+	const float GetEfSound();
+	UFUNCTION()
+	void SetEfSound(float Volume);
+	
+	
 };
