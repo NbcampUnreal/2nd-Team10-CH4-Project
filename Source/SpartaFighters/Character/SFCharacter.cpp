@@ -182,6 +182,7 @@ void ASFCharacter::AttackPressed()
 {
 	if (!SkillComponent || !StateComponent) return;
 	SkillComponent->HandleInputBasicAttack();
+	UGameplayStatics::PlaySoundAtLocation(this, AttackSound, GetActorLocation());
 }
 
 void ASFCharacter::AttackReleased()
@@ -194,6 +195,7 @@ void ASFCharacter::SkillAttackPressed()
 {
 	if (!SkillComponent || !StateComponent) return;
 	SkillComponent->HandleInputSkillAttack();
+	UGameplayStatics::PlaySoundAtLocation(this, SkillSound, GetActorLocation());
 }
 
 void ASFCharacter::SkillAttackReleased()
@@ -209,6 +211,7 @@ void ASFCharacter::GuardPressed()
 		if (AnimInstance)
 		{
 			AnimInstance->Montage_Play(GuardMontage);
+			UGameplayStatics::PlaySoundAtLocation(this, GuardSound, GetActorLocation());
 		}
 	}
 
@@ -301,6 +304,7 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	{
 		Multicast_SpawnHitEffect(PointDamageEvent->HitInfo.ImpactPoint, PointDamageEvent->ShotDirection.Rotation());
 	}
+	UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 
 	return DamageAmount;
 }
@@ -347,7 +351,7 @@ void ASFCharacter::Die()
 	{
 		return;
 	}
-
+	UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
 	bIsDead = true;
 
 	CachedController = GetController();
