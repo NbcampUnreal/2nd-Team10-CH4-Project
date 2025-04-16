@@ -1,14 +1,16 @@
 #include "Framework/SFBattleGameMode.h"
 #include "Framework/SFGameStateBase.h"
-#include "GameFramework/Controller.h"
+#include "Framework/SFGameInstance.h"
 #include "Framework/SFPlayerState.h"
 #include "Framework/SFPlayerController.h"
+#include "GameFramework/Controller.h"
 
 #include "Character/SFCharacter.h"
 
 #include "LevelObject/SFCharacterSpawner.h"
 
 #include "Kismet/GameplayStatics.h"
+
 ASFBattleGameMode::ASFBattleGameMode()
 {
 	GameStateClass = ASFGameStateBase::StaticClass();
@@ -21,6 +23,9 @@ ASFBattleGameMode::ASFBattleGameMode()
 	}
 
 	NumAICharactersToSpawn = 2;
+	BattleStartDelay = 3.f;
+	BattleTime = 180.f;
+	ReturnToLobbyTime = 5.f;
 }
 
 void ASFBattleGameMode::BeginPlay()
@@ -203,6 +208,23 @@ void ASFBattleGameMode::StartBattle()
 		BattleTime,
 		false);
 
+	if (ASFGameStateBase* SFGameState = GetGameState<ASFGameStateBase>())
+	{
+		SFGameState->SetBattleStartTime(GetWorld()->GetTimeSeconds());
+		SFGameState->SetBattleDuration(BattleTime);
+		SFGameState->SetReturnToLobbyTime(ReturnToLobbyTime);
+	}
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(*It))
+		{
+			// This is Server PlayerController
+			// But, Client RPC is this called.. Go Client..
+			SFPlayerController->Client_StartHUDUpdate();
+		}
+	}
+
 	Multicast_StartBattle();
 }
 
@@ -244,12 +266,23 @@ void ASFBattleGameMode::EndBattle()
 {
 	UE_LOG(LogTemp, Log, TEXT("Battle Ended"));
 
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(*It))
+		{
+			// This is Server PlayerController
+			// But, Client RPC is this called.. Go Client..
+			SFPlayerController->Client_EndBattle();
+		}
+	}
+
 	ASFPlayerState* Winner = CalculateWinner();
 	ASFGameStateBase* BattleGameState = GetGameState<ASFGameStateBase>();
 
 	if (BattleGameState)
 	{
 		BattleGameState->SetWinner(Winner);
+		BattleGameState->SetStartReturnToLobbyTime(GetWorld()->GetTimeSeconds());
 	}
 
 	GetWorldTimerManager().SetTimer(
@@ -279,25 +312,18 @@ ASFPlayerState* ASFBattleGameMode::CalculateWinner()
 
 void ASFBattleGameMode::ReturnToLobby()
 {
-	UE_LOG(LogTemp, Log, TEXT("Returning all players to lobby"));
+	UE_LOG(LogTemp, Log, TEXT("=============Returning all players to lobby=============="));
 
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
-		if (APlayerController* PC = It->Get())
+		if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(*It))
 		{
-			Client_TravelToLobby(PC);
+			SFPlayerController->Client_EndReturnToLobbyTimer();
+			SFPlayerController->Client_TravelToLobby();
+			UE_LOG(LogTemp, Log, TEXT("=============KKKKKKKKK=============="));
 		}
 	}
 }
-
-void ASFBattleGameMode::Client_TravelToLobby_Implementation(APlayerController* PC)
-{
-	if (PC)
-	{
-		PC->ClientTravel(TEXT("/Game/SpartaFighters/Level/LobbyMenu"), ETravelType::TRAVEL_Absolute);
-	}
-}
-
 
 void ASFBattleGameMode::SpawnAICharacters()
 {    

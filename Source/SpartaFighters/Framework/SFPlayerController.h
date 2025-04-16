@@ -61,6 +61,8 @@ public:
 	void Client_EndBattle();
 	UFUNCTION(Client, Reliable)
 	void Client_EndReturnToLobbyTimer();
+	UFUNCTION(Client, Reliable)
+	void Client_TravelToLobby();
 
 	void OnPossess(APawn* InPawn) override;
 };
