@@ -87,7 +87,6 @@ void ASFBattleGameMode::PollCharacterSpawnRequests()
 		APlayerController* PC = Elem.Key;
 		if (!IsValid(PC))
 		{
-
 			continue;
 		}
 
@@ -319,10 +318,21 @@ void ASFBattleGameMode::ReturnToLobby()
 		if (ASFPlayerController* SFPlayerController = Cast<ASFPlayerController>(*It))
 		{
 			SFPlayerController->Client_EndReturnToLobbyTimer();
-			SFPlayerController->Client_TravelToLobby();
-			UE_LOG(LogTemp, Log, TEXT("=============KKKKKKKKK=============="));
+			//SFPlayerController->Client_TravelToLobby();
 		}
 	}
+
+	GetWorldTimerManager().SetTimer(
+		LazyServerTravelTimerHandle,
+		this, 
+		&ASFBattleGameMode::ServerTravelToLobby,
+		0.5f,
+		false);	
+}
+
+void ASFBattleGameMode::ServerTravelToLobby()
+{
+	GetWorld()->ServerTravel("/Game/SpartaFighters/Level/Menu/LobbyMenu", true);
 }
 
 void ASFBattleGameMode::SpawnAICharacters()

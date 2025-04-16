@@ -12,7 +12,7 @@ AAIMagicDamageArea::AAIMagicDamageArea()
     DamageCapsule->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
     DamageCapsule->OnComponentBeginOverlap.AddDynamic(this, &AAIMagicDamageArea::OnOverlapBegin);
 
-    MagicDamage = 0.0f;
+    MagicDamage = 20.0f;
     DamageInterval = 1.0f;
     TotalDuration = 5.0f;
 }

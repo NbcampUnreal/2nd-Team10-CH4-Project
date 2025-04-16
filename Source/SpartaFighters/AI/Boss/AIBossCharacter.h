@@ -1,14 +1,14 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameplayTagContainer.h"
 #include "AI/Boss/AIMagicDamageArea.h"
 #include "AIBossCharacter.generated.h"
 
 class UNiagaraComponent;
 class UNiagaraSystem;
+class UStatusComponent;
 class UBoxComponent;
 class USphereComponent;
 
@@ -20,8 +20,97 @@ class SPARTAFIGHTERS_API AAIBossCharacter : public ACharacter
 public:
 	AAIBossCharacter();
 
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+		AController* EventInstigator, AActor* DamageCauser) override;
+
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UStatusComponent* StatusComponent;
+
+	//UFUNCTION(NetMulticast, Reliable)
+	//void Multicast_PlayTakeDamageAnimMontage();
+
+	//UFUNCTION(NetMulticast, Reliable)
+	//void Multicast_SpawnHitEffect(const FVector& Location, const FRotator& Rotation);
+
+	//UPROPERTY(EditAnywhere, Category = "Effects")
+	//UParticleSystem* HitEffect;
+
+	//UPROPERTY(EditAnywhere, Category = "Animation")
+	//UAnimMontage* OnDamageMontage;
+
+	UFUNCTION()
+	void OnHPChanged(AActor* AffectedActor, float HP);
+
+	UFUNCTION()
+	void Die();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDeathEffect();
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UNiagaraSystem* DeathExplosionEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	UAnimMontage* DeathMontage;
+
+	FTimerHandle TimerHandle_DestroyBoss;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Status")
+	bool bIsDead = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	UMaterialInterface* DissolveMaterial;
+
+	FTimerHandle DissolveTimerHandle;
+
+	UPROPERTY(ReplicatedUsing = OnRep_DissolveProgress)
+	float DissolveProgress;
+
+	UFUNCTION()
+	void OnRep_DissolveProgress();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StartDissolveEffect();
+
+	void StartDissolveEffect();
+
+	FTimerHandle TimerHandle_EnableRagdoll;
+
+	void EnableRagdoll();
+
+public:
+	UPROPERTY(ReplicatedUsing = OnRep_BossTags, EditAnywhere, Category = "Boss Phase")
+	FGameplayTagContainer BossCharacterTags;
+
+	// 페이즈 태그 에셋 설정
+	UPROPERTY(EditAnywhere, Category = "Boss Phase")
+	FGameplayTag Phase1Tag;
+
+	UPROPERTY(EditAnywhere, Category = "Boss Phase")
+	FGameplayTag Phase2Tag;
+
+	UPROPERTY(EditAnywhere, Category = "Boss Phase")
+	FGameplayTag Phase3Tag;
+
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UMaterialInterface* Phase2Material;
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UNiagaraSystem* Phase2AuraSystem;
+
+protected:
+	UFUNCTION()
+	void OnRep_BossTags();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ChangePhase(const FGameplayTag& NewPhaseTag);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ApplyPhaseEffects(const FGameplayTag& PhaseTag);
 
 	//------------BreathAttack---------------
 
@@ -37,6 +126,8 @@ protected:
 	FTimerHandle DamageTickTimer;
 
 	FTimerHandle DamageDurationTimer;
+
+	FTimerHandle DelayStartTimer;
 
 	int32 DamageTickCount;
 
@@ -142,7 +233,7 @@ public:
 	//---------------------------------------
 
 
-public:	
+public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -162,15 +253,24 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayAttack(UAnimSequence* AnimSequence);
 
-	virtual float PlayAnimMontage(
-		UAnimMontage* AnimMontage,
-		float InPlayRate = 1.f,
-		FName StartSectionName = NAME_None
-	) override;
+	UPROPERTY(ReplicatedUsing = OnRep_IsPlayingAttack, Transient)
+	bool bIsPlayingAttack = false;
+
+	UFUNCTION()
+	void OnRep_IsPlayingAttack();
+
+	UPROPERTY(Replicated)
+	UAnimSequence* CurrentAttackSequence;
+
+	//virtual float PlayAnimMontage(
+	//	UAnimMontage* AnimMontage,
+	//	float InPlayRate = 1.f,
+	//	FName StartSectionName = NAME_None
+	//) override;
 
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayBossAnim(UAnimMontage* Montage);
+	//UFUNCTION(NetMulticast, Reliable)
+	//void Multicast_PlayBossAnim(UAnimMontage* Montage);
 
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

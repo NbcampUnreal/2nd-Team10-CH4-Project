@@ -18,9 +18,24 @@ EBTNodeResult::Type UBTT_RandomTypeAttack::ExecuteTask(UBehaviorTreeComponent& O
 		return EBTNodeResult::Failed;
 	}
 
-	int32 RandomValue = FMath::RandRange(0, 2);
+	int32 RandomValue = FMath::RandRange(0, 99);
 
-	BlackboardComp->SetValueAsInt(AttackTypeKey.SelectedKeyName, RandomValue);
+	int32 SkillIndex = 0;
+
+	if (RandomValue < 40) 
+	{
+		SkillIndex = 0;
+	}
+	else if (RandomValue < 80)
+	{
+		SkillIndex = 1;
+	}
+	else
+	{
+		SkillIndex = 2;
+	}
+
+	BlackboardComp->SetValueAsInt(AttackTypeKey.SelectedKeyName, SkillIndex);
 
 	return EBTNodeResult::Succeeded;
 }
