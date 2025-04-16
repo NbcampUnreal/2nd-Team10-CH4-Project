@@ -38,9 +38,9 @@ public:
 	void Server_HandleBasicAttack();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_HandleBasicAttack(ECharacterState State);
+	void Multicast_HandleBasicAttack(FSkillDataRow Data);
 
-	void HandleBasicAttack(ECharacterState CurrentState);
+	void HandleBasicAttack(FSkillDataRow* Data);
 
 
 	// Handle Skill Attack
@@ -50,13 +50,13 @@ public:
 	void Server_HandleSkillAttack();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_HandleSkillAttack(ECharacterState State);
+	void Multicast_HandleSkillAttack(FSkillDataRow Data);
 
-	void HandleSkillAttack(ECharacterState CurrentState);
+	void HandleSkillAttack(FSkillDataRow* Data);
 
-	void ExcuteSkill();
 
-	// Handle Skill Attack
+
+	// Handle Dodge Attack
 	void HandleInputDodge();
 
 	UFUNCTION(Server, Reliable)
@@ -72,9 +72,17 @@ public:
 	void PlayAnimMontage();
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
+	void PlayAnimMontage(FSkillDataRow* Data);
+	void OnMontageEnded();
 
 	void PerformAttackTrace();
 	void ClearHitActors();
+
+	void CanNextCombo();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int MaxComboCount = 3;
+	int ComboCount = 0;
 
 private:
 	UPROPERTY()

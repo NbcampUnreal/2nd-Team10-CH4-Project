@@ -36,11 +36,14 @@ public:
 	ASFCharacter();
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStatusContainerComponent> StatusContainerComponent;
 	//virtual UStatusContainerComponent* GetStatusContainerComponent() const override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStatusComponent> StatusComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStateComponent> StateComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkillComponent> SkillComponent;
 
 	UFUNCTION(BlueprintCallable)
