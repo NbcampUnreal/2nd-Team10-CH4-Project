@@ -18,13 +18,13 @@ void UOptionsWidget::NativeConstruct()
 
 	if (BGMVolumeSlider)
 	{
-		float DefaultBGMVolume = 0.5f;
-		BGMVolumeSlider->SetValue(DefaultBGMVolume);
 
 		if (UOptionManager* OptionManager = GetGameInstance()->GetSubsystem<UOptionManager>())
 		{
-			OptionManager->BGSoundValue(DefaultBGMVolume);
-			OptionManager->EFSoundValue(DefaultBGMVolume);
+			BGMVolumeSlider->SetValue(OptionManager->GetBGSound());
+			EffectVolumeSlider->SetValue(OptionManager->GetEfSound());
+			OptionManager->BGSoundValue(OptionManager->GetBGSound());
+			OptionManager->EFSoundValue(OptionManager->GetBGSound());
 		}
 	}
 
@@ -67,6 +67,7 @@ void UOptionsWidget::OnBGMVolumeChanged(float Value)
 	UE_LOG(LogTemp, Warning, TEXT("OnBGMVolumeChanged"));
 	if (UOptionManager* OptionManager = GetGameInstance()->GetSubsystem<UOptionManager>())
 	{
+		OptionManager->SetBGSound(Value);
 		OptionManager->BGSoundValue(Value);
 	}
 }
@@ -77,6 +78,7 @@ void UOptionsWidget::OnEffectVolumeChanged(float Value)
 
 	if (UOptionManager* OptionManager = GetGameInstance()->GetSubsystem<UOptionManager>())
 	{
+		OptionManager->SetEfSound(Value);
 		OptionManager->EFSoundValue(Value);
 	}
 }
