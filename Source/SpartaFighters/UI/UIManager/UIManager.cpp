@@ -18,10 +18,13 @@
 #include "Framework/SFGameStateBase.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Items/SFItemBase.h"
 
 UUIManager::UUIManager()
 {
 	CurrentWidget = nullptr;
+	SelectCharacterWidgetInstance = nullptr;
+	MapSelectionWidgetInstance = nullptr;
 }
 
 void UUIManager::Init(APlayerController* PlayerController)
@@ -111,10 +114,26 @@ void UUIManager::ShowShopMenu()
 	SwitchToWidget(CachedShopMenu);
 }
 
-void UUIManager::ShowShopItemListMenu()
+void UUIManager::ShowShopItemListMenu(EItemType Type)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ShowShopItemListMenu"));
-	SwitchToWidget(CachedShopItemListMenu);
+	switch (Type)
+	{
+	case EItemType::Common:
+		CachedShopItemListMenu->SetItemTypeTextBlock(EItemType::Common);
+		SwitchToWidget(CachedShopItemListMenu);
+		break;
+	case EItemType::Exclusive:
+		CachedShopItemListMenu->SetItemTypeTextBlock(EItemType::Exclusive);
+		SwitchToWidget(CachedShopItemListMenu);
+		break;
+	case EItemType::Cosmetic:
+		CachedShopItemListMenu->SetItemTypeTextBlock(EItemType::Cosmetic);
+		SwitchToWidget(CachedShopItemListMenu);
+		break;
+	default:
+		break;
+	}
 }
 
 void UUIManager::SwitchToWidget(UUserWidget* NewWidget)
@@ -154,29 +173,30 @@ void UUIManager::SwitchToWidget(UUserWidget* NewWidget)
 
 void UUIManager::ShowMapSelectionWidget(EGameModeType GameModeType)
 {
-	if (!MapSelectionWidgetInstance && MapSelectionWidgetClass)
+	if (MapSelectionWidgetInstance == nullptr && MapSelectionWidgetClass)
 	{
 		MapSelectionWidgetInstance = CreateWidget<UMapSelectionWidget>(GetWorld(), MapSelectionWidgetClass);
 		MapSelectionWidgetInstance->AddToViewport();
 	}
-
-	if (MapSelectionWidgetInstance)
+	else
 	{
 		MapSelectionWidgetInstance->SetGameMode(GameModeType);
+		MapSelectionWidgetInstance->AddToViewport();
 		MapSelectionWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
 void UUIManager::ShowSelectCharacterWidget()
 {
-	if (!SelectCharacterWidgetInstance && SelectCharacterWidgetClass)
+	if (SelectCharacterWidgetInstance == nullptr && SelectCharacterWidgetClass)
 	{
 		SelectCharacterWidgetInstance = CreateWidget<USelectCharacterWidget>(GetWorld(), SelectCharacterWidgetClass);
 		SelectCharacterWidgetInstance->AddToViewport();
+		SelectCharacterWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 	}
-
-	if (SelectCharacterWidgetInstance)
+	else
 	{
+		SelectCharacterWidgetInstance->AddToViewport();
 		SelectCharacterWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 	}
 }

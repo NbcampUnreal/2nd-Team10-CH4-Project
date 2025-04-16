@@ -25,6 +25,9 @@
 #include "Character/Mage/FireBall.h"
 #include "NiagaraFunctionLibrary.h"
 
+
+
+
 ASFCharacter::ASFCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -61,6 +64,7 @@ ASFCharacter::ASFCharacter()
 	
 	bReplicates = true;
 	GetCharacterMovement()->SetIsReplicated(true);
+
 }
 
 void ASFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -274,7 +278,7 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	auto hasAuthority = HasAuthority();
-	ensureAlways(hasAuthority);
+	//ensureAlways(hasAuthority);
 
 	if (StatusComponent)
 	{

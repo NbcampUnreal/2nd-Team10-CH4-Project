@@ -20,4 +20,6 @@ public:
 
     UFUNCTION(Client, Reliable)
     void Client_ReceiveLoginResult(bool bSuccess, const FString& Message);
+    UFUNCTION(Client, Reliable)
+    void Client_TravelToLobby();
 };

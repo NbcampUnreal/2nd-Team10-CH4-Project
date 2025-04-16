@@ -1,6 +1,7 @@
 #include "Character/Components/StatusComponent.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UStatusComponent::UStatusComponent()
 {
@@ -30,6 +31,15 @@ void UStatusComponent::InitializeStatus()
 	StatusStruct.Set(EStatusType::CurHP, CurHP);
 
 	CurMP = StatusStruct.Get(EStatusType::CurMP);
+
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (!OwnerCharacter) return;
+
+	UCharacterMovementComponent* MovementComponent = OwnerCharacter->GetCharacterMovement();
+	if (!MovementComponent) return;
+
+	MovementComponent->JumpZVelocity = StatusStruct.Get(EStatusType::JumpPower);
+	MovementComponent->MaxWalkSpeed = StatusStruct.Get(EStatusType::MoveSpeed);
 }
 
 float UStatusComponent::GetStatusValue(EStatusType Type) const

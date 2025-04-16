@@ -1,5 +1,6 @@
 #include "Character/AttackSystem/ComboAttackNotify.h"
 #include "Character/SFCharacter.h"
+#include "Character/Components/SkillComponent.h"
 
 void UComboAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
@@ -10,7 +11,10 @@ void UComboAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 
 		if (Character)
 		{
-			//Character->NextCombo();
+			if (Character->SkillComponent)
+			{
+				Character->SkillComponent->CanNextCombo();
+			}
 		}
 	}
 }

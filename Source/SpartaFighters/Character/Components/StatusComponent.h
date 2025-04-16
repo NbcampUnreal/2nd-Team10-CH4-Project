@@ -24,6 +24,9 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
+	FStatusStruct StatusStruct;
+
 public:
 	// √ ±‚»≠
 	void InitializeStatus();
@@ -67,8 +70,6 @@ public:
 	FOnAttackPowerChanged OnAttackPowerChanged;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Status")
-	FStatusStruct StatusStruct;
 
 	UPROPERTY(ReplicatedUsing = OnRep_CurHP)
 	float CurHP;

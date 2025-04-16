@@ -46,11 +46,23 @@ void ASFItemPickup::BeginPlay()
 void ASFItemPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ASFCharacter* PlayerCharacter = Cast<ASFCharacter>(OtherActor);
-	if (PlayerCharacter && PlayerCharacter->IsLocallyControlled())
+	if (PlayerCharacter && PlayerCharacter->HasAuthority())
 	{
-		//Server request
-		Server_UsePickup(PlayerCharacter);
-		Destroy();
+		UE_LOG(LogTemp, Warning, TEXT("%s picked up and used by server: collide with %s "), *PickupItemInstance->ItemName.ToString(), *PlayerCharacter->GetName());
+
+		if (PickupItemInstance->IsA(USFConsumableBase::StaticClass()))
+		{
+			USFConsumableBase* ConsumableItem = Cast<USFConsumableBase>(PickupItemInstance);
+			ConsumableItem->Server_ApplyConsumableEffect(PlayerCharacter); //Server RPC
+			UE_LOG(LogTemp, Warning, TEXT("%s used by %s"), *ConsumableItem->ItemName.ToString(), *PlayerCharacter->GetName());
+			Destroy();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s is not a consumable item."), *PickupItemInstance->ItemName.ToString());
+		}
+
+		PickupItemInstance->OnItemAcquired();
 	}
 }
 

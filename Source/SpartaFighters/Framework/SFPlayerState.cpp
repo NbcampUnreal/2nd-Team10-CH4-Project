@@ -7,7 +7,7 @@
 ASFPlayerState::ASFPlayerState()
 {
 	bReplicates = true;
-	CurrentGold = 0.0f;
+	CurrentGold = 100.0f;
 }
 
 void ASFPlayerState::OnRep_bIsReady()
@@ -37,6 +37,11 @@ void ASFPlayerState::CopyProperties(APlayerState* PlayerState)
 }
 
 FString ASFPlayerState::GetUniqueID() const
+{
+	return CustomPlayerID;
+}
+
+FString ASFPlayerState::BP_GetUnique_ID() const
 {
 	return CustomPlayerID;
 }
@@ -93,6 +98,19 @@ bool ASFPlayerState::RemoveGold(float Amount)
 	return false;
 }
 
+//Set Inventory
+void ASFPlayerState::SetCharacterInventory(const TArray<USFItemBase*>& NewInventory)
+{
+	CharacterInventory = NewInventory;
+}
+
+//Set Equipment
+void ASFPlayerState::SetCharacterEquipment(USFEquipableBase* Common, USFEquipableBase* Exclusive, USFEquipableBase* Cosmetic)
+{
+	CharacterEquippedCommon = Common;
+	CharacterEquippedExclusive = Exclusive;
+	CharacterEquippedCosmetic = Cosmetic;
+}
 
 void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -103,4 +121,9 @@ void ASFPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASFPlayerState, bIsAI);
 	DOREPLIFETIME(ASFPlayerState, SelectedCharacterRow);
 	DOREPLIFETIME(ASFPlayerState, CurrentGold);
+	DOREPLIFETIME(ASFPlayerState, CharacterInventory);
+	DOREPLIFETIME(ASFPlayerState, CharacterEquippedCommon);
+	DOREPLIFETIME(ASFPlayerState, CharacterEquippedExclusive);
+	DOREPLIFETIME(ASFPlayerState, CharacterEquippedCosmetic);
 }
+
