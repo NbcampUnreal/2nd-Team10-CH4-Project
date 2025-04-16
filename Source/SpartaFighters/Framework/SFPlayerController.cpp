@@ -118,16 +118,17 @@ void ASFPlayerController::OnPossess(APawn* InPawn)
 	{
 		AddMappingContext();
 		SetInputMode(FInputModeGameOnly());
-	}
-
-	if (GetLocalRole() == ROLE_Authority)
-	{
 		SetupCharacterInventory();
 	}
+
+	//if (GetLocalRole() == ROLE_Authority)
+	//{
+	//	SetupCharacterInventory();
+	//}
 }
 
 //Inventory logic for shop
-void ASFPlayerController::SetupCharacterInventory()
+void ASFPlayerController::SetupCharacterInventory() 
 {
 	ASFCharacter* PossessedCharacter = Cast<ASFCharacter>(GetPawn());
 	if (PossessedCharacter)
