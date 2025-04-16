@@ -165,5 +165,6 @@ void ASFPlayerController::Client_TravelToLobby_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Client is returning to Lobby!"));
 
-	UGameplayStatics::OpenLevel(this, FName("/Game/SpartaFighters/Level/Menu/LobbyMenu"));
+	//UGameplayStatics::OpenLevel(this, FName("/Game/SpartaFighters/Level/Menu/LobbyMenu"));
+	ClientTravel("/Game/SpartaFighters/Level/Menu/LobbyMenu", ETravelType::TRAVEL_Absolute);
 }
