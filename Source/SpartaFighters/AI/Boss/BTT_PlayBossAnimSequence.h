@@ -19,7 +19,7 @@ public:
     UBTT_PlayBossAnimSequence();
 
     UPROPERTY(EditAnywhere, Category = "Animation")
-    UAnimSequence* AttackSequence; // 애니메이션 시퀀스 에셋 할당
+    UAnimSequence* AttackSequence;
 
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
     virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;

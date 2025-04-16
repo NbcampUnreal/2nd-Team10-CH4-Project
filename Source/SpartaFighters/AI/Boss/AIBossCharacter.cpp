@@ -2,12 +2,15 @@
 
 
 #include "AI/Boss/AIBossCharacter.h"
+#include "AI/AICharacterController.h"
 #include "NiagaraSystem.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Character/Components/StatusComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "BrainComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
@@ -16,14 +19,7 @@ AAIBossCharacter::AAIBossCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	//FlameFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FlameFX"));
-	//FlameFX->SetupAttachment(GetMesh(), TEXT("Head"));
-	//FlameFX->bAutoActivate = false;
-
-	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> Asset(TEXT("/Game/FourEvilDragonsPBR/FX_FlameThrower"));
-	//if (Asset.Succeeded()) FlameEffect = Asset.Object;
-
-	//FlameFX->SetAsset(FlameEffect);
+	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
 
 	DamageBoxExtent = FVector(2000, 400, 50);
 
@@ -55,6 +51,16 @@ AAIBossCharacter::AAIBossCharacter()
 	MagicRadius = 500.0f;
 	MagicHeight = 1000.0f;
 	MagicDamage = 30.0f;
+	WarningDelay = 0.5f;
+	MagicCircleDuration = 6.0f;
+	MagicAttackDuration = 5.0f;
+	MaxRandomAttacks = 3;
+	MagicAttackInterval = 1.5f;
+	CurrentAttackCount = 0;
+	MagicDuration = 5.0f;
+	MagicTickInterval = 1.0f;
+
+
 
 	bReplicates = true;
 	SetNetUpdateFrequency(60.0f);
@@ -73,6 +79,12 @@ void AAIBossCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (StatusComponent)
+	{
+		StatusComponent->OnDeath.AddDynamic(this, &AAIBossCharacter::Die);
+		StatusComponent->OnHealthChanged.AddDynamic(this, &AAIBossCharacter::OnHPChanged);
+	}
+
 	if (!GetMesh()->DoesSocketExist("Head"))
 	{
 		UE_LOG(LogTemp, Error, TEXT("[BeginPlay] Head socket MISSING!"));
@@ -84,6 +96,201 @@ void AAIBossCharacter::BeginPlay()
 		FVector BoxExtent = DamageBox->GetScaledBoxExtent();
 	}
 }
+
+float AAIBossCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+	AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (!HasAuthority()) return DamageAmount;
+
+	if (StatusComponent)
+	{
+		StatusComponent->ModifyStatus(EStatusType::CurHP, -DamageAmount);
+		float CurrentHP = StatusComponent->GetStatusValue(EStatusType::CurHP);
+		UE_LOG(LogTemp, Warning, TEXT("Boss Damaged - Current HP: %.2f"), CurrentHP);
+	}
+
+
+
+	// if need Phase chage
+	//float healthPercentage = StatusComponent->GetStatusValue(EStatusType::CurHP) /
+	//	StatusComponent->GetStatusValue(EStatusType::MaxHP);
+
+	//if (healthPercentage <= 0.5f && CurrentPhase == EBossPhase::Phase1)
+	//{
+	//	ChangeToPhase2();
+	//}
+
+	//Multicast_PlayTakeDamageAnimMontage();
+
+	//if (const FSkillDamageEvent* CustomEvent = static_cast<const FSkillDamageEvent*>(&DamageEvent))
+	//{
+	//	float knockbackPower = CustomEvent->KnockBackPower;
+	//	FVector Direction = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
+	//	LaunchCharacter(Direction * knockbackPower, true, true);
+	//}
+
+	//if (const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent))
+	//{
+	//	Multicast_SpawnHitEffect(PointDamageEvent->HitInfo.ImpactPoint,
+	//		PointDamageEvent->ShotDirection.Rotation());
+	//}
+
+	return DamageAmount;
+}
+
+//void AAIBossCharacter::Multicast_PlayTakeDamageAnimMontage_Implementation()
+//{
+//	if (OnDamageMontage)
+//	{
+//		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+//		if (AnimInstance)
+//		{
+//			AnimInstance->Montage_Play(OnDamageMontage);
+//		}
+//	}
+//}
+//
+//void AAIBossCharacter::Multicast_SpawnHitEffect_Implementation(const FVector& Location, const FRotator& Rotation)
+//{
+//	if (!HitEffect) return;
+//
+//	UGameplayStatics::SpawnEmitterAtLocation(
+//		GetWorld(),
+//		HitEffect,
+//		Location,
+//		Rotation,
+//		true
+//	);
+//}
+
+void AAIBossCharacter::OnHPChanged(AActor* AffectedActor, float HP)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Boss HP Changed : %.2f"), HP);
+}
+
+void AAIBossCharacter::Die()
+{
+	if (!HasAuthority() || bIsDead) return;
+
+	bIsDead = true;
+
+	if (AAICharacterController* AIController = Cast<AAICharacterController>(GetController()))
+	{
+		if (AIController->BrainComponent)
+		{
+			AIController->BrainComponent->StopLogic("Boss Died");
+		}
+	}
+
+	Multicast_StartDissolveEffect();
+
+	if (DeathMontage)
+	{
+		Multicast_PlayDeathEffect();
+	}
+
+	GetWorldTimerManager().SetTimer(
+		TimerHandle_EnableRagdoll,
+		this,
+		&AAIBossCharacter::EnableRagdoll,
+		1.0f,
+		false
+	);
+
+	GetWorldTimerManager().SetTimer(
+		TimerHandle_DestroyBoss,
+		[this]() { Destroy(); },
+		6.0f, false
+	);
+}
+
+void AAIBossCharacter::OnRep_DissolveProgress()
+{
+	if (UMaterialInstanceDynamic* DynMaterial = Cast<UMaterialInstanceDynamic>(GetMesh()->GetMaterial(0)))
+	{
+		DynMaterial->SetScalarParameterValue("Dissolve", DissolveProgress);
+	}
+}
+
+void AAIBossCharacter::Multicast_StartDissolveEffect_Implementation()
+{
+	StartDissolveEffect();
+}
+
+void AAIBossCharacter::StartDissolveEffect()
+{
+	if (!DissolveMaterial) return;
+
+	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(DissolveMaterial, this);
+
+	GetMesh()->SetMaterial(0, DynMaterial);
+
+	DynMaterial->SetScalarParameterValue("Dissolve", -1.0f);
+
+	DissolveProgress = -1.0f;
+	GetWorldTimerManager().SetTimer(
+		DissolveTimerHandle,
+		[this, DynMaterial]() // DynMaterial 캡처 추가
+		{
+			DissolveProgress += 0.016f;
+
+			// 서버/싱글플레이: 직접 파라미터 업데이트
+			if (HasAuthority())
+			{
+				DynMaterial->SetScalarParameterValue("Dissolve", DissolveProgress);
+			}
+
+			// 클라이언트: 리플리케이션으로 처리
+			if (DissolveProgress >= 1.0f)
+			{
+				GetWorldTimerManager().ClearTimer(DissolveTimerHandle);
+			}
+		},
+		0.04f,
+		true
+	);
+}
+
+void AAIBossCharacter::EnableRagdoll()
+{
+	USkeletalMeshComponent* SkeletalMesh = GetMesh();
+	if (!SkeletalMesh) return;
+
+	SkeletalMesh->SetCollisionProfileName(TEXT("Ragdoll"));
+	SkeletalMesh->SetSimulatePhysics(true);
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->DisableMovement();
+	}
+
+	if (GetCapsuleComponent())
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void AAIBossCharacter::Multicast_PlayDeathEffect_Implementation()
+{
+	//if (DeathExplosionEffect)
+	//{
+	//	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+	//		GetWorld(),
+	//		DeathExplosionEffect,
+	//		GetActorLocation(),
+	//		GetActorRotation()
+	//	);
+	//}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DeathMontage)
+	{
+		AnimInstance->Montage_Play(DeathMontage);
+	}
+}
+
 
 void AAIBossCharacter::Multicast_StartFireOnServer_Implementation()
 {
@@ -104,19 +311,27 @@ void AAIBossCharacter::StartFire()
 {
 	if (HasAuthority())
 	{
-		GetWorld()->GetTimerManager().SetTimer(DamageTickTimer, this, &AAIBossCharacter::ApplyBoxDamage, 0.2f, true);
-
 		GetWorld()->GetTimerManager().SetTimer(
-			DamageDurationTimer,
+			DelayStartTimer,
 			[this]()
 			{
-				GetWorld()->GetTimerManager().ClearTimer(DamageTickTimer);
+				GetWorld()->GetTimerManager().SetTimer(DamageTickTimer, this, &AAIBossCharacter::ApplyBoxDamage, 0.2f, true);
+
+				GetWorld()->GetTimerManager().SetTimer(
+					DamageDurationTimer,
+					[this]()
+					{
+						GetWorld()->GetTimerManager().ClearTimer(DamageTickTimer);
+					},
+					1.5f,
+					false
+				);
+
+				Multicast_StartFireOnServer();
 			},
-			1.5f,
+			1.0f,
 			false
 		);
-
-		Multicast_StartFireOnServer();
 	}
 }
 
@@ -142,7 +357,8 @@ void AAIBossCharacter::ApplyBoxDamage()
 
 	for (AActor* Actor : OverlappingActors)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[ApplyDamage] Damaging: %s"), *GetNameSafe(Actor));
+		if (Actor == this || Actor == nullptr) continue;
+
 		UGameplayStatics::ApplyDamage(
 			Actor,
 			DamagePerTick,
@@ -188,6 +404,8 @@ void AAIBossCharacter::DelayedAreaAttack()
 
 	for (AActor* Actor : OverlappingActors)
 	{
+		if (Actor == this || Actor == nullptr) continue;
+
 		UGameplayStatics::ApplyDamage(
 			Actor,
 			AreaDamage,
@@ -414,87 +632,97 @@ void AAIBossCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void AAIBossCharacter::PlayAttackAnimation(UAnimSequence* AnimSequence)
 {
-	if (HasAuthority()) // 서버에서만 실행
+	if (bIsPlayingAttack || !AnimSequence) return;
+
+	CurrentAttackSequence = AnimSequence;
+	bIsPlayingAttack = true;
+
+	if (HasAuthority())
 	{
 		Multicast_PlayAttack(AnimSequence);
 	}
-
-	if (!AnimSequence)
+	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[PlayAttackAnimation] AnimSequence null"));
-		return;
+		Server_PlayAttack(AnimSequence);
 	}
-
-	if (!GetMesh()->GetAnimInstance())
-	{
-		UE_LOG(LogTemp, Error, TEXT("[PlayAttackAnimation] AnimInstance null"));
-		return;
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("[PlayAttackAnimation] anim play start: %s"), *GetNameSafe(AnimSequence));
-
-	GetMesh()->GetAnimInstance()->PlaySlotAnimationAsDynamicMontage(
-		AnimSequence,
-		"DefaultSlot",
-		0.5f, // Blend In 시간 증가
-		0.5f, // Blend Out 시간 증가
-		1.0f,
-		1
-	);
-
-	bIsPlaying = true;
-
-	FOnMontageEnded OnMontageEnded;
-	OnMontageEnded.BindLambda([this](UAnimMontage* Montage, bool bInterrupted) {
-		UE_LOG(LogTemp, Warning, TEXT("[PlayAttackAnimation] anim end (Interrupted: %d)"),
-			(int)bInterrupted);
-		bIsPlaying = false;
-		});
-	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(OnMontageEnded);
-
-	UE_LOG(LogTemp, Warning, TEXT("Anim Instance: %s"), *GetNameSafe(GetMesh()->GetAnimInstance()));
-	UE_LOG(LogTemp, Warning, TEXT("Skeleton: %s"), *GetNameSafe(GetMesh()->GetSkeletalMeshAsset()->GetSkeleton()));
 }
 
 void AAIBossCharacter::Server_PlayAttack_Implementation(UAnimSequence* AnimSequence)
 {
 	UE_LOG(LogTemp, Warning, TEXT("[Server_PlayAttack] server called. AnimSequence: %s"), *GetNameSafe(AnimSequence));
+	CurrentAttackSequence = AnimSequence;
+	bIsPlayingAttack = true;
 	Multicast_PlayAttack(AnimSequence);
 }
 
 void AAIBossCharacter::Multicast_PlayAttack_Implementation(UAnimSequence* AnimSequence)
 {
-	if (GetMesh() && GetMesh()->GetAnimInstance())
+	if (AnimSequence && GetMesh() && GetMesh()->GetAnimInstance())
 	{
-		PlayAttackAnimation(AnimSequence);
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->PlaySlotAnimationAsDynamicMontage(
+				AnimSequence,
+				"DefaultSlot",
+				0.2f,
+				0.2f,
+				1.0f
+			);
+		}
+	}
+
+	bIsPlayingAttack = false;
+}
+
+void AAIBossCharacter::OnRep_IsPlayingAttack()
+{
+	if (bIsPlayingAttack && CurrentAttackSequence)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance && CurrentAttackSequence)
+		{
+			AnimInstance->PlaySlotAnimationAsDynamicMontage(
+				CurrentAttackSequence,
+				"DefaultSlot",
+				0.2f,
+				0.2f,
+				1.0f
+			);
+		}
 	}
 }
 
-float AAIBossCharacter::PlayAnimMontage(
-	UAnimMontage* AnimMontage,
-	float InPlayRate,
-	FName StartSectionName
-)
-{
-	float Duration = Super::PlayAnimMontage(AnimMontage, InPlayRate, StartSectionName);
 
-	UE_LOG(LogTemp, Warning, TEXT("Montage duration: %f"), Duration);
-	return Duration;
-}
+//float AAIBossCharacter::PlayAnimMontage(
+//	UAnimMontage* AnimMontage,
+//	float InPlayRate,
+//	FName StartSectionName
+//)
+//{
+//	float Duration = Super::PlayAnimMontage(AnimMontage, InPlayRate, StartSectionName);
+//
+//	UE_LOG(LogTemp, Warning, TEXT("Montage duration: %f"), Duration);
+//	return Duration;
+//}
+//
+//void AAIBossCharacter::Multicast_PlayBossAnim_Implementation(UAnimMontage* Montage)
+//{
+//	if (!HasAuthority() && GetMesh()->GetAnimInstance())
+//	{
+//		PlayAnimMontage(Montage);
+//	}
+//}
 
 void AAIBossCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AAIBossCharacter, bIsPlaying);
+	DOREPLIFETIME(AAIBossCharacter, bIsPlayingAttack);
+	DOREPLIFETIME(AAIBossCharacter, bIsDead);
+	DOREPLIFETIME(AAIBossCharacter, CurrentAttackSequence);
+	DOREPLIFETIME(AAIBossCharacter, DissolveProgress);
 }
 
-void AAIBossCharacter::Multicast_PlayBossAnim_Implementation(UAnimMontage* Montage)
-{
-	if (!HasAuthority() && GetMesh()->GetAnimInstance())
-	{
-		PlayAnimMontage(Montage);
-	}
-}
 
 
 
