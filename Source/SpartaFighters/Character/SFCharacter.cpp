@@ -15,6 +15,7 @@
 #include "Components/StatusComponent.h"
 #include "Components/StateComponent.h"
 #include "Components/SkillComponent.h"
+#include "Inventory/SFInventoryComponent.h"
 
 #include "Engine/DamageEvents.h"
 #include "Common/SkillDamageEvent.h"
@@ -61,7 +62,8 @@ ASFCharacter::ASFCharacter()
 	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
 	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
 	SkillComponent = CreateDefaultSubobject<USkillComponent>(TEXT("SkillComponent"));
-	
+	InventoryComponent = CreateDefaultSubobject<USFInventoryComponent>(TEXT("InventoryComponent"));
+
 	bReplicates = true;
 	GetCharacterMovement()->SetIsReplicated(true);
 
@@ -70,7 +72,6 @@ ASFCharacter::ASFCharacter()
 void ASFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
 }
 
 //UStatusContainerComponent* ASFCharacter::GetStatusContainerComponent() const
