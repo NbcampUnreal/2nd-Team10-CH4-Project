@@ -18,6 +18,7 @@ class UStatusContainerComponent;
 class UStatusComponent;
 class UStateComponent;
 class USkillComponent;
+class USFInventoryComponent;
 
 struct FInputActionValue;
 struct FSkillDataRow;
@@ -45,6 +46,9 @@ public:
 	TObjectPtr<UStateComponent> StateComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkillComponent> SkillComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USFInventoryComponent> InventoryComponent;
+
 
 	UFUNCTION(BlueprintCallable)
 	UStateComponent* GetStateComponent();
