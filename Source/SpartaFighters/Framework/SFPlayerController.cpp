@@ -8,6 +8,8 @@
 
 #include "Character/SFCharacter.h"
 #include "Inventory/SFInventoryComponent.h"
+#include "Items/SFItemBase.h"
+#include "Inventory/SFInventoryInteractionComponent.h"
 
 ASFPlayerController::ASFPlayerController()
 {
@@ -121,34 +123,58 @@ void ASFPlayerController::OnPossess(APawn* InPawn)
 	}
 }
 
-//Inventory logic for shop
-void ASFPlayerController::SetupCharacterInventory() 
+void ASFPlayerController::SetupCharacterInventory()
 {
 	ASFCharacter* PossessedCharacter = Cast<ASFCharacter>(GetPawn());
-	if (PossessedCharacter)
+	if (PossessedCharacter && GetLocalRole() == ROLE_Authority)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Possessed Character exist"));
+		UE_LOG(LogTemp, Warning, TEXT("Possessed Character exist (Authority)"));
 		USFInventoryComponent* InventoryComp = PossessedCharacter->FindComponentByClass<USFInventoryComponent>();
-		USFGameInstanceSubsystem* GameInstanceSubsystem = GetGameInstanceSubsystem();
+		USFInventoryInteractionComponent* InteractionComp = PossessedCharacter->FindComponentByClass<USFInventoryInteractionComponent>();
 
-		if (InventoryComp && GameInstanceSubsystem)
+		if (InventoryComp && InteractionComp)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("InventoryComponent and GameInstanceSubsystem exist"));
+			UE_LOG(LogTemp, Warning, TEXT("InventoryComponent and InventoryInteractionComponent exist"));
 			if (ASFPlayerState* PS = GetPlayerState<ASFPlayerState>())
 			{
 				UE_LOG(LogTemp, Warning, TEXT("PlayerState unique ID: %s"), *PS->GetUniqueID());
-				TArray<TSubclassOf<class USFItemBase>> PendingPurchases = GameInstanceSubsystem->GetPendingShopPurchases(PS->GetUniqueID());
-				for (auto& ItemClass : PendingPurchases)
-				{
-					InventoryComp->Server_AddItemByClass(ItemClass);
-					UE_LOG(LogTemp, Warning, TEXT("Item added"));
-				}
-				GameInstanceSubsystem->ClearPendingShopPurchases(PS->GetUniqueID());
-				UE_LOG(LogTemp, Warning, TEXT("Item well added and shop purchase cleared"));
+				// ServerRPC 
+				InteractionComp->Server_GetPendingPurchases(PS->GetUniqueID());
 			}
 		}
 	}
 }
+
+//Inventory logic for shop
+//void ASFPlayerController::SetupCharacterInventory() 
+//{
+//	ASFCharacter* PossessedCharacter = Cast<ASFCharacter>(GetPawn());
+//	if (PossessedCharacter)
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("Possessed Character exist"));
+//		USFInventoryComponent* InventoryComp = PossessedCharacter->FindComponentByClass<USFInventoryComponent>();
+//		USFGameInstanceSubsystem* GameInstanceSubsystem = GetGameInstanceSubsystem();
+//
+//		if (InventoryComp && GameInstanceSubsystem)
+//		{
+//			UE_LOG(LogTemp, Warning, TEXT("InventoryComponent and GameInstanceSubsystem exist"));
+//			if (ASFPlayerState* PS = GetPlayerState<ASFPlayerState>())
+//			{
+//				UE_LOG(LogTemp, Warning, TEXT("PlayerState unique ID: %s"), *PS->GetUniqueID());
+//				TArray<TSubclassOf<class USFItemBase>> PendingPurchases = GameInstanceSubsystem->GetPendingShopPurchases(PS->GetUniqueID());
+//				UE_LOG(LogTemp, Warning, TEXT("Pending Purchases Count: %d"), PendingPurchases.Num());
+//				for (auto& ItemClass : PendingPurchases)
+//				{
+//					UE_LOG(LogTemp, Warning, TEXT("Attempting to add item class: %s"), *ItemClass->GetName());
+//					InventoryComp->Server_AddItemByClass(ItemClass);
+//					UE_LOG(LogTemp, Warning, TEXT("Item added"));
+//				}
+//				GameInstanceSubsystem->ClearPendingShopPurchases(PS->GetUniqueID());
+//				UE_LOG(LogTemp, Warning, TEXT("Item well added and shop purchase cleared"));
+//			}
+//		}
+//	}
+//}
 
 USFGameInstanceSubsystem* ASFPlayerController::GetGameInstanceSubsystem() const
 {
