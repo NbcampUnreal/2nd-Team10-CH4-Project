@@ -1,6 +1,3 @@
-
-
-
 #include "BTT_StartJump.h"
 #include "AIController.h"
 #include "GameFramework/Character.h"

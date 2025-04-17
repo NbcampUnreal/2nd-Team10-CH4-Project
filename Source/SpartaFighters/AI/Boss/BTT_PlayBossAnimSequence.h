@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,9 +5,6 @@
 #include "AIBossCharacter.h"
 #include "BTT_PlayBossAnimSequence.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SPARTAFIGHTERS_API UBTT_PlayBossAnimSequence : public UBTTaskNode
 {

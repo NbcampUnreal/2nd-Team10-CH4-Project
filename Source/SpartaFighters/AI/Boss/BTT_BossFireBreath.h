@@ -1,14 +1,9 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTT_BossFireBreath.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SPARTAFIGHTERS_API UBTT_BossFireBreath : public UBTTaskNode
 {

@@ -1,6 +1,3 @@
-
-
-
 #include "AI/Boss/BTT_PlayBossAnimSequence.h"
 #include "AI/Boss/AIBossCharacter.h"
 #include "AIController.h"
@@ -13,8 +10,6 @@ UBTT_PlayBossAnimSequence::UBTT_PlayBossAnimSequence()
 
 EBTNodeResult::Type UBTT_PlayBossAnimSequence::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-    UE_LOG(LogTemp, Warning, TEXT("[BTT_PlayBossAnimSequence] ExecuteTask start"));
-
     AAIController* AIController = OwnerComp.GetAIOwner();
     if (!AIController)
     {
@@ -35,11 +30,8 @@ EBTNodeResult::Type UBTT_PlayBossAnimSequence::ExecuteTask(UBehaviorTreeComponen
         return EBTNodeResult::Failed;
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("[BTT_PlayBossAnimSequence] AttackSequence: %s"), *GetNameSafe(AttackSequence));
-
     if (BossCharacter->HasAuthority())
     {
-        UE_LOG(LogTemp, Warning, TEXT("[BTT_PlayBossAnimSequence] server anim start"));
         BossCharacter->Server_PlayAttack(AttackSequence);
         bIsPlaying = true;
     }
@@ -55,7 +47,6 @@ void UBTT_PlayBossAnimSequence::TickTask(UBehaviorTreeComponent & OwnerComp, uin
 {
     if (BossCharacter.IsValid() && !BossCharacter->bIsPlaying)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[BTT_PlayBossAnimSequence] anim end"));
         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
     }
 }

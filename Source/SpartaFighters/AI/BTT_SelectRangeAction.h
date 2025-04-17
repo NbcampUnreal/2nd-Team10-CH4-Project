@@ -6,9 +6,6 @@
 #include "AI/Character/Enum/AIActionState.h"
 #include "BTT_SelectRangeAction.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SPARTAFIGHTERS_API UBTT_SelectRangeAction : public UBTTaskNode
 {

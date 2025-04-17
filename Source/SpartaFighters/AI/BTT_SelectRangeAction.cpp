@@ -84,11 +84,11 @@ EBTNodeResult::Type UBTT_SelectRangeAction::ExecuteTask(UBehaviorTreeComponent& 
 
 void UBTT_SelectRangeAction::SelectActionForIdleTarget(EAIActionType& NewAction, EAIState& NewState)
 {
-    const int32 BasicAttack = 60;
+    const int32 BasicAttack = 10;
     const int32 CrounchAttack = 10;
     const int32 JumpAttack = 10;
     const int32 Evade = 10;
-    const int32 Retreat = 10;
+    const int32 Retreat = 60;
     const int32 TotalValue = BasicAttack + CrounchAttack + JumpAttack + Evade + Retreat;
 
     int32 RandomValue = FMath::RandRange(0, TotalValue - 1);
@@ -143,11 +143,11 @@ void UBTT_SelectRangeAction::SelectActionForIdleTarget(EAIActionType& NewAction,
 
 void UBTT_SelectRangeAction::SelectActionForCrouchTarget(EAIActionType& NewAction, EAIState& NewState)
 {
-    const int32 BasicAttack = 60;
+    const int32 BasicAttack = 10;
     const int32 CrounchAttack = 10;
     const int32 JumpAttack = 10;
     const int32 Evade = 10;
-    const int32 Retreat = 10;
+    const int32 Retreat = 60;
     const int32 TotalValue = BasicAttack + CrounchAttack + JumpAttack + Evade + Retreat;
 
     int32 RandomValue = FMath::RandRange(0, TotalValue - 1);
@@ -203,10 +203,10 @@ void UBTT_SelectRangeAction::SelectActionForCrouchTarget(EAIActionType& NewActio
 void UBTT_SelectRangeAction::SelectActionForJumpTarget(EAIActionType& NewAction, EAIState& NewState)
 {
     const int32 BasicAttack = 10;
-    const int32 CrounchAttack = 35;
-    const int32 JumpAttack = 35;
+    const int32 CrounchAttack = 10;
+    const int32 JumpAttack = 10;
     const int32 Evade = 10;
-    const int32 Retreat = 10;
+    const int32 Retreat = 60;
     const int32 TotalValue = BasicAttack + CrounchAttack + JumpAttack + Evade + Retreat;
 
     int32 RandomValue = FMath::RandRange(0, TotalValue - 1);
@@ -248,11 +248,11 @@ void UBTT_SelectRangeAction::SelectActionForJumpTarget(EAIActionType& NewAction,
 
 void UBTT_SelectRangeAction::SelectActionForMoveTarget(EAIActionType& NewAction, EAIState& NewState)
 {
-    const int32 BasicAttack = 60;
+    const int32 BasicAttack = 10;
     const int32 CrounchAttack = 10;
     const int32 JumpAttack = 10;
     const int32 Evade = 10;
-    const int32 Retreat = 10;
+    const int32 Retreat = 60;
     const int32 TotalValue = BasicAttack + CrounchAttack + JumpAttack + Evade + Retreat;
 
     int32 RandomValue = FMath::RandRange(0, TotalValue - 1);
@@ -307,11 +307,11 @@ void UBTT_SelectRangeAction::SelectActionForMoveTarget(EAIActionType& NewAction,
 
 void UBTT_SelectRangeAction::SelectActionForGuardTarget(EAIActionType& NewAction, EAIState& NewState)
 {
-    const int32 BasicAttack = 60;
+    const int32 BasicAttack = 10;
     const int32 CrounchAttack = 10;
     const int32 JumpAttack = 10;
     const int32 Evade = 10;
-    const int32 Retreat = 10;
+    const int32 Retreat = 60;
     const int32 TotalValue = BasicAttack + CrounchAttack + JumpAttack + Evade + Retreat;
 
     int32 RandomValue = FMath::RandRange(0, TotalValue - 1);
@@ -366,11 +366,11 @@ void UBTT_SelectRangeAction::SelectActionForGuardTarget(EAIActionType& NewAction
 
 void UBTT_SelectRangeAction::SelectActionForAttackTarget(EAIActionType& NewAction, EAIState& NewState)
 {
-    const int32 BasicAttack = 60;
+    const int32 BasicAttack = 10;
     const int32 CrounchAttack = 10;
     const int32 JumpAttack = 10;
     const int32 Evade = 10;
-    const int32 Retreat = 10;
+    const int32 Retreat = 60;
     const int32 TotalValue = BasicAttack + CrounchAttack + JumpAttack + Evade + Retreat;
 
     int32 RandomValue = FMath::RandRange(0, TotalValue - 1);
@@ -425,11 +425,11 @@ void UBTT_SelectRangeAction::SelectActionForAttackTarget(EAIActionType& NewActio
 
 void UBTT_SelectRangeAction::SelectActionForRollTarget(EAIActionType& NewAction, EAIState& NewState)
 {
-    const int32 BasicAttack = 60;
+    const int32 BasicAttack = 10;
     const int32 CrounchAttack = 10;
     const int32 JumpAttack = 10;
     const int32 Evade = 10;
-    const int32 Retreat = 10;
+    const int32 Retreat = 60;
     const int32 TotalValue = BasicAttack + CrounchAttack + JumpAttack + Evade + Retreat;
 
     int32 RandomValue = FMath::RandRange(0, TotalValue - 1);
