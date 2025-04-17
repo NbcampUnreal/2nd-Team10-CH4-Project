@@ -46,7 +46,7 @@ EBTNodeResult::Type UBTT_MoveToTarget::ExecuteTask(UBehaviorTreeComponent& Owner
             FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
             UE_LOG(LogTemp, Warning, TEXT("Move to target timed out."));
         }
-        }, 10.0f, false);
+    }, 10.0f, false);
 
     return EBTNodeResult::InProgress;
 }
@@ -92,8 +92,8 @@ FVector UBTT_MoveToTarget::Calculate8Direction(const FVector& CurrentLocation, c
     float Angle = FMath::RadiansToDegrees(FMath::Atan2(Dir.Y, Dir.X));
     float Snapped = FMath::RoundToFloat(Angle / 45.0f) * 45.0f;
     return FVector(FMath::Cos(FMath::DegreesToRadians(Snapped)),
-        FMath::Sin(FMath::DegreesToRadians(Snapped)),
-        0.0f).GetSafeNormal();
+                   FMath::Sin(FMath::DegreesToRadians(Snapped)),
+                   0.0f).GetSafeNormal();
 }
 
 FVector UBTT_MoveToTarget::FindValidDirectionTowardsTarget(const FVector& CurrentLocation, const FVector& TargetLocation) const
@@ -107,8 +107,8 @@ FVector UBTT_MoveToTarget::FindValidDirectionTowardsTarget(const FVector& Curren
     {
         float CheckAngle = BaseAngle + (i <= 4 ? i * Step : (i - 8) * Step);
         FVector Dir = FVector(FMath::Cos(FMath::DegreesToRadians(CheckAngle)),
-            FMath::Sin(FMath::DegreesToRadians(CheckAngle)),
-            0.0f).GetSafeNormal();
+                              FMath::Sin(FMath::DegreesToRadians(CheckAngle)),
+                              0.0f).GetSafeNormal();
         FVector Dest = CurrentLocation + Dir * AcceptanceRadius;
         if (IsPathValid(Dest))
         {
