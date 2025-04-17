@@ -77,6 +77,6 @@ void UShopMenu::OnExitClicked()
 {
     if (UUIManager* UIManager = ResolveUIManager())
     {
-        UIManager->ShowLobbyMenu();
+        UIManager->ShowRoomMenu();
     }
 }

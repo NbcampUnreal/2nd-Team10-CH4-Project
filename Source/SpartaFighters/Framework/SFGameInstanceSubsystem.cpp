@@ -8,6 +8,7 @@
 #include "DataTypes/GameModeType.h"
 #include "UI/UIManager/UIManager.h"
 
+
 void USFGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -205,6 +206,7 @@ void USFGameInstanceSubsystem::AddPendingShopPurchase(const FString& PlayerID, T
 	if (!PendingShopPurchases.Contains(PlayerID))
 	{
 		PendingShopPurchases.Add(PlayerID, TArray<TSubclassOf<class USFItemBase>>());
+		UE_LOG(LogTemp,Warning,TEXT("Pending Purchase Array Added"))
 	}
 	PendingShopPurchases[PlayerID].Add(ItemClass);
 	UE_LOG(LogTemp, Log, TEXT("Added pending shop purchase for Player: %s, Item: %s"), *PlayerID, *ItemClass->GetName());
