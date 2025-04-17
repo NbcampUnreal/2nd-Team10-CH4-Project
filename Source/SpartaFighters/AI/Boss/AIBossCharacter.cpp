@@ -27,6 +27,8 @@ AAIBossCharacter::AAIBossCharacter()
 	DamageBox->SetupAttachment(GetMesh(), TEXT("Head"));
 	DamageBox->SetBoxExtent(DamageBoxExtent);
 	DamageBox->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	DamageBox->SetSimulatePhysics(false);
+	DamageBox->SetEnableGravity(false);
 
 	DamagePerTick = 20.0f;
 	DamageTickCount = 0;
@@ -44,6 +46,8 @@ AAIBossCharacter::AAIBossCharacter()
 	AreaAttackSphere->SetupAttachment(RootComponent);
 	AreaAttackSphere->SetSphereRadius(800.0f);
 	AreaAttackSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	AreaAttackSphere->SetSimulatePhysics(false);
+	AreaAttackSphere->SetEnableGravity(false);
 
 	AreaDamage = 20.f;
 
@@ -339,17 +343,17 @@ void AAIBossCharacter::Multicast_PlayDeathEffect_Implementation()
 
 void AAIBossCharacter::Multicast_StartFireOnServer_Implementation()
 {
-	DrawDebugBox(
-		GetWorld(),
-		DamageBox->GetComponentLocation(),
-		DamageBox->GetScaledBoxExtent(),
-		DamageBox->GetComponentQuat(),
-		FColor::Red,
-		false,
-		1.0f,
-		0,
-		2.0f
-	);
+	//DrawDebugBox(
+	//	GetWorld(),
+	//	DamageBox->GetComponentLocation(),
+	//	DamageBox->GetScaledBoxExtent(),
+	//	DamageBox->GetComponentQuat(),
+	//	FColor::Red,
+	//	false,
+	//	1.0f,
+	//	0,
+	//	2.0f
+	//);
 }
 
 void AAIBossCharacter::StartFire()
@@ -388,17 +392,17 @@ void AAIBossCharacter::ApplyBoxDamage()
 	TArray<AActor*> OverlappingActors;
 	DamageBox->GetOverlappingActors(OverlappingActors, ACharacter::StaticClass());
 
-	DrawDebugBox(
-		GetWorld(),
-		DamageBox->GetComponentLocation(),
-		DamageBox->GetScaledBoxExtent(),
-		DamageBox->GetComponentQuat(),
-		FColor::Red,
-		false,
-		1.0f,
-		0,
-		2.0f
-	);
+	//DrawDebugBox(
+	//	GetWorld(),
+	//	DamageBox->GetComponentLocation(),
+	//	DamageBox->GetScaledBoxExtent(),
+	//	DamageBox->GetComponentQuat(),
+	//	FColor::Red,
+	//	false,
+	//	1.0f,
+	//	0,
+	//	2.0f
+	//);
 
 	for (AActor* Actor : OverlappingActors)
 	{
@@ -416,17 +420,17 @@ void AAIBossCharacter::ApplyBoxDamage()
 
 void AAIBossCharacter::Multicast_AreaAttackOnServer_Implementation()
 {
-	DrawDebugBox(
-		GetWorld(),
-		DamageBox->GetComponentLocation(),
-		DamageBox->GetScaledBoxExtent(),
-		DamageBox->GetComponentQuat(),
-		FColor::Red,
-		false,
-		1.0f,
-		0,
-		2.0f
-	);
+	//DrawDebugBox(
+	//	GetWorld(),
+	//	DamageBox->GetComponentLocation(),
+	//	DamageBox->GetScaledBoxExtent(),
+	//	DamageBox->GetComponentQuat(),
+	//	FColor::Red,
+	//	false,
+	//	1.0f,
+	//	0,
+	//	2.0f
+	//);
 }
 
 void AAIBossCharacter::AreaAttack()
@@ -460,15 +464,15 @@ void AAIBossCharacter::DelayedAreaAttack()
 		);
 	}
 
-	DrawDebugSphere(
-		GetWorld(),
-		GetActorLocation(),
-		AreaAttackSphere->GetScaledSphereRadius(),
-		32,
-		FColor::Red,
-		false,
-		2.0f
-	);
+	//DrawDebugSphere(
+	//	GetWorld(),
+	//	GetActorLocation(),
+	//	AreaAttackSphere->GetScaledSphereRadius(),
+	//	32,
+	//	FColor::Red,
+	//	false,
+	//	2.0f
+	//);
 }
 
 
@@ -596,18 +600,18 @@ void AAIBossCharacter::ExecuteRandomAttack()
 			AttackLocation = HitResult.Location;
 		}
 
-		DrawDebugCapsule(
-			GetWorld(),
-			AttackLocation,
-			MagicHeight / 2,
-			MagicRadius,
-			FQuat::Identity,
-			FColor::Green,
-			false,
-			2.0f,
-			0,
-			3.0f
-		);
+		//DrawDebugCapsule(
+		//	GetWorld(),
+		//	AttackLocation,
+		//	MagicHeight / 2,
+		//	MagicRadius,
+		//	FQuat::Identity,
+		//	FColor::Green,
+		//	false,
+		//	2.0f,
+		//	0,
+		//	3.0f
+		//);
 
 		CastMagicAttack(AttackLocation);
 		UE_LOG(LogTemp, Warning, TEXT("Attacking location: %s"), *AttackLocation.ToString());
@@ -649,18 +653,18 @@ void AAIBossCharacter::Multicast_PreMagicEffect_Implementation(FVector Location)
 		);
 	}
 
-	DrawDebugCapsule(
-		GetWorld(),
-		Location,
-		MagicHeight / 2,
-		MagicRadius,
-		FQuat::Identity,
-		FColor::Yellow,
-		false,
-		WarningDelay,
-		0,
-		3.0f
-	);
+	//DrawDebugCapsule(
+	//	GetWorld(),
+	//	Location,
+	//	MagicHeight / 2,
+	//	MagicRadius,
+	//	FQuat::Identity,
+	//	FColor::Yellow,
+	//	false,
+	//	WarningDelay,
+	//	0,
+	//	3.0f
+	//);
 }
 
 void AAIBossCharacter::Tick(float DeltaTime)
