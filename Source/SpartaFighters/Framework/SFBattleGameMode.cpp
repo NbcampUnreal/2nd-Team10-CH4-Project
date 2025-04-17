@@ -25,7 +25,7 @@ ASFBattleGameMode::ASFBattleGameMode()
 	NumAICharactersToSpawn = 2;
 	BattleStartDelay = 3.f;
 	BattleTime = 180.f;
-	ReturnToLobbyTime = 5.f;
+	ReturnToLobbyTime = 6.f;
 }
 
 void ASFBattleGameMode::BeginPlay()
@@ -50,6 +50,11 @@ void ASFBattleGameMode::BeginPlay()
 			SpawnPoints.Add(Spawner);
 			UE_LOG(LogTemp, Warning, TEXT("Spawner Added to SpawnPoints"));
 		}
+	}
+
+	if (ASFGameStateBase* SFGameState = GetGameState<ASFGameStateBase>())
+	{
+		SFGameState->SetBattleDuration(BattleTime);
 	}
 }
 
@@ -210,7 +215,7 @@ void ASFBattleGameMode::StartBattle()
 	if (ASFGameStateBase* SFGameState = GetGameState<ASFGameStateBase>())
 	{
 		SFGameState->SetBattleStartTime(GetWorld()->GetTimeSeconds());
-		SFGameState->SetBattleDuration(BattleTime);
+		/*SFGameState->SetBattleDuration(BattleTime);*/
 		SFGameState->SetReturnToLobbyTime(ReturnToLobbyTime);
 	}
 
@@ -287,7 +292,7 @@ void ASFBattleGameMode::EndBattle()
 	GetWorldTimerManager().SetTimer(
 		ReturnLobbyTimerHandle,
 		this, &ASFBattleGameMode::ReturnToLobby,
-		5.0f,
+		ReturnToLobbyTime,
 		false);
 }
 
@@ -337,124 +342,78 @@ void ASFBattleGameMode::ServerTravelToLobby()
 
 void ASFBattleGameMode::SpawnAICharacters()
 {    
-	UE_LOG(LogTemp, Warning, TEXT("--- [SpawnAICharacters] Function Entered ---")); // 함수 진입 로그
-
-	// 서버 권한 확인
 	if (!HasAuthority())
 	{
 		UE_LOG(LogTemp, Error, TEXT("[SpawnAICharacters] Error: Not running on Authority! AI can only be spawned by the server."));
 		return;
 	}
 
-	// 1. AI 클래스 유효성 검사
 	if (!AICharacterClass)
 	{
-		// 이 로그가 출력되면 블루프린트에서 AICharacterClass 설정이 안 된 것!
 		UE_LOG(LogTemp, Error, TEXT("[SpawnAICharacters] Error: AICharacterClass is NOT set in GameMode! Check the GameMode Blueprint Defaults."));
 		return;
 	}
-	else
-	{
-		// 설정된 클래스 이름 로그 (디버깅에 유용)
-		UE_LOG(LogTemp, Log, TEXT("[SpawnAICharacters] AICharacterClass is set to: %s"), *AICharacterClass->GetName());
-	}
 
-	// 2. 스폰 포인트 유효성 검사
-	UE_LOG(LogTemp, Log, TEXT("[SpawnAICharacters] Checking SpawnPoints. Current Count: %d"), SpawnPoints.Num());
 	if (SpawnPoints.Num() == 0)
 	{
-		// 스폰 포인트가 하나도 없으면 스폰 불가
 		UE_LOG(LogTemp, Error, TEXT("[SpawnAICharacters] Error: No spawn points found in the SpawnPoints array! Add ASFCharacterSpawner actors to the level."));
 		return;
 	}
 
-	// 3. 스폰 루프 시작
-	UE_LOG(LogTemp, Log, TEXT("[SpawnAICharacters] Starting loop to attempt spawning %d AI characters."), NumAICharactersToSpawn);
-
-	int32 SuccessfullySpawnedCount = 0; // 성공적으로 스폰된 AI 수 추적
+	int32 SuccessfullySpawnedCount = 0;
 
 	for (int32 i = 0; i < NumAICharactersToSpawn; ++i)
 	{
-		UE_LOG(LogTemp, Log, TEXT("[SpawnAICharacters] --- Attempting to spawn AI #%d ---"), i + 1);
-
-		// 4. 스폰 포인트 찾기
 		ASFCharacterSpawner* SelectedSpawner = nullptr;
 		int32 Attempts = 0;
-		const int32 MaxAttempts = SpawnPoints.Num() * 2; // 스폰 포인트 수의 2배만큼 시도 (무한 루프 방지 강화)
+		const int32 MaxAttempts = SpawnPoints.Num() * 2;
 
-		// 이미 사용된 스폰 포인트를 제외하고 찾거나, 다른 방식으로 선택 (플레이어 위치와 먼 곳 등)
-		// 여기서는 간단히 랜덤 선택 + 유효성 검사
 		while (Attempts < MaxAttempts)
 		{
 			int32 RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
-			if (SpawnPoints.IsValidIndex(RandomIndex) && IsValid(SpawnPoints[RandomIndex])) // 인덱스 및 스포너 유효성 확인
+			if (SpawnPoints.IsValidIndex(RandomIndex) && IsValid(SpawnPoints[RandomIndex]))
 			{
 				SelectedSpawner = SpawnPoints[RandomIndex];
-				UE_LOG(LogTemp, Log, TEXT("[SpawnAICharacters] Found potential spawner %s at index %d."), *SelectedSpawner->GetName(), RandomIndex);
-				// TODO: 이 스포너가 이미 점유되었는지 확인하는 로직 추가 가능
-				break; // 유효한 스포너 찾으면 루프 종료
+				break;
 			}
 			Attempts++;
 		}
 
-		// 스폰 포인트 찾기 실패 시
 		if (!SelectedSpawner)
 		{
 			UE_LOG(LogTemp, Error, TEXT("[SpawnAICharacters] Error: Failed to find a valid spawn point for AI #%d after %d attempts. Skipping this AI."), i + 1, MaxAttempts);
-			continue; // 다음 AI 스폰 시도
+			continue;
 		}
 
-		// 5. 스폰 파라미터 설정
 		FTransform SpawnTransform = SelectedSpawner->GetActorTransform();
 		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this; // GameMode가 AI의 오너
-		SpawnParams.Instigator = nullptr; // AI는 보통 Instigator 없음
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn; // 충돌 시 위치 조정
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = nullptr;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-		// 6. 스폰 시도 로그
-		UE_LOG(LogTemp, Log, TEXT("[SpawnAICharacters] Attempting to spawn AI %d (%s) at %s using Spawner %s"),
-			i + 1,
-			*AICharacterClass->GetName(),
-			*SpawnTransform.ToString(),
-			*SelectedSpawner->GetName());
-
-		// 7. **** 실제 AI 캐릭터 스폰 ****
 		ACharacter* NewAICharacter = GetWorld()->SpawnActor<ACharacter>(AICharacterClass, SpawnTransform, SpawnParams);
-
-		// 8. 스폰 결과 확인
-		if (IsValid(NewAICharacter)) // 스폰 성공 시 IsValid 로 확인
+		if (IsValid(NewAICharacter))
 		{
 			SuccessfullySpawnedCount++;
-			UE_LOG(LogTemp, Warning, TEXT("[SpawnAICharacters] SUCCESS: AI Character #%d spawned: %s (Class: %s)"),
-				SuccessfullySpawnedCount, *NewAICharacter->GetName(), *NewAICharacter->GetClass()->GetName());
 
-			// 9. **** AI 컨트롤러 스폰 시도 (매우 중요!) ****
-			UE_LOG(LogTemp, Log, TEXT("[SpawnAICharacters] Attempting to spawn default controller for AI: %s"), *NewAICharacter->GetName());
-			NewAICharacter->SpawnDefaultController(); // AI 캐릭터 클래스에 지정된 기본 컨트롤러 스폰 시도
+			NewAICharacter->SpawnDefaultController();
 
-			// 10. 컨트롤러 스폰 결과 확인
-			AController* AIController = NewAICharacter->GetController(); // 스폰된 컨트롤러 가져오기
+			AController* AIController = NewAICharacter->GetController();
 			if (IsValid(AIController))
 			{
 				UE_LOG(LogTemp, Log, TEXT("[SpawnAICharacters] SUCCESS: Controller %s spawned and possessed AI %s."),
 					*AIController->GetName(), *NewAICharacter->GetName());
-				// 컨트롤러가 비헤이비어 트리를 실행하도록 추가 설정 필요 시 여기에
-				// 예: AYourAIController* MyAICon = Cast<AYourAIController>(AIController); if(MyAICon) { MyAICon->RunBehaviorTree(MyBTAsset); }
 			}
 			else
 			{
-				// 컨트롤러 스폰 실패 시 AI는 동작하지 않을 가능성이 높음!
 				UE_LOG(LogTemp, Error, TEXT("[SpawnAICharacters] FAILURE: Failed to spawn or possess default controller for AI %s! Check AI Character's 'AIController Class' setting in Class Defaults."),
 					*NewAICharacter->GetName());
 			}
 		}
-		else // 스폰 실패 시
+		else
 		{
 			UE_LOG(LogTemp, Error, TEXT("[SpawnAICharacters] FAILURE: GetWorld()->SpawnActor failed for AI #%d using class %s at %s!"),
 				i + 1, *AICharacterClass->GetName(), *SpawnTransform.ToString());
-			// 실패 원인 추적 필요 (콜리전, 클래스 문제 등)
 		}
-	} // End of for loop
-
-	UE_LOG(LogTemp, Warning, TEXT("--- [SpawnAICharacters] Function Exited. Successfully spawned %d out of %d requested AI characters. ---"), SuccessfullySpawnedCount, NumAICharactersToSpawn);
+	}
 }

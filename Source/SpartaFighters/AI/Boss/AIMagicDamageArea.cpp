@@ -12,6 +12,9 @@ AAIMagicDamageArea::AAIMagicDamageArea()
     DamageCapsule->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
     DamageCapsule->OnComponentBeginOverlap.AddDynamic(this, &AAIMagicDamageArea::OnOverlapBegin);
 
+    DamageCapsule->SetSimulatePhysics(false);
+    DamageCapsule->SetEnableGravity(false);
+
     MagicDamage = 20.0f;
     DamageInterval = 1.0f;
     TotalDuration = 5.0f;
@@ -21,7 +24,6 @@ void AAIMagicDamageArea::BeginPlay()
 {
     Super::BeginPlay();
 
-    // 데미지 틱 시작
     GetWorld()->GetTimerManager().SetTimer(
         DamageTimerHandle,
         this,
@@ -30,7 +32,6 @@ void AAIMagicDamageArea::BeginPlay()
         true
     );
 
-    // 자동 파괴
     SetLifeSpan(TotalDuration);
 }
 

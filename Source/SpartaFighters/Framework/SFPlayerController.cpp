@@ -91,7 +91,7 @@ void ASFPlayerController::Client_EndBattle_Implementation()
 			UIManager->EndHUDUpdate();
 			UIManager->CloseCombatHUD();
 			UIManager->ShowCombatResultHUD();
-			UIManager->StartCombatResultUpdate();
+			UIManager->DelayStartCombatResultUpdate(); // delay for 1s.. Becuase UX Up!!
 		}
 	}
 }

@@ -18,6 +18,8 @@ public:
     ASFPlayerState* GetWinner() const { return WinnerPlayerState; }
 
     float GetRemainingBattleTime() const;
+    float GetRemainingReturnToLobbyTime() const;
+    float GetBattleDuration() const;
     float GetReturnToLobbyTime() const;
     void SetBattleStartTime(float TimeInput); 
     void SetBattleDuration(float DurationInput);
