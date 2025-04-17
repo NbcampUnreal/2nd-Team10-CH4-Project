@@ -19,8 +19,9 @@ EBTNodeResult::Type UBTT_MoveToTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 {
     AIPawn = OwnerComp.GetAIOwner()->GetPawn();
 
-    if (!AIPawn)
+    if (!AIPawn || !AIPawn->HasAuthority())
     {
+        FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
         return EBTNodeResult::Failed;
     }
 
