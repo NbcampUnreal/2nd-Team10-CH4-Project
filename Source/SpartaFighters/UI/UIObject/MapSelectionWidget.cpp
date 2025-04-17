@@ -8,6 +8,7 @@
 #include "Framework/SFRoomPlayerController.h"
 #include "DataTable/MapInfoRow.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/UIManager/UIManager.h"
 
 void UMapSelectionWidget::NativeConstruct()
 {
@@ -42,6 +43,17 @@ void UMapSelectionWidget::NativeDestruct()
 	if (RightArrowButton)
 	{
 		RightArrowButton->OnClicked.RemoveDynamic(this, &UMapSelectionWidget::OnRightArrowClicked);
+	}
+}
+
+void UMapSelectionWidget::OnExitClicked()
+{
+	SetVisibility(ESlateVisibility::Hidden);
+
+	UUIManager* UIManager = ResolveUIManager();
+	if (UIManager != nullptr)
+	{
+		UIManager->SetVisbleRoomMenu();
 	}
 }
 
