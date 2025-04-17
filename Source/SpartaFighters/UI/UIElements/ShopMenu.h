@@ -36,5 +36,6 @@ private:
 	void OnCosmeticItemClicked();
 
 	void OnExitClicked() override;
-
+	void UpdateCurrentGoldText();
+	float GetCurrentGold();
 };
