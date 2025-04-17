@@ -25,7 +25,7 @@ ASFBattleGameMode::ASFBattleGameMode()
 	NumAICharactersToSpawn = 2;
 	BattleStartDelay = 3.f;
 	BattleTime = 180.f;
-	ReturnToLobbyTime = 5.f;
+	ReturnToLobbyTime = 6.f;
 }
 
 void ASFBattleGameMode::BeginPlay()
@@ -50,6 +50,11 @@ void ASFBattleGameMode::BeginPlay()
 			SpawnPoints.Add(Spawner);
 			UE_LOG(LogTemp, Warning, TEXT("Spawner Added to SpawnPoints"));
 		}
+	}
+
+	if (ASFGameStateBase* SFGameState = GetGameState<ASFGameStateBase>())
+	{
+		SFGameState->SetBattleDuration(BattleTime);
 	}
 }
 
@@ -210,7 +215,7 @@ void ASFBattleGameMode::StartBattle()
 	if (ASFGameStateBase* SFGameState = GetGameState<ASFGameStateBase>())
 	{
 		SFGameState->SetBattleStartTime(GetWorld()->GetTimeSeconds());
-		SFGameState->SetBattleDuration(BattleTime);
+		/*SFGameState->SetBattleDuration(BattleTime);*/
 		SFGameState->SetReturnToLobbyTime(ReturnToLobbyTime);
 	}
 
@@ -287,7 +292,7 @@ void ASFBattleGameMode::EndBattle()
 	GetWorldTimerManager().SetTimer(
 		ReturnLobbyTimerHandle,
 		this, &ASFBattleGameMode::ReturnToLobby,
-		5.0f,
+		ReturnToLobbyTime,
 		false);
 }
 

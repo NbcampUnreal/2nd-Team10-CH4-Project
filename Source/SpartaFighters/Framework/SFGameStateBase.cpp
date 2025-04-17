@@ -26,11 +26,21 @@ float ASFGameStateBase::GetRemainingBattleTime() const
     return FMath::Max(0.f, BattleDuration - Elapsed);
 }
 
-float ASFGameStateBase::GetReturnToLobbyTime() const
+float ASFGameStateBase::GetRemainingReturnToLobbyTime() const
 {
     float ServerTime = GetWorld()->GetGameState()->GetServerWorldTimeSeconds();
     float Elapsed = ServerTime - StartReturnToLobbyTime;
     return FMath::Max(0.f, ReturnToLobbyTime - Elapsed);
+}
+
+float ASFGameStateBase::GetBattleDuration() const
+{
+    return BattleDuration;
+}
+
+float ASFGameStateBase::GetReturnToLobbyTime() const
+{
+    return ReturnToLobbyTime;
 }
 
 void ASFGameStateBase::SetBattleStartTime(float TimeInput)

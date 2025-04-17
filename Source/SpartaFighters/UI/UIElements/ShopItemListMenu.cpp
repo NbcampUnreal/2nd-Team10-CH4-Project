@@ -65,6 +65,7 @@ void UShopItemListMenu::NativeConstruct()
 					NewItem->ItemDescription = FText::FromString(ItemData->ItemDescription);
 					NewItem->Price = ItemData->Price;
 					NewItem->ItemIcon = ItemData->ItemIcon.LoadSynchronous(); 
+					NewItem->ItemClass = ItemData->ItemClass;
 					ShopItems.Add(NewItem);
 				}
 				else
@@ -126,34 +127,37 @@ void UShopItemListMenu::PurchaseSelectedItem()
 				UE_LOG(LogTemp, Warning, TEXT("PlayerState UniqueID for purchase: %s"), *PlayerState->GetUniqueID());
 				if (PlayerState->RemoveGold(SelectedItem->Price))
 				{
-					if (ASFCharacter* PlayerCharacter = Cast<ASFCharacter>(PlayerController->GetPawn()))
+					//When Character doesnt exist
+					if (USFGameInstanceSubsystem* GameInstanceSubsystem = GetGameInstanceSubsystem())
 					{
-						//When Character exist
-						if (USFInventoryComponent* InventoryComponent = GetInventoryComponent())
+						bool bAlreadyPurchased = false;
+						for (const auto& ExistingItemClass : GameInstanceSubsystem->GetPendingShopPurchases(PlayerState->GetUniqueID()))
 						{
-							InventoryComponent->Server_AddItemByClass(SelectedItem->GetClass());
-							if (USFGameInstanceSubsystem* GameInstanceSubsystem = GetGameInstanceSubsystem())
+							if (ExistingItemClass == SelectedItem->GetClass())
 							{
-								GameInstanceSubsystem->UpdatePlayerInventory(PlayerState->GetUniqueID(), InventoryComponent->GetInventory());
+								bAlreadyPurchased = true;
+								break;
 							}
 						}
-						UE_LOG(LogTemp, Warning, TEXT("Purchased %s for %d gold (Character Exists)."), *SelectedItem->ItemName.ToString(), SelectedItem->Price);
-					}
-					else
-					{
-						//When Character doesnt exist
-						if (USFGameInstanceSubsystem* GameInstanceSubsystem = GetGameInstanceSubsystem())
+
+						if (bAlreadyPurchased)
+						{
+							PlayerState->AddGold(SelectedItem->Price);
+							PurchaseButton->SetIsEnabled(false);
+							EquipButton->SetIsEnabled(false);
+							UE_LOG(LogTemp, Warning, TEXT("Already purchased"));
+						}
+						else
 						{
 							GameInstanceSubsystem->AddPendingShopPurchase(PlayerState->GetUniqueID(), SelectedItem->GetClass());
 							UE_LOG(LogTemp, Warning, TEXT("Added %s to pending shop purchases (No Character)."), *SelectedItem->GetName());
 						}
+						UpdateCurrentGoldText();
+						PurchaseButton->SetIsEnabled(false);
+						EquipButton->SetIsEnabled(false);
+						SelectedItem = nullptr;
+						ItemListView->ClearSelection();
 					}
-
-					UpdateCurrentGoldText();
-					PurchaseButton->SetIsEnabled(false);
-					EquipButton->SetIsEnabled(false);
-					SelectedItem = nullptr;
-					ItemListView->ClearSelection();
 				}
 				else
 				{
@@ -186,18 +190,29 @@ void UShopItemListMenu::PopulateItemList()
 
 void UShopItemListMenu::OnItemSelectionChanged(UObject* SelectedItemObject)
 {
-    if (SelectedItemObject)
-    {
-        SelectedItem = Cast<USFItemBase>(SelectedItemObject);
-        PurchaseButton->SetIsEnabled(true);
-		UpdateEquipButtonVisibility();
-    }
-    else
-    {
-        PurchaseButton->SetIsEnabled(false);
+	if (SelectedItemObject)
+	{
+		USFItemBase* CastedItem = Cast<USFItemBase>(SelectedItemObject);
+		if (CastedItem)
+		{
+			SelectedItem = CastedItem;
+			PurchaseButton->SetIsEnabled(true);
+			UpdateEquipButtonVisibility();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OnItemSelectionChanged: Failed to cast selected object to USFItemBase."));
+			SelectedItem = nullptr;
+			PurchaseButton->SetIsEnabled(false);
+			EquipButton->SetIsEnabled(false);
+		}
+	}
+	else
+	{
+		PurchaseButton->SetIsEnabled(false);
 		EquipButton->SetIsEnabled(false);
-        SelectedItem = nullptr;
-    }
+		SelectedItem = nullptr;
+	}
 }
 
 void UShopItemListMenu::OnPurchaseButtonClicked()
@@ -267,7 +282,8 @@ void UShopItemListMenu::OnExitClicked()
 {
     if (UUIManager* UIManager = ResolveUIManager())
     {
-        UIManager->ShowRoomMenu();
+		ShopItems.Empty();
+        UIManager->ShowShopMenu();
     }
 }
 

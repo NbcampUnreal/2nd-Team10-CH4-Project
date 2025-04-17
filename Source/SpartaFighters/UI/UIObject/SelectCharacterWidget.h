@@ -43,6 +43,7 @@ protected:
 
 	UFUNCTION()
 	void OnCharacterSlotClicked(FName RowName);
+
 	//UFUNCTION()
 	//void OnConfirmClicked();
 	void UpdateAvailableCharacters();
