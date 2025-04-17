@@ -49,7 +49,7 @@ void ULoginMenu::NativeConstruct()
 	}
 	if (InstructionText)
 	{
-		InstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Sparta Fighters!"));
+		InstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Relic Seekers!"));
 	}
 
 	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
@@ -90,7 +90,7 @@ void ULoginMenu::NativeDestruct()
 	}
 	if (InstructionText)
 	{
-		InstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Sparta Fighters!"));
+		InstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Relic Seekers!"));
 	}
 }
 
@@ -264,7 +264,7 @@ void ULoginMenu::ResetInstructionText()
 {
 	if (InstructionText)
 	{
-		InstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Sparta Fighters!"));
+		InstructionText->SetText(LOCTEXT("DefaultInstructionText", "Welcome To Relic Seekers"));
 	}
 }
 

@@ -2,6 +2,10 @@
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
 #include "UI/UIManager/UIManager.h"
+#include "Framework/SFPlayerState.h"
+#include "Character/SFCharacter.h"
+#include "Components/TextBlock.h"
+
 
 void UShopMenu::NativeConstruct()
 {
@@ -26,6 +30,7 @@ void UShopMenu::NativeConstruct()
         PlayerController->SetInputMode(InputModeData);
         PlayerController->bShowMouseCursor = true;
     }
+    UpdateCurrentGoldText();
 }
 
 void UShopMenu::NativeDestruct()
@@ -79,4 +84,32 @@ void UShopMenu::OnExitClicked()
     {
         UIManager->ShowRoomMenu();
     }
+}
+
+void UShopMenu::UpdateCurrentGoldText()
+{
+    if (CurrentGoldTextBlock)
+    {
+        CurrentGoldTextBlock->SetText(FText::AsNumber(GetCurrentGold()));
+    }
+}
+
+float UShopMenu::GetCurrentGold()
+{
+    if (APlayerController* PlayerController = GetOwningPlayer())
+    {
+        if (ASFPlayerState* PlayerState = PlayerController->GetPlayerState<ASFPlayerState>())
+        {
+            return PlayerState->CurrentGold;
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("GetCurrentGold - PlayerState is nullptr."));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("GetCurrentGold - PlayerController is nullptr."));
+    }
+    return 0.0f;
 }
