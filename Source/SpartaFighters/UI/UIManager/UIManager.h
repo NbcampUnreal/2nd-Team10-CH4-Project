@@ -53,6 +53,7 @@ public:
     void CloseCombatHUD();
     void CloseCombatResultHUD();
     void UpdateCombatHUD();
+    void DelayStartCombatResultUpdate();
     void UpdateCombatResult();
 
     UFUNCTION()
@@ -126,4 +127,6 @@ private:
 	
     FTimerHandle HUDUpdateTimerHandle;
     FTimerHandle CombatResultHUDUpdateTimerHandle;
+    FTimerHandle LazyCombatResultUpdateTimerHandle;
+    FTimerHandle DelayStartCombatResultTimerHandle;
 };
