@@ -1,14 +1,9 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTT_StartCrouch.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SPARTAFIGHTERS_API UBTT_StartCrouch : public UBTTaskNode
 {

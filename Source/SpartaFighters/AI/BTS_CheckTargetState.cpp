@@ -1,12 +1,9 @@
-
-
-
 #include "AI/BTS_CheckTargetState.h"
 #include "AIController.h"
 #include "GameFramework/Character.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Components/StateComponent.h"
-#include "Kismet/GameplayStatics.h" // GetNameSafe 사용 시 필요
+#include "Kismet/GameplayStatics.h" // Need for GetNameSafe
 
 UBTS_CheckTargetState::UBTS_CheckTargetState()
 {
@@ -63,9 +60,6 @@ void UBTS_CheckTargetState::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
     BlackboardComp->SetValueAsEnum(TargetStateKey.SelectedKeyName, (uint8)CurrentTargetState);
 
     FString StateString = UEnum::GetValueAsString(CurrentTargetState);
-
-    //UE_LOG(LogTemp, Log, TEXT("BTS_CheckTargetState: Target '%s' State Updated - State: %s"), *GetNameSafe(TargetCharacter), *StateString);
-
 }
 
 void UBTS_CheckTargetState::ClearTargetStateKeys(UBlackboardComponent* BlackboardComp)

@@ -1,6 +1,3 @@
-
-
-
 #include "BTT_RandomTypeAttack.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
