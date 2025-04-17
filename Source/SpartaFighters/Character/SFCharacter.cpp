@@ -16,6 +16,7 @@
 #include "Components/StateComponent.h"
 #include "Components/SkillComponent.h"
 #include "Inventory/SFInventoryComponent.h"
+#include "Inventory/SFInventoryInteractionComponent.h"
 
 #include "Engine/DamageEvents.h"
 #include "Common/SkillDamageEvent.h"
@@ -63,6 +64,7 @@ ASFCharacter::ASFCharacter()
 	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
 	SkillComponent = CreateDefaultSubobject<USkillComponent>(TEXT("SkillComponent"));
 	InventoryComponent = CreateDefaultSubobject<USFInventoryComponent>(TEXT("InventoryComponent"));
+	InventoryInteractionComponent = CreateDefaultSubobject<USFInventoryInteractionComponent>(TEXT("InventoryInteractionComponent"));
 
 	bReplicates = true;
 	GetCharacterMovement()->SetIsReplicated(true);

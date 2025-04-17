@@ -7,7 +7,7 @@
 ASFPlayerState::ASFPlayerState()
 {
 	bReplicates = true;
-	CurrentGold = 500.0f;
+	CurrentGold = 450.0f;
 }
 
 void ASFPlayerState::OnRep_bIsReady()

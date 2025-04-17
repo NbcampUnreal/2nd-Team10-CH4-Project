@@ -19,6 +19,7 @@ class UStatusComponent;
 class UStateComponent;
 class USkillComponent;
 class USFInventoryComponent;
+class USFInventoryInteractionComponent;
 
 struct FInputActionValue;
 struct FSkillDataRow;
@@ -48,6 +49,8 @@ public:
 	TObjectPtr<USkillComponent> SkillComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USFInventoryComponent> InventoryComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USFInventoryInteractionComponent* InventoryInteractionComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	USoundBase* DeathSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
