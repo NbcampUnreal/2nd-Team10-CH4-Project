@@ -37,7 +37,6 @@ EBTNodeResult::Type UBTT_PlayBossAnimSequence::ExecuteTask(UBehaviorTreeComponen
 
     UE_LOG(LogTemp, Warning, TEXT("[BTT_PlayBossAnimSequence] AttackSequence: %s"), *GetNameSafe(AttackSequence));
 
-    // 서버에서 애니메이션 시작
     if (BossCharacter->HasAuthority())
     {
         UE_LOG(LogTemp, Warning, TEXT("[BTT_PlayBossAnimSequence] server anim start"));
