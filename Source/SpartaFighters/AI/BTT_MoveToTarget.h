@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,9 +5,6 @@
 #include "Navigation/PathFollowingComponent.h"
 #include "BTT_MoveToTarget.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SPARTAFIGHTERS_API UBTT_MoveToTarget : public UBTTaskNode
 {

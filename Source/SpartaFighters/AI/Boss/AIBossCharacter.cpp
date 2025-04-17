@@ -1,6 +1,3 @@
-
-
-
 #include "AI/Boss/AIBossCharacter.h"
 #include "AI/AICharacterController.h"
 #include "NiagaraSystem.h"
@@ -241,17 +238,15 @@ void AAIBossCharacter::StartDissolveEffect()
 	DissolveProgress = -1.0f;
 	GetWorldTimerManager().SetTimer(
 		DissolveTimerHandle,
-		[this, DynMaterial]() // DynMaterial 캡처 추가
+		[this, DynMaterial]()
 		{
 			DissolveProgress += 0.016f;
 
-			// 서버/싱글플레이: 직접 파라미터 업데이트
 			if (HasAuthority())
 			{
 				DynMaterial->SetScalarParameterValue("Dissolve", DissolveProgress);
 			}
 
-			// 클라이언트: 리플리케이션으로 처리
 			if (DissolveProgress >= 1.0f)
 			{
 				GetWorldTimerManager().ClearTimer(DissolveTimerHandle);

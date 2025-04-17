@@ -1,6 +1,3 @@
-
-
-
 #include "AI/BTT_MoveToTarget.h"
 #include "AI/AICharacterController.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -52,8 +49,6 @@ EBTNodeResult::Type UBTT_MoveToTarget::ExecuteTask(UBehaviorTreeComponent& Owner
     return EBTNodeResult::InProgress;
 }
 
-
-// TickTask works when the task is in InProgress state.
 void UBTT_MoveToTarget::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
     Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
@@ -98,7 +93,6 @@ void UBTT_MoveToTarget::UpdateMovement(const FVector& Direction) const
         MovementComp->AddInputVector(Direction * 1.5f);
 
         const FRotator TargetRotation = Direction.Rotation();
-        // Natural rotation, but is it really necessary?
         const FRotator NewRotation = FMath::RInterpTo(AIPawn->GetActorRotation(),TargetRotation, GetWorld()->GetDeltaSeconds(), 8.0f);
 
         AIPawn->SetActorRotation(NewRotation);

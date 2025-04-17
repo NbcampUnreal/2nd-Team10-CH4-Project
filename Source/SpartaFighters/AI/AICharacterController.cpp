@@ -1,6 +1,3 @@
-
-
-
 #include "AICharacterController.h"
 
 void AAICharacterController::BeginPlay()

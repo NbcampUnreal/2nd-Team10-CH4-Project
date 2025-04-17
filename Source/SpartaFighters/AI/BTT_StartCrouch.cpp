@@ -1,10 +1,7 @@
-
-
-
 #include "BTT_StartCrouch.h"
 #include "AIController.h"
 #include "GameFramework/Character.h"
-#include "GameFramework/CharacterMovementComponent.h" // CanCrouch 확인 위해 필요
+#include "GameFramework/CharacterMovementComponent.h" // Required for using CanCrouch
 
 UBTT_StartCrouch::UBTT_StartCrouch()
 {
