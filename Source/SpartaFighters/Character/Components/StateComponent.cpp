@@ -6,6 +6,8 @@
 UStateComponent::UStateComponent()
 {
 	CurrentState = ECharacterState::Idle;
+	CurrentSpecialState = ECharacterSpecialState::None;
+
 	SetIsReplicatedByDefault(true);
 	bIsInAction = false;
 }
@@ -14,13 +16,13 @@ void UStateComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (GetOwnerRole() == ROLE_Authority)
-	{
-		if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
-		{
-			UpdateState(Character);
-		}
-	}
+	//if (GetOwnerRole() == ROLE_Authority)
+	//{
+	//	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
+	//	{
+	//		UpdateState(Character);
+	//	}
+	//}
 
 }
 
@@ -75,6 +77,11 @@ void UStateComponent::OnRep_CurrentState()
 	UE_LOG(LogTemp, Log, TEXT("[Client] MovementState changed to: %d"), (uint8)CurrentState);
 }
 
+void UStateComponent::OnRep_SpecialState()
+{
+	UE_LOG(LogTemp, Log, TEXT("[Client] SpecialState changed to: %d"), (uint8)CurrentSpecialState);
+}
+
 
 void UStateComponent::SetIsInAction(bool bIn)
 {
@@ -90,5 +97,15 @@ bool UStateComponent::IsInAction() const
 bool UStateComponent::IsInState(ECharacterState CheckState) const
 {
 	return CurrentState == CheckState;
+}
+
+void UStateComponent::SetSpecialState(ECharacterSpecialState NewState)
+{
+	CurrentSpecialState = NewState;
+}
+
+void UStateComponent::ResetSpecialState()
+{
+	CurrentSpecialState = ECharacterSpecialState::None;
 }
 

@@ -63,9 +63,9 @@ public:
 	void Server_HandleDodge();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_HandleDodge(ECharacterState State);
+	void Multicast_HandleDodge(FSkillDataRow Data);
 
-	void HandleDodge(ECharacterState CurrentState);
+	void HandleDodge(FSkillDataRow* Data);
 
 
 	// Handle Animation
@@ -79,6 +79,7 @@ public:
 	void ClearHitActors();
 
 	void CanNextCombo();
+	void ResetCombo();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int MaxComboCount = 3;

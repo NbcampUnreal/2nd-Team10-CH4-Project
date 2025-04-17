@@ -25,10 +25,7 @@ void USkillComponent::HandleInputBasicAttack()
 {
 	if (!IsValid(OwnerCharacter) || !IsValid(SkillDataTable)) return;
 
-	if (!OwnerCharacter->HasAuthority())
-	{
-		Server_HandleBasicAttack();
-	}
+	Server_HandleBasicAttack();
 }
 
 void USkillComponent::Server_HandleBasicAttack_Implementation()
@@ -70,7 +67,7 @@ void USkillComponent::Multicast_HandleBasicAttack_Implementation(FSkillDataRow D
 void USkillComponent::HandleBasicAttack(FSkillDataRow* Data)
 {
 	PlayAnimMontage(Data);
-
+	UGameplayStatics::PlaySoundAtLocation(this, OwnerCharacter->AttackSound, OwnerCharacter->GetActorLocation());
 }
 
 
@@ -78,10 +75,7 @@ void USkillComponent::HandleInputSkillAttack()
 {
 	if (!IsValid(OwnerCharacter) || !IsValid(SkillDataTable)) return;
 
-	if (!OwnerCharacter->HasAuthority())
-	{
-		Server_HandleSkillAttack();
-	}
+	Server_HandleSkillAttack();
 }
 
 void USkillComponent::Server_HandleSkillAttack_Implementation()
@@ -133,7 +127,9 @@ void USkillComponent::HandleSkillAttack(FSkillDataRow* Data)
 	else
 	{
 		StatusComponet->ModifyMP(-Data->MPCost);
+
 		PlayAnimMontage(Data);
+		UGameplayStatics::PlaySoundAtLocation(this, OwnerCharacter->SkillSound, OwnerCharacter->GetActorLocation());
 	}
 }
 
@@ -141,46 +137,36 @@ void USkillComponent::HandleInputDodge()
 {
 	if (!IsValid(OwnerCharacter) || !IsValid(SkillDataTable)) return;
 
-	if (OwnerCharacter->HasAuthority())
-	{
-		Multicast_HandleDodge(StateComponent->GetState());
-	}
-	else
-	{
-		Server_HandleDodge();
-	}
+	Server_HandleDodge();
 }
 
 void USkillComponent::Server_HandleDodge_Implementation()
 {
-	Multicast_HandleDodge(StateComponent->GetState());
-}
-
-void USkillComponent::Multicast_HandleDodge_Implementation(ECharacterState State)
-{
-	HandleDodge(State);
-}
-
-void USkillComponent::HandleDodge(ECharacterState CurrentState)
-{
 	FName RowName = TEXT("Dodge");
 	StateComponent->SetIsInAction(true);
+	StateComponent->SetSpecialState(ECharacterSpecialState::Invincible);
 	CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>(RowName, TEXT("SkillLookup"));
-	PlayAnimMontage();
+
+	Multicast_HandleDodge(*CurrentSkillData);
+}
+
+void USkillComponent::Multicast_HandleDodge_Implementation(FSkillDataRow Data)
+{
+	HandleDodge(&Data);
+}
+
+void USkillComponent::HandleDodge(FSkillDataRow* Data)
+{
+	PlayAnimMontage(Data);
 }
 
 void USkillComponent::PlayAnimMontage()
 {
-	//CurrentSkillData = SkillDataTable->FindRow<FSkillDataRow>(RowName, TEXT("SkillLookup"));
 	if (!CurrentSkillData || !CurrentSkillData->SkillMontage) return;
 
 	if (UAnimInstance* Anim = OwnerCharacter->GetMesh()->GetAnimInstance())
 	{
 		Anim->Montage_Play(CurrentSkillData->SkillMontage);
-
-		//FOnMontageEnded EndDelegate;
-		//EndDelegate.BindUObject(this, &USkillComponent::OnMontageEnded);
-		//Anim->Montage_SetEndDelegate(EndDelegate, CurrentSkillData->SkillMontage);
 
 		StateComponent->SetIsInAction(true);
 	}
@@ -221,7 +207,6 @@ void USkillComponent::OnMontageEnded()
 	}
 
 	ClearHitActors();
-	ComboCount = 0;
 }
 
 void USkillComponent::PerformAttackTrace()
@@ -303,4 +288,9 @@ void USkillComponent::CanNextCombo()
 	{
 		StateComponent->SetIsInAction(false);
 	}
+}
+
+void USkillComponent::ResetCombo()
+{
+	ComboCount = 0;
 }
