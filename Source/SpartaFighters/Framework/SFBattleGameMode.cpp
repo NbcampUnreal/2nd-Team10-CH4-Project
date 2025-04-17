@@ -292,7 +292,7 @@ void ASFBattleGameMode::EndBattle()
 	GetWorldTimerManager().SetTimer(
 		ReturnLobbyTimerHandle,
 		this, &ASFBattleGameMode::ReturnToLobby,
-		6.0f,
+		ReturnToLobbyTime,
 		false);
 }
 
