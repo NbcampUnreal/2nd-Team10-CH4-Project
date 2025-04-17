@@ -1,5 +1,4 @@
 #include "UI/UIObject/SelectionWidget.h"
-#include "SelectionWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 

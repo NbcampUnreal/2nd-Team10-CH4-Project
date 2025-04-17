@@ -108,6 +108,11 @@ void UUIManager::ShowRoomMenu()
 	SwitchToWidget(CachedRoomMenu);
 }
 
+void UUIManager::SetVisbleRoomMenu()
+{
+	CachedRoomMenu->SetVisibility(ESlateVisibility::Visible);
+}
+
 void UUIManager::ShowShopMenu()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ShowShopMenu"));
@@ -173,32 +178,26 @@ void UUIManager::SwitchToWidget(UUserWidget* NewWidget)
 
 void UUIManager::ShowMapSelectionWidget(EGameModeType GameModeType)
 {
+	if (MapSelectionWidgetInstance != nullptr)
+	{
+		MapSelectionWidgetInstance->RemoveFromParent();
+		MapSelectionWidgetInstance = nullptr;
+	}
+
 	if (MapSelectionWidgetInstance == nullptr && MapSelectionWidgetClass)
 	{
 		MapSelectionWidgetInstance = CreateWidget<UMapSelectionWidget>(GetWorld(), MapSelectionWidgetClass);
+		MapSelectionWidgetInstance->SetGameMode(GameModeType);
 		MapSelectionWidgetInstance->AddToViewport();
 	}
 	else
 	{
-		MapSelectionWidgetInstance->SetGameMode(GameModeType);
-		MapSelectionWidgetInstance->AddToViewport();
 		MapSelectionWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
 void UUIManager::ShowSelectCharacterWidget()
 {
-	/*if (SelectCharacterWidgetInstance == nullptr && SelectCharacterWidgetClass)
-	{
-		SelectCharacterWidgetInstance = CreateWidget<USelectCharacterWidget>(GetWorld(), SelectCharacterWidgetClass);
-		SelectCharacterWidgetInstance->AddToViewport();
-		SelectCharacterWidgetInstance->SetVisibility(ESlateVisibility::Visible);
-	}
-	else
-	{
-		SelectCharacterWidgetInstance->AddToViewport();
-		SelectCharacterWidgetInstance->SetVisibility(ESlateVisibility::Visible);
-	}*/
 	if (SelectCharacterWidgetInstance != nullptr)
 	{
 		SelectCharacterWidgetInstance->RemoveFromParent();

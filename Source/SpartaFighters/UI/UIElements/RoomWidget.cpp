@@ -149,6 +149,7 @@ void URoomWidget::OnSelectMapButtonClicked()
 			if (UUIManager* UIManager = Subsystem->GetUIManager())
 			{
 				UIManager->ShowMapSelectionWidget(Subsystem->GetCurrentGameMode());
+				SetVisibility(ESlateVisibility::HitTestInvisible);
 			}
 		}
 	}
