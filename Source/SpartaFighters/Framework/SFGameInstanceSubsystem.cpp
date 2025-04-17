@@ -24,6 +24,7 @@ void USFGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		MapDataTable = GameInstance->MapDataTable;
 		GameInstance->LoadMapData();
 	}
+	bIsBrowse = false;
 }
 
 void USFGameInstanceSubsystem::Deinitialize()
@@ -146,12 +147,27 @@ void USFGameInstanceSubsystem::ConnectToServerByAddress(const FString& ServerAdd
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Client traveling to server: %s"), *ServerAddress);
-	FString ServerURL = ServerAddress;
-	///	When loading a save game, the URL should be different.
-	FURL DedicatedServerURL(nullptr, *ServerURL, TRAVEL_Absolute);
-	FString ErrorMessage;
-	GEngine->Browse(GEngine->GetWorldContextFromWorldChecked(GetWorld()), DedicatedServerURL, ErrorMessage);
+	if (!bIsBrowse)
+	{
+		bIsBrowse = true;
+
+		UE_LOG(LogTemp, Log, TEXT("Client traveling to server: %s"), *ServerAddress);
+		FString ServerURL = ServerAddress;
+		///	When loading a save game, the URL should be different.
+		FURL DedicatedServerURL(nullptr, *ServerURL, TRAVEL_Absolute);
+		FString ErrorMessage;
+		GEngine->Browse(GEngine->GetWorldContextFromWorldChecked(GetWorld()), DedicatedServerURL, ErrorMessage);
+	}
+	else
+	{
+		GetWorld()->ServerTravel("/Game/SpartaFighters/Level/Menu/RoomMenu", true);
+
+		/*ENetMode NetMode = GetWorld()->GetNetMode();
+		if (NetMode == NM_Standalone)
+		{
+			GetWorld()->ServerTravel("/Game/SpartaFighters/Level/Menu/RoomMenu", true);
+		}*/
+	}
 }
 
 //Add inventory logic

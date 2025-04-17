@@ -52,6 +52,8 @@ protected:
     
     void ReturnToLobby();
 
+    void ServerTravelToLobby();
+
     // RPCs
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_StartBattle();
@@ -60,6 +62,7 @@ protected:
     FTimerHandle BattleStartTimerHandle;
     FTimerHandle BattleTimerHandle;
     FTimerHandle ReturnLobbyTimerHandle;
+    FTimerHandle LazyServerTravelTimerHandle;
 
     // SFBattleGameMode.h
     FTimerHandle SpawnPollingTimerHandle;
@@ -71,15 +74,12 @@ protected:
 
 
 
-
-    // AI 관련 설정 추가
+    // AI character spawn logic
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
-    TSubclassOf<ACharacter> AICharacterClass; // 스폰할 AI 캐릭터 클래스
+    TSubclassOf<ACharacter> AICharacterClass;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
-    int32 NumAICharactersToSpawn = 2; // 스폰할 AI 캐릭터 수
+    int32 NumAICharactersToSpawn = 2;
 
-
-    // AI 스폰 함수 추가
     void SpawnAICharacters();
 };

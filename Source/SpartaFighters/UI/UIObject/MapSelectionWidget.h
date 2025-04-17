@@ -18,6 +18,7 @@ class SPARTAFIGHTERS_API UMapSelectionWidget : public USelectionWidget
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	virtual void OnExitClicked() override;
 
 public:
 	UPROPERTY(meta = (BindWidget))

@@ -46,6 +46,8 @@ private:
 	//Inventory when(no character)
 	TMap<FString, TArray<TSubclassOf<class USFItemBase>>> PendingShopPurchases;
 
+	bool bIsBrowse;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Data")
 	TObjectPtr<UDataTable> MapDataTable;

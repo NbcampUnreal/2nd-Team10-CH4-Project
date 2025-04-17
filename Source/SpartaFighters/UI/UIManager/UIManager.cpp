@@ -108,6 +108,11 @@ void UUIManager::ShowRoomMenu()
 	SwitchToWidget(CachedRoomMenu);
 }
 
+void UUIManager::SetVisbleRoomMenu()
+{
+	CachedRoomMenu->SetVisibility(ESlateVisibility::Visible);
+}
+
 void UUIManager::ShowShopMenu()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ShowShopMenu"));
@@ -173,29 +178,34 @@ void UUIManager::SwitchToWidget(UUserWidget* NewWidget)
 
 void UUIManager::ShowMapSelectionWidget(EGameModeType GameModeType)
 {
+	if (MapSelectionWidgetInstance != nullptr)
+	{
+		MapSelectionWidgetInstance->RemoveFromParent();
+		MapSelectionWidgetInstance = nullptr;
+	}
+
 	if (MapSelectionWidgetInstance == nullptr && MapSelectionWidgetClass)
 	{
 		MapSelectionWidgetInstance = CreateWidget<UMapSelectionWidget>(GetWorld(), MapSelectionWidgetClass);
+		MapSelectionWidgetInstance->SetGameMode(GameModeType);
 		MapSelectionWidgetInstance->AddToViewport();
 	}
 	else
 	{
-		MapSelectionWidgetInstance->SetGameMode(GameModeType);
-		MapSelectionWidgetInstance->AddToViewport();
 		MapSelectionWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
 void UUIManager::ShowSelectCharacterWidget()
 {
-	if (SelectCharacterWidgetInstance == nullptr && SelectCharacterWidgetClass)
+	if (SelectCharacterWidgetInstance != nullptr)
+	{
+		SelectCharacterWidgetInstance->RemoveFromParent();
+	}
+
+	if (SelectCharacterWidgetClass)
 	{
 		SelectCharacterWidgetInstance = CreateWidget<USelectCharacterWidget>(GetWorld(), SelectCharacterWidgetClass);
-		SelectCharacterWidgetInstance->AddToViewport();
-		SelectCharacterWidgetInstance->SetVisibility(ESlateVisibility::Visible);
-	}
-	else
-	{
 		SelectCharacterWidgetInstance->AddToViewport();
 		SelectCharacterWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 	}
@@ -203,13 +213,24 @@ void UUIManager::ShowSelectCharacterWidget()
 
 void UUIManager::ShowCombatHUD()
 {
-	//ensureAlways(CachedCombatHUD);
-	//CachedCombatHUD->AddToViewport();
-	//UE_LOG(LogTemp, Warning, TEXT("Show Combat HUD Completed!!"));
-
 	if (CachedCombatHUD)
 	{
 		CachedCombatHUD->AddToViewport();
+
+		if (UTextBlock* PlayTimeText = Cast<UTextBlock>(CachedCombatHUD->GetWidgetFromName(TEXT("PlayTimerTextBlock"))))
+		{
+			float DefaultTime = 0.f;
+
+			if (ASFGameStateBase* GameState = OwningPlayer->GetWorld()->GetGameState<ASFGameStateBase>())
+			{
+				DefaultTime = GameState->GetBattleDuration();
+			}
+
+			int32 TotalSeconds = FMath::Max(0, FMath::FloorToInt(DefaultTime));
+			int32 Minutes = TotalSeconds / 60;
+			int32 Seconds = TotalSeconds % 60;
+			PlayTimeText->SetText(FText::FromString(FString::Printf(TEXT("%d : %02d"), Minutes, Seconds)));
+		}
 	}
 	else
 	{
@@ -233,7 +254,21 @@ void UUIManager::CloseOptionsWidget()
 void UUIManager::ShowCombatResultHUD()
 {
 	ensureAlways(CachedCombatResultHUD);
+
 	CachedCombatResultHUD->AddToViewport();
+
+	if (UTextBlock* ReturnToLobbyText = Cast<UTextBlock>(CachedCombatResultHUD->GetWidgetFromName(TEXT("ReturnToLobbyTextBlock"))))
+	{
+		float DefaultTime = 0.f;
+
+		if (ASFGameStateBase* GameState = OwningPlayer->GetWorld()->GetGameState<ASFGameStateBase>())
+		{
+			DefaultTime = GameState->GetReturnToLobbyTime() - 1.f;
+		}
+
+		int32 ReturnToLobbySecond = FMath::Max(0, FMath::FloorToInt(DefaultTime));
+		ReturnToLobbyText->SetText(FText::FromString(FString::Printf(TEXT("After %d Seconds, Return to the Lobby..."), ReturnToLobbySecond)));
+	}
 }
 
 void UUIManager::CloseCombatHUD()
@@ -259,10 +294,25 @@ void UUIManager::UpdateCombatHUD()
 			RemainingTime = GameState->GetRemainingBattleTime();
 		}
 
-		int32 Minutes = FMath::FloorToInt(RemainingTime / 60.f);
-		int32 Seconds = FMath::FloorToInt(FMath::Fmod(RemainingTime, 60.f));
+		int32 TotalSeconds = FMath::Max(0, FMath::FloorToInt(RemainingTime));
+		int32 Minutes = TotalSeconds / 60;
+		int32 Seconds = TotalSeconds % 60;
 
 		PlayTimeText->SetText(FText::FromString(FString::Printf(TEXT("%d : %02d"), Minutes, Seconds)));
+	}
+}
+
+void UUIManager::DelayStartCombatResultUpdate()
+{
+	if (UWorld* World = OwningPlayer ? OwningPlayer->GetWorld() : nullptr)
+	{
+		World->GetTimerManager().SetTimer(
+			DelayStartCombatResultTimerHandle,
+			this,
+			&UUIManager::StartCombatResultUpdate,
+			1.0f,
+			false
+		);
 	}
 }
 
@@ -274,12 +324,11 @@ void UUIManager::UpdateCombatResult()
 
 		if (ASFGameStateBase* GameState = OwningPlayer->GetWorld()->GetGameState<ASFGameStateBase>())
 		{
-			ReturnToLobbyTime = GameState->GetReturnToLobbyTime();
+			ReturnToLobbyTime = GameState->GetRemainingReturnToLobbyTime();
 		}
 
-		int32 ReturnToLobbySecond = FMath::FloorToInt(FMath::Fmod(ReturnToLobbyTime, 60.f));
-
-		ReturnToLobbyText->SetText(FText::FromString(FString::Printf(TEXT("After %d seconds, return to the lobby..."), ReturnToLobbySecond)));
+		int32 ReturnToLobbySecond = FMath::Max(0, FMath::FloorToInt(ReturnToLobbyTime));
+		ReturnToLobbyText->SetText(FText::FromString(FString::Printf(TEXT("After %d Seconds, Return to the Lobby..."), ReturnToLobbySecond)));
 	}
 }
 

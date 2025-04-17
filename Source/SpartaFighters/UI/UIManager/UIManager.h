@@ -35,6 +35,7 @@ public:
     void ShowLoginMenu();
     void ShowLobbyMenu();
     void ShowRoomMenu();
+    void SetVisbleRoomMenu();
 
     void ShowShopMenu();
     void ShowShopItemListMenu(EItemType Type);
@@ -53,6 +54,7 @@ public:
     void CloseCombatHUD();
     void CloseCombatResultHUD();
     void UpdateCombatHUD();
+    void DelayStartCombatResultUpdate();
     void UpdateCombatResult();
 
     UFUNCTION()
@@ -126,4 +128,6 @@ private:
 	
     FTimerHandle HUDUpdateTimerHandle;
     FTimerHandle CombatResultHUDUpdateTimerHandle;
+    FTimerHandle LazyCombatResultUpdateTimerHandle;
+    FTimerHandle DelayStartCombatResultTimerHandle;
 };

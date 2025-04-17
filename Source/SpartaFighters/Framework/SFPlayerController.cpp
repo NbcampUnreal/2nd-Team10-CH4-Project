@@ -93,7 +93,7 @@ void ASFPlayerController::Client_EndBattle_Implementation()
 			UIManager->EndHUDUpdate();
 			UIManager->CloseCombatHUD();
 			UIManager->ShowCombatResultHUD();
-			UIManager->StartCombatResultUpdate();
+			UIManager->DelayStartCombatResultUpdate(); // delay for 1s.. Becuase UX Up!!
 		}
 	}
 }
@@ -190,5 +190,6 @@ void ASFPlayerController::Client_TravelToLobby_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Client is returning to Lobby!"));
 
-	UGameplayStatics::OpenLevel(this, FName("/Game/SpartaFighters/Level/Menu/LobbyMenu"));
+	//UGameplayStatics::OpenLevel(this, FName("/Game/SpartaFighters/Level/Menu/LobbyMenu"));
+	ClientTravel("/Game/SpartaFighters/Level/Menu/LobbyMenu", ETravelType::TRAVEL_Absolute);
 }
