@@ -1,14 +1,9 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
 #include "BTS_CheckTargetState.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SPARTAFIGHTERS_API UBTS_CheckTargetState : public UBTService
 {

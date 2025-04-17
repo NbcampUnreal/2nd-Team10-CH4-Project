@@ -14,6 +14,7 @@ void UEndAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 			if (Character->SkillComponent)
 			{
 				Character->SkillComponent->OnMontageEnded();
+				Character->SkillComponent->ResetCombo();
 			}
 		}
 	}

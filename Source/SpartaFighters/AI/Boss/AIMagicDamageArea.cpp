@@ -37,18 +37,24 @@ void AAIMagicDamageArea::BeginPlay()
 
 void AAIMagicDamageArea::ApplyDamageTick()
 {
+    TArray<AActor*> ValidActors;
     for (AActor* Actor : OverlappingActors)
     {
-        if (Actor && Actor != GetOwner())
+        if (IsValid(Actor) && Actor != GetOwner())
         {
-            UGameplayStatics::ApplyDamage(
-                Actor,
-                MagicDamage,
-                nullptr,
-                this,
-                UDamageType::StaticClass()
-            );
+            ValidActors.Add(Actor);
         }
+    }
+
+    for (AActor* Actor : ValidActors)
+    {
+        UGameplayStatics::ApplyDamage(
+            Actor,
+            MagicDamage,
+            nullptr,
+            this,
+            UDamageType::StaticClass()
+        );
     }
 }
 

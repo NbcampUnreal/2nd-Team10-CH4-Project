@@ -1,6 +1,3 @@
-
-
-
 #include "BTT_StopCrouch.h"
 #include "AIController.h"
 #include "GameFramework/Character.h"

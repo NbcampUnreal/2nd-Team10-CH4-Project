@@ -1,14 +1,9 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTT_RotateToTarget.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SPARTAFIGHTERS_API UBTT_RotateToTarget : public UBTTaskNode
 {
@@ -36,7 +31,7 @@ private:
 	float RotationInterpSpeed = 30.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Rotation")
-	float AcceptableAngle = 5.0f; // 몇 도 이내면 회전 완료로 간주
+	float AcceptableAngle = 5.0f;
 
 
 };

@@ -1,14 +1,9 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTT_SelectRandomTarget.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SPARTAFIGHTERS_API UBTT_SelectRandomTarget : public UBTTaskNode
 {
@@ -30,5 +25,4 @@ private:
 
     //UPROPERTY(EditAnywhere, Category = "Target Selection")
     //bool bSelectOnlyAI;
-
 };

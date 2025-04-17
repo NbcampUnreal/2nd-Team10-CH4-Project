@@ -41,6 +41,8 @@ protected:
 	//UPROPERTY(EditAnywhere, Category = "Animation")
 	//UAnimMontage* OnDamageMontage;
 
+
+
 	UFUNCTION()
 	void OnHPChanged(AActor* AffectedActor, float HP);
 
@@ -85,7 +87,6 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_BossTags, EditAnywhere, Category = "Boss Phase")
 	FGameplayTagContainer BossCharacterTags;
 
-	// 페이즈 태그 에셋 설정
 	UPROPERTY(EditAnywhere, Category = "Boss Phase")
 	FGameplayTag Phase1Tag;
 

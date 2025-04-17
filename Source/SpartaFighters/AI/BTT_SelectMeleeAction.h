@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,9 +6,6 @@
 #include "AI/Character/Enum/AIActionState.h"
 #include "BTT_SelectMeleeAction.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SPARTAFIGHTERS_API UBTT_SelectMeleeAction : public UBTTaskNode
 {
