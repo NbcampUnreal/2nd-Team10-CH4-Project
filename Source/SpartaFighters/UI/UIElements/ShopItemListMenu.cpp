@@ -152,6 +152,30 @@ void UShopItemListMenu::PurchaseSelectedItem()
 							GameInstanceSubsystem->AddPendingShopPurchase(PlayerState->GetUniqueID(), SelectedItem->GetClass());
 							UE_LOG(LogTemp, Warning, TEXT("Added %s to pending shop purchases (No Character)."), *SelectedItem->GetName());
 						}
+						//
+						FString PendingPurchasesLog = FString::Printf(TEXT("Pending Purchases for Player %s:"), *PlayerState->GetUniqueID());
+						const TArray<TSubclassOf<class USFItemBase>>& PendingPurchases = GameInstanceSubsystem->GetPendingShopPurchases(PlayerState->GetUniqueID());
+
+						if (PendingPurchases.IsEmpty())
+						{
+							UE_LOG(LogTemp, Warning, TEXT("%s Empty"), *PendingPurchasesLog);
+						}
+						else
+						{
+							for (const auto& ItemClass : PendingPurchases)
+							{
+								if (ItemClass)
+								{
+									PendingPurchasesLog += FString::Printf(TEXT(" %s,"), *ItemClass->GetName());
+								}
+								else
+								{
+									PendingPurchasesLog += TEXT(" NullItem,");
+								}
+							}
+							UE_LOG(LogTemp, Warning, TEXT("%s"), *PendingPurchasesLog);
+						}
+						//
 						UpdateCurrentGoldText();
 						PurchaseButton->SetIsEnabled(false);
 						EquipButton->SetIsEnabled(false);
