@@ -16,6 +16,7 @@
 #include "Components/StateComponent.h"
 #include "Components/SkillComponent.h"
 #include "Inventory/SFInventoryComponent.h"
+#include "Inventory/SFInventoryInteractionComponent.h"
 
 #include "Engine/DamageEvents.h"
 #include "Common/SkillDamageEvent.h"
@@ -58,11 +59,12 @@ ASFCharacter::ASFCharacter()
 	// Add Components
 	//MovementInputComponent = CreateDefaultSubobject<UMovementInputComponent>(TEXT("MoveInputComponent"));
 
-	StatusContainerComponent = CreateDefaultSubobject<UStatusContainerComponent>(TEXT("StatusContainerComponent"));	
+	//StatusContainerComponent = CreateDefaultSubobject<UStatusContainerComponent>(TEXT("StatusContainerComponent"));	
 	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
 	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
 	SkillComponent = CreateDefaultSubobject<USkillComponent>(TEXT("SkillComponent"));
 	InventoryComponent = CreateDefaultSubobject<USFInventoryComponent>(TEXT("InventoryComponent"));
+	InventoryInteractionComponent = CreateDefaultSubobject<USFInventoryInteractionComponent>(TEXT("InventoryInteractionComponent"));
 
 	bReplicates = true;
 	GetCharacterMovement()->SetIsReplicated(true);
@@ -182,7 +184,6 @@ void ASFCharacter::AttackPressed()
 {
 	if (!SkillComponent || !StateComponent) return;
 	SkillComponent->HandleInputBasicAttack();
-	UGameplayStatics::PlaySoundAtLocation(this, AttackSound, GetActorLocation());
 }
 
 void ASFCharacter::AttackReleased()
@@ -195,7 +196,6 @@ void ASFCharacter::SkillAttackPressed()
 {
 	if (!SkillComponent || !StateComponent) return;
 	SkillComponent->HandleInputSkillAttack();
-	UGameplayStatics::PlaySoundAtLocation(this, SkillSound, GetActorLocation());
 }
 
 void ASFCharacter::SkillAttackReleased()
@@ -289,8 +289,6 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 		StatusComponent->ModifyStatus(EStatusType::CurHP, -DamageAmount);
 	}
 
-	Multicast_PlayTakeDamageAnimMontage();
-
 	// Knock Back
 	if (const FSkillDamageEvent* CustomEvent = static_cast<const FSkillDamageEvent*>(&DamageEvent))
 	{
@@ -302,15 +300,19 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	// Damage Effect
 	if (const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent))
 	{
-		Multicast_SpawnHitEffect(PointDamageEvent->HitInfo.ImpactPoint, PointDamageEvent->ShotDirection.Rotation());
+		Multicast_HandleTakeDamageEvent(PointDamageEvent->HitInfo.ImpactPoint, PointDamageEvent->ShotDirection.Rotation());
 	}
-	UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 
 	return DamageAmount;
 }
 
-void ASFCharacter::Multicast_PlayTakeDamageAnimMontage_Implementation()
+void ASFCharacter::Multicast_HandleTakeDamageEvent_Implementation(const FVector& Location, const FRotator& Rotation)
 {
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+	}
+
 	if (OnDamageMontage)
 	{
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -319,20 +321,17 @@ void ASFCharacter::Multicast_PlayTakeDamageAnimMontage_Implementation()
 			AnimInstance->Montage_Play(OnDamageMontage);
 		}
 	}
-}
 
-
-void ASFCharacter::Multicast_SpawnHitEffect_Implementation(const FVector& Location, const FRotator& Rotation)
-{
-	if (!HitEffect) return;
-
-	UGameplayStatics::SpawnEmitterAtLocation(
-		GetWorld(),
-		HitEffect,
-		Location,
-		Rotation,
-		true
-	);
+	if (HitEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			HitEffect,
+			Location,
+			Rotation,
+			true
+		);
+	}
 }
 
 void ASFCharacter::OnHPChanged(AActor* AffectedActor, float HP)

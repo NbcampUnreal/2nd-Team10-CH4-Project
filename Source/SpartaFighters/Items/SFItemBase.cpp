@@ -8,7 +8,8 @@ USFItemBase::USFItemBase():
 	ItemName(NAME_None),
 	ItemDescription(FText::GetEmpty()),
 	ItemType(EItemType::Common),
-	Price(0)
+	Price(0),
+	ItemClass()
 {
 }
 

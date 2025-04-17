@@ -19,6 +19,7 @@ class UStatusComponent;
 class UStateComponent;
 class USkillComponent;
 class USFInventoryComponent;
+class USFInventoryInteractionComponent;
 
 struct FInputActionValue;
 struct FSkillDataRow;
@@ -37,8 +38,8 @@ public:
 	ASFCharacter();
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStatusContainerComponent> StatusContainerComponent;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	//TObjectPtr<UStatusContainerComponent> StatusContainerComponent;
 	//virtual UStatusContainerComponent* GetStatusContainerComponent() const override;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStatusComponent> StatusComponent;
@@ -48,6 +49,8 @@ public:
 	TObjectPtr<USkillComponent> SkillComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USFInventoryComponent> InventoryComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USFInventoryInteractionComponent* InventoryInteractionComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	USoundBase* DeathSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
@@ -134,14 +137,12 @@ protected:
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayTakeDamageAnimMontage();
-
 	UFUNCTION()
 	void OnHPChanged(AActor* AffectedActor, float HP);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SpawnHitEffect(const FVector& Location, const FRotator& Rotation);
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_HandleTakeDamageEvent(const FVector& Location, const FRotator& Rotation);
+
 
 	//UFUNCTION()
 	//void OnCharacterDead();
@@ -181,7 +182,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effects");
 	UNiagaraSystem* DeathExplosionEffect;
 
-	UFUNCTION(NetMulticast,Unreliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayDeathEffect();
 
 };
