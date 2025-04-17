@@ -7,6 +7,8 @@ UOptionManager::UOptionManager()
 {
 	CurrentResolution = {1920,1080};
 	CurrentMode = EScreenMode::FullScreen;
+	backgroundSound = 0.5f;
+	effectSound = 0.5f;
 	ConstructorHelpers::FObjectFinder<USoundMix>
 		SoundMix(TEXT("/Script/Engine.SoundMix'/Game/PlatformFighterKit/Blueprints/Option/SoundOption/MainSoundMix.MainSoundMix'"));
 	ConstructorHelpers::FObjectFinder<USoundClass>
@@ -30,13 +32,13 @@ UOptionManager::UOptionManager()
 void UOptionManager::BGSoundValue(float Value) 
 {
 	backgroundSound = Value;
-	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, SC_BackGround, backgroundSound);
+	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, SC_BackGround, backgroundSound*2);
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MainSoundMix);
 }
 void UOptionManager::EFSoundValue(float Value)
 {
 	effectSound = Value;
-	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, SC_Effect, backgroundSound);
+	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, SC_Effect, backgroundSound*2);
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), MainSoundMix);
 }
 
@@ -69,4 +71,21 @@ void UOptionManager::ChangeResolution(FIntPoint Resolution)
 		CurrentResolution = Resolution;
 		GEngine->GetGameUserSettings()->SetScreenResolution(CurrentResolution);
 	}
+}
+
+const float UOptionManager::GetBGSound()
+{
+	return backgroundSound;
+}
+const float UOptionManager::GetEfSound()
+{
+	return effectSound;
+}
+void UOptionManager::SetBGSound(float Volume)
+{
+	backgroundSound = Volume;
+}
+void UOptionManager::SetEfSound(float Volume)
+{
+	effectSound = Volume;
 }

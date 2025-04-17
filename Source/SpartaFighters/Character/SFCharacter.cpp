@@ -15,6 +15,7 @@
 #include "Components/StatusComponent.h"
 #include "Components/StateComponent.h"
 #include "Components/SkillComponent.h"
+#include "Inventory/SFInventoryComponent.h"
 
 #include "Engine/DamageEvents.h"
 #include "Common/SkillDamageEvent.h"
@@ -61,7 +62,8 @@ ASFCharacter::ASFCharacter()
 	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
 	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
 	SkillComponent = CreateDefaultSubobject<USkillComponent>(TEXT("SkillComponent"));
-	
+	InventoryComponent = CreateDefaultSubobject<USFInventoryComponent>(TEXT("InventoryComponent"));
+
 	bReplicates = true;
 	GetCharacterMovement()->SetIsReplicated(true);
 
@@ -70,7 +72,6 @@ ASFCharacter::ASFCharacter()
 void ASFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
 }
 
 //UStatusContainerComponent* ASFCharacter::GetStatusContainerComponent() const
@@ -181,6 +182,7 @@ void ASFCharacter::AttackPressed()
 {
 	if (!SkillComponent || !StateComponent) return;
 	SkillComponent->HandleInputBasicAttack();
+	UGameplayStatics::PlaySoundAtLocation(this, AttackSound, GetActorLocation());
 }
 
 void ASFCharacter::AttackReleased()
@@ -193,6 +195,7 @@ void ASFCharacter::SkillAttackPressed()
 {
 	if (!SkillComponent || !StateComponent) return;
 	SkillComponent->HandleInputSkillAttack();
+	UGameplayStatics::PlaySoundAtLocation(this, SkillSound, GetActorLocation());
 }
 
 void ASFCharacter::SkillAttackReleased()
@@ -208,6 +211,7 @@ void ASFCharacter::GuardPressed()
 		if (AnimInstance)
 		{
 			AnimInstance->Montage_Play(GuardMontage);
+			UGameplayStatics::PlaySoundAtLocation(this, GuardSound, GetActorLocation());
 		}
 	}
 
@@ -300,6 +304,7 @@ float ASFCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	{
 		Multicast_SpawnHitEffect(PointDamageEvent->HitInfo.ImpactPoint, PointDamageEvent->ShotDirection.Rotation());
 	}
+	UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 
 	return DamageAmount;
 }
@@ -346,7 +351,7 @@ void ASFCharacter::Die()
 	{
 		return;
 	}
-
+	UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
 	bIsDead = true;
 
 	CachedController = GetController();

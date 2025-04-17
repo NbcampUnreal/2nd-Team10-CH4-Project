@@ -12,7 +12,7 @@ class SPARTAFIGHTERS_API USFHealthPotion : public USFConsumableBase
 public:
 	USFHealthPotion();
 	
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Potion")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Potion")
 	float RecoveryAmount;
 
 	

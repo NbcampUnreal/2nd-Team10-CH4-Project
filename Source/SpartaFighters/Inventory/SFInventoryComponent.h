@@ -7,6 +7,8 @@
 #include "Net/UnrealNetwork.h"
 #include "SFInventoryComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEquippedItemsUpdated);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SPARTAFIGHTERS_API USFInventoryComponent : public UActorComponent
@@ -78,6 +80,14 @@ public:
 
 	//Update data locally in server
 	void Internal_UpdateData();
+
+	// Event dispatched when the inventory is updated
+	UPROPERTY(BlueprintAssignable)
+	FOnInventoryUpdated OnInventoryUpdated;
+
+	// Event dispatched when the equipped items are updated
+	UPROPERTY(BlueprintAssignable)
+	FOnEquippedItemsUpdated OnEquippedItemsUpdated;
 
 private:
 	USFEquipableBase** GetEquippedItemPtrBySlot(SFEquipSlot EquipSlot);
