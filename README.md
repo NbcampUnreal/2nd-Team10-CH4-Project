@@ -40,6 +40,23 @@ MySQL 기본 로그인 시스템
 
 Niagara, DataTable, SeamlessTravel
 
+## 🛜데이터베이스 기반 로그인 방법
+1. C드라이브에 DataBase폴더 생성 
+2. 폴더 내에 ImportDatabase.bat와 InitDatabase.sql파일 설치
+3. 바탕화면에 net8.0.zip을 받아 압축 해제
+4. cmd실행해 다음 명령어 순서대로 실행
+   
+cd C:\Program Files\MySQL\MySQL Server 8.0\bin
+mysql -u root -p
+create database spartafighters;
+show databases;
+use spartafighters;
+desc users;
+select*from users;
+
+5. 프로젝트 파일->Config->DefaultGame.ini파일을 열어 WebAPIUse = true이면
+데이터베이스 기반 회원가입/로그인 가능
+6. http://localhost:5000/swagger에 접속해 데이터베이스에 저장된 정보 확인가능(했으나 250429~ 접속 불가 문제 확인)
 
 ## 📅 개발 일정 & 과정
 
