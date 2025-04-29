@@ -47,11 +47,17 @@ Niagara, DataTable, SeamlessTravel
 4. cmd실행해 다음 명령어 순서대로 실행
    
 cd C:\Program Files\MySQL\MySQL Server 8.0\bin
+
 mysql -u root -p
+
 create database spartafighters;
+
 show databases;
+
 use spartafighters;
+
 desc users;
+
 select*from users;
 
 5. 프로젝트 파일->Config->DefaultGame.ini파일을 열어 WebAPIUse = true이면
