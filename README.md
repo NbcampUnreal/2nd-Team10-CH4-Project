@@ -62,7 +62,7 @@ select*from users;
 
 5. 프로젝트 파일->Config->DefaultGame.ini파일을 열어 WebAPIUse = true이면
 데이터베이스 기반 회원가입/로그인 가능
-6. http://localhost:5000/swagger에 접속해 데이터베이스에 저장된 정보 확인가능(했으나 250429~ 접속 불가 문제 확인)
+6. net8.0.zip 압축 풀고 SW 실행한상태에서 http://localhost:5000/swagger에 접속해 데이터베이스에 저장된 정보 확인가능
 
 ## 📅 개발 일정 & 과정
 
